@@ -4,7 +4,7 @@ Trousseau
 
 *Trousseau* is an encrypted (*gpg*) key-value store file. It is designed to be easily manipulated and imported/exported on multiple remote storage sources.
 
-It was built with private keys transportation and sharing across a servers (or cowers, there nodes after all). However it could be useful to anyone who needs to store and eventualy share sensitive datas(passwords, banking credentials sensitive personal informations, ...).
+It was built with private keys transportation and sharing across servers (or coworkers, they're nodes after all). However it could be useful to anyone who needs to store and eventualy share sensitive datas (passwords, banking credentials sensitive personal informations, ...).
 
 As of today *Trousseau* exposes a **push** - **pull interface to amazon S3 storage, but more are to come (Scp, Ftp, Dropbox, GDrive).
 
