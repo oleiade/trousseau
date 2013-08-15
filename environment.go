@@ -8,17 +8,24 @@ import (
 )
 
 type Environment struct {
+	RemoteHost 		string
+	RemotePort 		string
+	RemoteUser 		string
+	RemoteFilename	string
 	S3Bucket   		string `env:"TROUSSEAU_S3_BUCKET"`
-	S3Filename 		string `env:"TROUSSEAU_S3_FILENAME"`
 	SshPrivateKey	string `env:"TROUSSEAU_SSH_PRIVATE_KEY"`
 	Password   		string `env:"TROUSSEAU_PASSWORD"`
 }
 
 func NewEnvironment() *Environment {
 	env := &Environment{
-		S3Bucket:   "",
-		S3Filename: "trousseau",
-		Password:   "",
+		RemoteHost: 	"",
+		RemotePort: 	"22",
+		RemoteUser: 	"",
+		RemoteFilename: "trousseau",
+		S3Bucket:   	"",
+		SshPrivateKey:	gPrivateRsaKeyPath,
+		Password:   	"",
 	}
 	env.Load()
 
@@ -36,9 +43,12 @@ func (e *Environment) Load() error {
 
 	for field, tag := range envTags {
 		envVar := os.Getenv(tag)
-		err = reflections.SetField(e, field, envVar)
-		if err != nil {
-			return err
+
+		if envVar != "" {
+			err = reflections.SetField(e, field, envVar)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

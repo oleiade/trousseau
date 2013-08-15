@@ -37,11 +37,35 @@ func RemoteStorageFlag() cli.StringFlag {
     }
 }
 
-func S3RemoteFilenameFlag() cli.StringFlag {
+func RemoteFilenameFlag() cli.StringFlag {
     return cli.StringFlag {
-        "s3-remote-filename",
+        "remote-filename",
         "",
-        "S3 remote name of the trousseau file",
+        "Remote name of the trousseau file",
+    }
+}
+
+func RemoteHostFlag() cli.StringFlag {
+    return cli.StringFlag {
+        "host",
+        "",
+        "Remote storage hostname",
+    }
+}
+
+func RemotePortFlag() cli.StringFlag {
+    return cli.StringFlag {
+        "port",
+        "22",
+        "Port to be used for remote storage connexion",
+    }
+}
+
+func RemoteUserFlag() cli.StringFlag {
+    return cli.StringFlag {
+        "user",
+        "",
+        "User to be used for remote storage connexion",
     }
 }
 

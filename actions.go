@@ -53,8 +53,11 @@ func PushAction(c *cli.Context) {
 	environment := NewEnvironment()
 	err := environment.OverrideWith(map[string]string{
 		"S3Bucket": c.String("s3-bucket"),
-		"S3Filename": c.String("s3-remote-filename"),
-		"SshPrivateKey": c.String("ssh"),
+		"SshPrivateKey": c.String("ssh-private-key"),
+		"RemoteFilename": c.String("remote-filename"),
+		"RemoteHost": c.String("host"),
+		"RemotePort": c.String("port"),
+		"RemoteUser": c.String("user"),
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -82,8 +85,11 @@ func PullAction(c *cli.Context) {
 	environment := NewEnvironment()
 	err := environment.OverrideWith(map[string]string{
 		"S3Bucket": c.String("s3-bucket"),
-		"S3Filename": c.String("s3-remote-filename"),
 		"SshPrivateKey": c.String("ssh-private-key"),
+		"RemoteFilename": c.String("remote-filename"),
+		"RemoteHost": c.String("host"),
+		"RemotePort": c.String("port"),
+		"RemoteUser": c.String("user"),
 	})
 	if err != nil {
 		log.Fatal(err)
