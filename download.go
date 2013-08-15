@@ -5,6 +5,9 @@ import (
 	"launchpad.net/goamz/aws"
 )
 
+// downloadUsingS3 executes the whole process of pulling
+// the trousseau data store file from s3 remote storage
+// using the provided environment.
 func DownloadUsingS3(env *Environment) error {
 	awsAuth, err := aws.EnvAuth()
 	if err != nil {
@@ -27,6 +30,9 @@ func DownloadUsingS3(env *Environment) error {
 	return nil
 }
 
+// downloadUsingScp executes the whole process of pulling
+// the trousseau data store file from scp remote storage
+// using the provided environment.
 func DownloadUsingScp(env *Environment) error {
 	privateKeyContent, err := DecodePrivateKeyFromFile(env.SshPrivateKey)
 	if err != nil {

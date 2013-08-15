@@ -5,7 +5,9 @@ import (
 	"launchpad.net/goamz/aws"
 )
 
-
+// uploadUsingS3 executes the whole process of pushing
+// the trousseau data store file to s3 remote storage
+// using the provided environment.
 func uploadUsingS3(env *Environment) error {
 	awsAuth, err := aws.EnvAuth()
 	if err != nil {
@@ -28,6 +30,9 @@ func uploadUsingS3(env *Environment) error {
 	return nil
 }
 
+// uploadUsingScp executes the whole process of pushing
+// the trousseau data store file to scp remote storage
+// using the provided environment.
 func uploadUsingScp(env *Environment) error {
 	privateKeyContent, err := DecodePrivateKeyFromFile(env.SshPrivateKey)
 	if err != nil {
