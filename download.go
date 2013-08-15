@@ -19,7 +19,7 @@ func DownloadUsingS3(env *Environment) error {
 			"TROUSSEAU_S3_BUCKET")
 	}
 
-	err = s3Storage.Pull(env.S3Filename)
+	err = s3Storage.Pull(env.RemoteFilename)
 	if err != nil {
 		return err
 	}
@@ -28,5 +28,25 @@ func DownloadUsingS3(env *Environment) error {
 }
 
 func DownloadUsingScp(env *Environment) error {
+	privateKeyContent, err := DecodePrivateKeyFromFile(env.SshPrivateKey)
+	if err != nil {
+		return err
+	}
+	
+	keyChain := NewKeychain(privateKeyContent)
+	scpStorage := NewScpStorage(env.RemoteHost,
+								env.RemotePort,
+								env.RemoteUser,
+								keyChain)
+	err = scpStorage.Connect()
+	if err != nil {
+		return err
+	}
+
+	err = scpStorage.Pull(env.RemoteFilename)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

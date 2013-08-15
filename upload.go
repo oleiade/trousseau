@@ -20,7 +20,7 @@ func uploadUsingS3(env *Environment) error {
 			"TROUSSEAU_S3_BUCKET")
 	}
 
-	err = s3Storage.Push(env.S3Filename)
+	err = s3Storage.Push(env.RemoteFilename)
 	if err != nil {
 		return err
 	}
@@ -29,5 +29,25 @@ func uploadUsingS3(env *Environment) error {
 }
 
 func uploadUsingScp(env *Environment) error {
+	privateKeyContent, err := DecodePrivateKeyFromFile(env.SshPrivateKey)
+	if err != nil {
+		return err
+	}
+
+	keyChain := NewKeychain(privateKeyContent)
+	scpStorage := NewScpStorage(env.RemoteHost,
+								env.RemotePort,
+								env.RemoteUser,
+								keyChain)
+	err = scpStorage.Connect()
+	if err != nil {
+		return err
+	}
+
+	err = scpStorage.Push(env.RemoteFilename)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
