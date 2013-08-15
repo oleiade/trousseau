@@ -32,6 +32,10 @@ func NewEnvironment() *Environment {
 	return env
 }
 
+// Load method will try to load Environment struct
+// tagged fields value from system environement. Every
+// found values will override Environment field current
+// value.
 func (e *Environment) Load() error {
 	var err 	error
 	var envTags	map[string]string
@@ -55,6 +59,8 @@ func (e *Environment) Load() error {
 	return nil
 }
 
+// OverrideWith will override the Environment values
+// according to a provided key-value map.
 func (e *Environment) OverrideWith(data map[string]string) error {
 	for field, value := range data {
 		has, err := reflections.HasField(*e, field)
