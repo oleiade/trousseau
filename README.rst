@@ -7,7 +7,7 @@ Trousseau
 It was built with private keys transportation and sharing across servers in mind. However it could be useful to anyone who needs to store and eventualy share sensitive datas: passwords, banking credentials sensitive personal informations, and so on...
 
 
-As of today *Trousseau* exposes a **push** - **pull interface to amazon S3 storage, but more are to come (Scp, Ftp, Dropbox, GDrive).
+As of today *Trousseau* exposes a **push** - **pull interface to *S3* and *scp* storage methods but more are to come (Ftp, Dropbox, GDrive).
 
 *Trousseau* is an open source software under the MIT license. Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on: see `Contribute <>`_
 
@@ -94,8 +94,8 @@ Api
 * ``remove-recipient RECIPIENT`` : Removes a recipient from the store. The recipient will not be able to open or modify the store.
 
 
-Example
-```````
+Create the trousseau datastore
+``````````````````````````````
 
 .. code-block:: bash
 
@@ -123,8 +123,14 @@ Example
     =t2zr
     -----END PGP MESSAGE-----
 
+Meta data
+`````````    
 
-    # Now you can see some basic data have been added
+.. code-block:: bash
+
+    # If you take a look at the encrypted content of the
+    # trousseau datastore manually using gpg, you can see
+    # that the created trousseau is not empty 
     $ cat ~/.trousseau | gpg -d -r 4B7D890 --textmode
     You need a passphrase to unlock the secret key for
     user: "My Gpg User <MyGpg@mail.com>"
@@ -135,8 +141,9 @@ Example
     {"_meta":{"created_at":"2013-08-12 08:00:20.457477714 +0200 CEST","last_modified_at":"2013-08-12 08:00:20.457586991 +0200 CEST","recipients":["92EDE36B"],"version":"0.1.0"},"data":{}}
 
 
-    # Among these data appears the metadata. Fortunately
-    # trousseau exposes a meta command to output them properly
+    # The data attached to the empty trousseau store are
+    # the metadata. Fortunately trousseau exposes a meta
+    # command to output them properly.
     $ trousseau meta
     CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
     LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
@@ -144,8 +151,13 @@ Example
     TrousseauVersion: 0.1.0c
 
 
-    # Now suppose you'd like another recipient to be able to open and update
-    # the trousseau store
+Adding and removing recipients
+``````````````````````````````
+
+.. code-block:: bash
+
+    # Now suppose you'd like another recipient, which
+    # will then be able to open and update the trousseau store
     $ trousseau add-recipient 75FE3AB
     $ trousseau add-recipient 869FA4A
     $ trousseau meta
@@ -163,9 +175,6 @@ Example
     LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
     Recipients: [4B7D890, 869FA4A]
     TrousseauVersion: 0.1.0c
-
-
-Now, we're up and ready for some fun stuff
 
 
 Getting, setting, deleting, listing keys
@@ -233,26 +242,31 @@ Api
 S3 Example
 ``````````
 
+Pushing the trousseau data store to Amazon S3 will require some setup:
+
+* Make sure to set aws credentials environment variables
+    
+    .. code-block:: bash
+
+        $ export AWS_ACCESS_KEY_ID=myaeccskey
+        $ export AWS_SECRET_ACCESS_KEY=mysecretkey
+
+* You can setup the bucket to push data store into and the remote filename using environment. However, you're also able to provide these parameters as arguments of the **push** and **pull** methods.
+    
+    .. code-block:: bash
+
+        $ export TROUSSEAU_S3_FILENAME=trousseau
+        $ export TROUSSEAU_S3_BUCKET=mytrousseaubucket
+
+
+Once you've to set it up, you're ready to properly push the data store to S3.
+
 .. code-block:: bash
-
-    # First let's make sure our aws credentials are set
-    # in the environement
-    $ export AWS_ACCESS_KEY_ID=myaeccskey
-    $ export AWS_SECRET_ACCESS_KEY=mysecretkey
-
 
     # Considering a non empty trousseau data store
     $ trousseau show
     abc: 123
     easy as: do re mi
-
-
-    # In order to be able to push to S3, whether set env variables
-    # TROUSSEAU_S3_FILENAME and TROUSSEAU_S3_BUCKET or provide -s3-remote-filename
-    # and -s3-bucket flags to the command line
-    $ export TROUSSEAU_S3_FILENAME=trousseau
-    $ export TROUSSEAU_S3_BUCKET=mytrousseaubucket
-
 
     # And then you're ready to push
     $ trousseau push
@@ -269,11 +283,37 @@ S3 Example
     easy as: do re mi
 
 
+Scp example
+```````````
+
+.. code-block:: bash
+
+    # We start with a non empty trousseau data store
+    $ trousseau show
+    abc: 123
+    easy as: do re mi
+
+    # To push it using scp we need to provide it a couple of
+    # basic options
+    $ trousseau push --remote-storage scp --host <myhost> --port <myport> --user <myuser>
+
+
+    # Now that data store has been pushed to the remote storage
+    # using scp, let's remove the local data store and pull it
+    # once again to ensure it worked
+    $ rm ~/.trousseau
+    $ trousseau show
+    Trousseau unconfigured: no data store
+    $ trousseau pull --remote-storage scp --host <myhost> --port <myport> --user <myuser>
+    $ trousseau show
+    abc: 123
+    easy as: do re mi    
+
+
 More features to come
 =====================
 
 * Support for Sftp remote storage
-* Support for scp remote storage
 * Support for GDrive remote storage
 * Support for Dropbox remote storage
 
