@@ -8,9 +8,10 @@ import (
 )
 
 type Environment struct {
-	S3Bucket   string `env:"TROUSSEAU_S3_BUCKET"`
-	S3Filename string `env:"TROUSSEAU_S3_FILENAME"`
-	Password   string `env:"TROUSSEAU_PASSWORD"`
+	S3Bucket   		string `env:"TROUSSEAU_S3_BUCKET"`
+	S3Filename 		string `env:"TROUSSEAU_S3_FILENAME"`
+	SshPrivateKey	string `env:"TROUSSEAU_SSH_PRIVATE_KEY"`
+	Password   		string `env:"TROUSSEAU_PASSWORD"`
 }
 
 func NewEnvironment() *Environment {

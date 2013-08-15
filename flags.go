@@ -29,6 +29,14 @@ func YesFlag() cli.StringFlag {
     }
 }
 
+func RemoteStorageFlag() cli.StringFlag {
+    return cli.StringFlag {
+        "remote-storage",
+        "s3",
+        "Remote storage type to use: s3 or scp",
+    }
+}
+
 func S3RemoteFilenameFlag() cli.StringFlag {
     return cli.StringFlag {
         "s3-remote-filename",
@@ -42,5 +50,13 @@ func S3BucketFlag() cli.StringFlag {
         "s3-bucket",
         "",
         "S3 name of the bucket hosting the trousseau file",
+    }
+}
+
+func SshPrivateKeyPathFlag() cli.StringFlag {
+    return cli.StringFlag {
+        "ssh-private-key",
+        "",
+        "Path to the ssh private key to be used",
     }
 }

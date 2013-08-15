@@ -21,6 +21,8 @@ func PushCommand() cli.Command {
 			OverwriteFlag(),
 			S3RemoteFilenameFlag(),
 			S3BucketFlag(),
+			SshPrivateKeyPathFlag(),
+			RemoteStorageFlag(),
 		},
 	}
 }
@@ -34,6 +36,8 @@ func PullCommand() cli.Command {
 			OverwriteFlag(),
 			S3RemoteFilenameFlag(),
 			S3BucketFlag(),
+			SshPrivateKeyPathFlag(),
+			RemoteStorageFlag(),
 		},
 
 	}

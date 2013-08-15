@@ -2,7 +2,6 @@ package trousseau
 
 import (
 	"github.com/codegangsta/cli"
-	"launchpad.net/goamz/aws"
 	"log"
 	"fmt"
 	"strings"
@@ -55,27 +54,23 @@ func PushAction(c *cli.Context) {
 	err := environment.OverrideWith(map[string]string{
 		"S3Bucket": c.String("s3-bucket"),
 		"S3Filename": c.String("s3-remote-filename"),
+		"SshPrivateKey": c.String("ssh"),
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	awsAuth, err := aws.EnvAuth()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	s3Storage := NewS3Storage(awsAuth, environment.S3Bucket, aws.EUWest)
-	err = s3Storage.Connect()
-	if err != nil {
-		log.Fatalf("Unable to connect to S3, have you set %s and %s env vars?",
-			"TROUSSEAU_S3_FILENAME",
-			"TROUSSEAU_S3_BUCKET")
-	}
-
-	err = s3Storage.Push(environment.S3Filename)
-	if err != nil {
-		log.Fatal(err)
+	switch c.String("remote-storage") {
+	case "s3":
+		err = uploadUsingS3(environment)
+		if err != nil {
+			log.Fatal(err)
+		}
+	case "scp":
+		err = uploadUsingScp(environment)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -88,27 +83,23 @@ func PullAction(c *cli.Context) {
 	err := environment.OverrideWith(map[string]string{
 		"S3Bucket": c.String("s3-bucket"),
 		"S3Filename": c.String("s3-remote-filename"),
+		"SshPrivateKey": c.String("ssh-private-key"),
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	awsAuth, err := aws.EnvAuth()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	s3Storage := NewS3Storage(awsAuth, environment.S3Bucket, aws.EUWest)
-	err = s3Storage.Connect()
-	if err != nil {
-		log.Fatalf("Unable to connect to S3, have you set %s and %s env vars?",
-			"TROUSSEAU_S3_FILENAME",
-			"TROUSSEAU_S3_BUCKET")
-	}
-
-	err = s3Storage.Pull(environment.S3Filename)
-	if err != nil {
-		log.Fatal(err)
+	switch c.String("remote-storage") {
+	case "s3":
+		err = DownloadUsingS3(environment)
+		if err != nil {
+			log.Fatal(err)
+		}
+	case "scp":
+		err = DownloadUsingScp(environment)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
