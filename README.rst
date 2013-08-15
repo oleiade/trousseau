@@ -7,9 +7,9 @@ Trousseau
 It was built with private keys transportation and sharing across servers in mind. However it could be useful to anyone who needs to store and eventualy share sensitive datas: passwords, banking credentials sensitive personal informations, and so on...
 
 
-As of today *Trousseau* exposes a **push** - **pull interface to *S3* and *scp* storage methods but more are to come (Ftp, Dropbox, GDrive).
+As of today *Trousseau* exposes a **push**-**pull** interface to *S3* and *scp* storage methods but more are to come (Ftp, Dropbox, GDrive).
 
-*Trousseau* is an open source software under the MIT license. Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on: see `Contribute <>`_
+*Trousseau* is an open source software under the MIT license. Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on: see **Contribute**
 
 
 Installation
@@ -324,6 +324,6 @@ Contribute
 ==========
 
 * Check for open issues or open a fresh issue to start a discussion around a feature idea or a bug.
-* Fork `the repository`_ on GitHub to start making your changes to the **master** branch (or branch off of it).
+* Fork the repository on GitHub to start making your changes to the **master** branch (or branch off of it).
 * Write tests which shows that the bug was fixed or that the feature works as expected.
-* Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS_.
+* Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS.
