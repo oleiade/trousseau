@@ -1,26 +1,26 @@
 package trousseau
 
 import (
+	"bytes"
 	"code.google.com/p/go.crypto/ssh"
 	"crypto"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"io/ioutil"
-	"strings"
-	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"strings"
 )
 
 type ScpStorage struct {
-	host 		string
-	port 		string
-	connexion 	*ssh.ClientConn
+	host      string
+	port      string
+	connexion *ssh.ClientConn
 
-	Keychain 	*Keychain
-	User 		string
-	Endpoint 	string
+	Keychain *Keychain
+	User     string
+	Endpoint string
 }
 
 type Keychain struct {
@@ -30,10 +30,10 @@ type Keychain struct {
 func NewScpStorage(host, port, user string, keychain *Keychain) *ScpStorage {
 	return &ScpStorage{
 		Keychain: keychain,
-		User: user,
+		User:     user,
 		Endpoint: strings.Join([]string{host, port}, ":"),
-		host: host,
-		port: port,
+		host:     host,
+		port:     port,
 	}
 }
 
@@ -78,7 +78,7 @@ func (ss *ScpStorage) Connect() error {
 
 	clientConfig := &ssh.ClientConfig{
 		User: ss.User,
-		Auth: []ssh.ClientAuth {
+		Auth: []ssh.ClientAuth{
 			ssh.ClientAuthKeyring(ss.Keychain),
 		},
 	}
@@ -117,12 +117,11 @@ func (ss *ScpStorage) Push(remoteName string) error {
 }
 
 func (ss *ScpStorage) Pull(remoteName string) error {
-		session, err := ss.connexion.NewSession()
+	session, err := ss.connexion.NewSession()
 	if err != nil {
 		return fmt.Errorf("Failed to create session: %s", err.Error())
 	}
 	defer session.Close()
-
 
 	var remoteFileBuffer bytes.Buffer
 	session.Stdout = &remoteFileBuffer

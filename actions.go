@@ -1,9 +1,9 @@
 package trousseau
 
 import (
+	"fmt"
 	"github.com/codegangsta/cli"
 	"log"
-	"fmt"
 	"strings"
 	"time"
 )
@@ -33,10 +33,10 @@ func CreateAction(c *cli.Context) {
 	recipients := strings.Split(c.Args()[0], ",")
 
 	meta := Meta{
-		CreatedAt:      	time.Now().String(),
-		LastModifiedAt: 	time.Now().String(),
-		Recipients:     	recipients,
-		TrousseauVersion:	TROUSSEAU_VERSION,
+		CreatedAt:        time.Now().String(),
+		LastModifiedAt:   time.Now().String(),
+		Recipients:       recipients,
+		TrousseauVersion: TROUSSEAU_VERSION,
 	}
 
 	// Create and write empty store file
@@ -52,12 +52,12 @@ func PushAction(c *cli.Context) {
 
 	environment := NewEnvironment()
 	err := environment.OverrideWith(map[string]string{
-		"S3Bucket": c.String("s3-bucket"),
-		"SshPrivateKey": c.String("ssh-private-key"),
+		"S3Bucket":       c.String("s3-bucket"),
+		"SshPrivateKey":  c.String("ssh-private-key"),
 		"RemoteFilename": c.String("remote-filename"),
-		"RemoteHost": c.String("host"),
-		"RemotePort": c.String("port"),
-		"RemoteUser": c.String("user"),
+		"RemoteHost":     c.String("host"),
+		"RemotePort":     c.String("port"),
+		"RemoteUser":     c.String("user"),
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -84,12 +84,12 @@ func PullAction(c *cli.Context) {
 
 	environment := NewEnvironment()
 	err := environment.OverrideWith(map[string]string{
-		"S3Bucket": c.String("s3-bucket"),
-		"SshPrivateKey": c.String("ssh-private-key"),
+		"S3Bucket":       c.String("s3-bucket"),
+		"SshPrivateKey":  c.String("ssh-private-key"),
 		"RemoteFilename": c.String("remote-filename"),
-		"RemoteHost": c.String("host"),
-		"RemotePort": c.String("port"),
-		"RemoteUser": c.String("user"),
+		"RemoteHost":     c.String("host"),
+		"RemotePort":     c.String("port"),
+		"RemoteUser":     c.String("user"),
 	})
 	if err != nil {
 		log.Fatal(err)

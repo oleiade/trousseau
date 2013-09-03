@@ -1,31 +1,31 @@
 package trousseau
 
 import (
-	"os"
-	"fmt"
 	"errors"
+	"fmt"
 	"github.com/oleiade/reflections"
+	"os"
 )
 
 type Environment struct {
-	RemoteHost 		string
-	RemotePort 		string
-	RemoteUser 		string
-	RemoteFilename	string
-	S3Bucket   		string `env:"TROUSSEAU_S3_BUCKET"`
-	SshPrivateKey	string `env:"TROUSSEAU_SSH_PRIVATE_KEY"`
-	Password   		string `env:"TROUSSEAU_PASSWORD"`
+	RemoteHost     string
+	RemotePort     string
+	RemoteUser     string
+	RemoteFilename string
+	S3Bucket       string `env:"TROUSSEAU_S3_BUCKET"`
+	SshPrivateKey  string `env:"TROUSSEAU_SSH_PRIVATE_KEY"`
+	Password       string `env:"TROUSSEAU_PASSWORD"`
 }
 
 func NewEnvironment() *Environment {
 	env := &Environment{
-		RemoteHost: 	"",
-		RemotePort: 	"22",
-		RemoteUser: 	"",
+		RemoteHost:     "",
+		RemotePort:     "22",
+		RemoteUser:     "",
 		RemoteFilename: "trousseau",
-		S3Bucket:   	"",
-		SshPrivateKey:	gPrivateRsaKeyPath,
-		Password:   	"",
+		S3Bucket:       "",
+		SshPrivateKey:  gPrivateRsaKeyPath,
+		Password:       "",
 	}
 	env.Load()
 
@@ -37,8 +37,8 @@ func NewEnvironment() *Environment {
 // found values will override Environment field current
 // value.
 func (e *Environment) Load() error {
-	var err 	error
-	var envTags	map[string]string
+	var err error
+	var envTags map[string]string
 
 	envTags, err = reflections.Tags(*e, "env")
 	if err != nil {
@@ -66,7 +66,7 @@ func (e *Environment) OverrideWith(data map[string]string) error {
 		has, err := reflections.HasField(*e, field)
 		if !has {
 			errMsg := fmt.Sprintf("No such field %s in Environement struct",
-								  field)
+				field)
 			return errors.New(errMsg)
 		} else if err != nil {
 			return err

@@ -38,12 +38,12 @@ func DownloadUsingScp(env *Environment) error {
 	if err != nil {
 		return err
 	}
-	
+
 	keyChain := NewKeychain(privateKeyContent)
 	scpStorage := NewScpStorage(env.RemoteHost,
-								env.RemotePort,
-								env.RemoteUser,
-								keyChain)
+		env.RemotePort,
+		env.RemoteUser,
+		keyChain)
 	err = scpStorage.Connect()
 	if err != nil {
 		return err
