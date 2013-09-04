@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bitbucket.com/facteur/trousseau"
 	"github.com/codegangsta/cli"
+	"github.com/oleiade/trousseau"
 	"os"
 )
 
