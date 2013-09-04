@@ -26,7 +26,7 @@ func NewEncryptedStore(store *DataStore) *EncryptedStore {
 func NewEncryptedStoreFromFile(filePath string) (*EncryptedStore, error) {
 	encryptedData, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("trousseau data store file ($HOME/.trousseau) not found")
 	}
 
 	encryptedStore := &EncryptedStore{
