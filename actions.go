@@ -145,6 +145,40 @@ func ImportAction(c *cli.Context) {
 		log.Fatal("Not enough argument supplied to import command")
 	}
 
+	var err error
+	var inputFilePath string = c.Args()[0]
+	var outputFilePath string = gStorePath
+	var inputFile *os.File
+	var outputFile *os.File
+
+	inputFile, err = os.Open(inputFilePath)
+	defer inputFile.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// If trousseau data store does not exist create
+	// it through the import process, otherwise just
+	// override it's content
+	if !pathExists(outputFilePath) {
+		outputFile, err = os.Create(outputFilePath)
+		defer outputFile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		outputFile, err = os.OpenFile(outputFilePath, os.O_WRONLY, 0744)
+		defer outputFile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	_, err = io.Copy(outputFile, inputFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Println("trousseau imported")
 }
 
