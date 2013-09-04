@@ -3,7 +3,9 @@ package trousseau
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
+	"io"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -110,10 +112,39 @@ func PullAction(c *cli.Context) {
 }
 
 func ExportAction(c *cli.Context) {
+	if !hasEnoughArgs(c.Args(), 1) {
+		log.Fatal("Not enough argument supplied to export command")
+	}
+
+	var err error
+	var inputFilePath string = gStorePath
+	var outputFilePath string = c.Args()[0]
+
+	inputFile, err := os.Open(inputFilePath)
+	defer inputFile.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	outputFile, err := os.Create(outputFilePath)
+	defer outputFile.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = io.Copy(outputFile, inputFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Println("trousseau exported")
 }
 
 func ImportAction(c *cli.Context) {
+	if !hasEnoughArgs(c.Args(), 1) {
+		log.Fatal("Not enough argument supplied to import command")
+	}
+
 	fmt.Println("trousseau imported")
 }
 
