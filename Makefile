@@ -13,23 +13,14 @@ GIT_STATUS = $(shell test -n "`git status --porcelain`" && echo "+CHANGES")
 GOPATH ?= $(BUILD_DIR)
 export GOPATH
 
-# If current system is OSX, make sure to enable
-# CGO for goamz/s3 package dependency to be able to
-# use tls root certificates
-ifeq ($(SYS_OS), Darwin)
-COMPILATION_OPTIONS = CGO_ENABLED=1
-LDFLAGS := '-w'
-else
-COMPILATION_OPTIONS = CGO_ENABLED=0
-LDFLAGS := '-w -d'
-endif
-
 GO_OPTIONS ?= -a -ldflags=$(LDFLAGS)
 ifeq ($(VERBOSE), 1)
 GO_OPTIONS += -v
 endif
 
 BUILD_OPTIONS = -a -ldflags "-X main.GITCOMMIT $(GIT_COMMIT)$(GIT_STATUS)"
+COMPILATION_OPTIONS = CGO_ENABLED=0
+LDFLAGS := '-w -d'
 
 SRC_DIR := $(GOPATH)/src
 

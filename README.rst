@@ -24,7 +24,7 @@ Precompiled binaries of the project for *i386*, *x86_64* and *arm* architectures
 Build it
 --------
 
-1. First, make sure you have a `Go <http://http://golang.org/>`_ language compiler **>= 1.1** (*mandatory*) and `git <http://gitscm.org>`_ installed.
+1. First, make sure you have a `Go <http://http://golang.org/>`_ language compiler **>= 1.1.2** (*mandatory*) and `git <http://gitscm.org>`_ installed.
 
 2. Then, just build and copy the ``./bin/trousseau`` executable to a system *PATH* location
 
