@@ -1,8 +1,9 @@
+.. image:: https://dl.dropboxusercontent.com/u/2497327/TROUSSEAU.jpg
+   :align: center
+
 =========
 Trousseau
 =========
-
-.. image:: https://dl.dropboxusercontent.com/u/2497327/TROUSSEAU.jpg
 
 *Trousseau* is a **gpg** encrypted key-value store file written in Go. It is designed to be easily manipulated and imported/exported on multiple remote storage sources.
 
