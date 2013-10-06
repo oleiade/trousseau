@@ -1,10 +1,6 @@
 .. image:: https://dl.dropboxusercontent.com/u/2497327/TROUSSEAU.jpg
    :align: center
 
-=========
-Trousseau
-=========
-
 *Trousseau* is a **gpg** encrypted key-value store file written in Go. It is designed to be easily manipulated and imported/exported on multiple remote storage sources.
 
 It was built with private keys transportation and sharing across servers in mind. However it could be useful to anyone who needs to store and eventualy share sensitive datas: passwords, banking credentials sensitive personal informations, and so on...
