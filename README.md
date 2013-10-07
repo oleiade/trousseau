@@ -1,3 +1,5 @@
+![Trousseau, a portable encrypted keyring](https://dl.dropboxusercontent.com/u/2497327/Github/trousseau/trousseau-animation.gif)
+
 ## What it is
 
 
