@@ -58,7 +58,7 @@ func DecodePrivateKeyFromFile(privateKeyPath string) (*rsa.PrivateKey, error) {
 	return rsakey, nil
 }
 
-func (k *Keychain) Key(i int) (interface{}, error) {
+func (k *Keychain) Key(i int) (key ssh.PublicKey, err error) {
 	if i != 0 {
 		return nil, nil
 	}
