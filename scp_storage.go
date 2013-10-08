@@ -62,7 +62,11 @@ func (k *Keychain) Key(i int) (key ssh.PublicKey, err error) {
 	if i != 0 {
 		return nil, nil
 	}
-	return &k.key.PublicKey, nil
+	
+    // Transform the rsa key into an ssh key
+    ssh_publickey, _ := ssh.NewPublicKey(k.key.PublicKey)
+
+	return ssh_publickey, nil
 }
 
 func (k *Keychain) Sign(i int, rand io.Reader, data []byte) (sig []byte, err error) {
