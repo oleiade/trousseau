@@ -1,6 +1,6 @@
 SYS_OS := $(shell uname -s)
 
-TROUSSEAU_PACKAGE := bitbucket.com/facteur/trousseau
+TROUSSEAU_PACKAGE := github.com/oleiade/trousseau
 BUILD_SRC := build_src
 BUILD_PATH := ${BUILD_SRC}/src/${TROUSSEAU_PACKAGE}
 
