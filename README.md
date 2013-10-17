@@ -1,21 +1,67 @@
 ![Trousseau, a portable encrypted keyring](https://dl.dropboxusercontent.com/u/2497327/Github/trousseau/trousseau-animation.gif)
 
-## What it is
+## What
 
+*Trousseau* is a **gpg** encrypted key-value store designed to be a *simple*, *safe* and *relient* place for your data.
+It stores data in a single multi-recipients encrypted file and can supports both local and remote storage sources (S3 and ssh so far) import/export.
 
-*Trousseau* is a **gpg** encrypted key-value store file written in Go. It is designed to be easily manipulated and imported/exported on multiple remote storage sources.
-It was built with private keys transportation and sharing across servers in mind. However it could be useful to anyone who needs to store and eventualy share sensitive datas: passwords, banking credentials sensitive personal informations, and so on...
-As of today *Trousseau* exposes a **push**-**pull** interface to *S3* and *scp* storage methods but more are to come (Ftp, Dropbox, GDrive).
-*Trousseau* is an open source software under the MIT license. Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on: see **Contribute**
+Create a *trousseau* store, specify which *gpg* recipients are allowed to open and modify it, and adding some key-value pairs to, export it to s3 for example, and re-import it on another device. As simple as that.
+
+Whether you're a devops, a paranoid guy living in a bunker, or the random user who seek a simple way to store it's critical data in safe maneer. *Trousseau* can do something for you.
+
+<div class="section-break"></div>
+## Why
+
+Storing, transporting, and sharing sensible data can be hard, and much more difficult when it comes to automate it.
+*Trousseau* was created with private keys transportation and sharing across a servers cluster in mind.
+However it has proved being usefull to anyone who need to store and eventually share a passwords store, bank accounts details or even more sensible data.
+
+<div class="subsection-break"></div>
+### Real world use cases
+
+<div class="subsection-break"></div>
+#### For the devops out there
+
+*Trousseau can be useful to you when it comes to*:
+
+* **Store** sensible data: Your brand new shinny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite cvs. No more plain certificates and keys in your repositories and configuration files.
+* **Share** passwords, keys and other critical data with coworkers and servers in your cluster in a safe maneer. *Trousseau* encrypts it's content for the specific recipient you provide it. Only the recipient you intend to be able to import and read-write the *Trousseau* store content will be able to. *Trousseau* proved to be a great way to share some services passwords with your coworkers too!
+* **Deploy** keys to your servers in a safe and normative way. Encrypt the trousseau store for every servers selectively.
+
+<div class="subsection-break"></div>
+#### For the common users
+
+* *Store* your sensible data like passwords, bank account details, sex tapes involving you and your teachers or whatever comes to your mind in a encrypted store.
+* *Sync* your sensible data store to remote services and easily share it between your unix-like devices.
+
+## It's open-source
+
+*Trousseau* is an open source software under the MIT license.
+Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on: see **Contribute**
 
 <div class="section-break"></div>
 ## Installation
 
 <div class="subsection-break"></div>
-### Binaries
+### Debian and ubuntu
 
-Precompiled binaries of the project for *i386*, *x86_64* and *arm* architectures (linux and darwin) can be found in the project *bin* folder.
-Just copy it on your `PATH` and go ahead with *usage* instructions.
+A bintray debian repository provides *trousseau* packages for *i386*, *x86_64* and *arm* architectures, so you can easily install it.
+Just add the repository to your sources.list:
+
+```bash
+$ sudo echo "deb http://dl.bintray.com/oleiade/deb /" >> /etc/apt/sources.list
+```
+
+And you're ready to go:
+
+```bash
+$ sudo apt-get install trousseau
+```
+
+<div class="subsection-break"></div>
+### OSX
+
+A repository for osx distributions will be provided soon. But for now, please refer to the **build** installation.
 
 <div class="subsection-break"></div>
 ### Build it
