@@ -13,8 +13,9 @@ Whether you're a devops, a paranoid guy living in a bunker, or the random user w
 ## Why
 
 Storing, transporting, and sharing sensible data can be hard, and much more difficult when it comes to automate it.
+
 *Trousseau* was created with private keys transportation and sharing across a servers cluster in mind.
-However it has proved being usefull to anyone who need to store and eventually share a passwords store, bank accounts details or even more sensible data.
+However it has proved being useful to anyone who need to store and eventually share a passwords store, bank accounts details or even more sensible data.
 
 <div class="subsection-break"></div>
 ### Real world use cases
@@ -31,8 +32,8 @@ However it has proved being usefull to anyone who need to store and eventually s
 <div class="subsection-break"></div>
 #### For the common users
 
-* *Store* your sensible data like passwords, bank account details, sex tapes involving you and your teachers or whatever comes to your mind in a encrypted store.
-* *Sync* your sensible data store to remote services and easily share it between your unix-like devices.
+* **Store** your sensible data like passwords, bank account details, sex tapes involving you and your teachers or whatever comes to your mind in a encrypted store.
+* **Sync** your sensible data store to remote services and easily share it between your unix-like devices.
 
 ## It's open-source
 
@@ -75,13 +76,10 @@ A repository for osx distributions will be provided soon. But for now, please re
 ```
 
 <div class="section-break"></div>
-## Usage
+## Prerequisities
 
 <div class="subsection-break"></div>
-### Prerequisities
-
-<div class="break"></div>
-#### Gpg password
+### Gpg password
 
 Every decryption operations will require your *gpg* primary key password. As of today, **trousseau** will handle your password through the environment.
 Export your primary key password as `TROUSSEAU_PASSWORD` environment variable.
@@ -93,8 +91,8 @@ Export your primary key password as `TROUSSEAU_PASSWORD` environment variable.
     $ trousseau get abc
 ```
 
-<div class="break"></div>
-#### AWS credentials
+<div class="subsection-break"></div>
+### AWS credentials
 
 If you intend to use the push/pull feature using `S3 <http://http://aws.amazon.com/s3/>` service, please make sure to set the
 `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` variables, like:
@@ -104,40 +102,40 @@ If you intend to use the push/pull feature using `S3 <http://http://aws.amazon.c
     $ trousseau pull
 ```
 
-<div class="break"></div>
-#### Environment variables
+<div class="subsection-break"></div>
+### Environment variables (so you know)
 
 * `TROUSSEAU_PASSWORD` (**mandatory**): your *gpg* primary key password that will be used to identify you as one of the trousseau data store recipient and give read/write access.
 * `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (*optional*): Your aws account credentials with proper read/write acces over S3. *Only if you intend to use the S3 remote storage features*
 * `TROUSSEAU_S3_BUCKET` and `TROUSSEAU_S3_FILENAME` (*optional*): The remote s3 bucket the trousseau data should be pushed/pulled from and the expected remote name of the trousseau data store file.
 
-<div class="subsection-break"></div>
-### Actions
+<div class="section-break"></div>
+## Let's get started
 
-<div class="break"></div>
-#### Store creation and management
+<div class="subsection-break"></div>
+### Basics
 
 First use of **trousseau** requires the data store to be created. A **trousseau** data store is built and maintained for a list of *gpg* recipients who will be the only ones able to decrypt and manipulate it (so don't forget to include yourself ;) )
 
 <div class="break"></div>
-*Api*
+#### Api
 
-* `create [RECIPIENTS ...]` : creates the trousseau encrypted datastore for provided recipients and stores it in `$HOME/.trousseau`
-* `meta` : Outputs the store metadata.
-* `add-recipient RECIPIENT` : Adds a recipient to the store. The recipient will be able to open and modify the store.
-* `remove-recipient RECIPIENT` : Removes a recipient from the store. The recipient will not be able to open or modify the store.
+* **create** [RECIPIENTS ...] : creates the trousseau encrypted datastore for provided recipients and stores it in `$HOME/.trousseau`
+* **meta** : Outputs the store metadata.
+* **add-recipient** RECIPIENT : Adds a recipient to the store. The recipient will be able to open and modify the store.
+* **remove-recipient** RECIPIENT : Removes a recipient from the store. The recipient will not be able to open or modify the store.
 
 <div class="break"></div>
-*Create the trousseau datastore*
+#### First steps with the data store
 
 ```bash
-    # create a trousseau for two gpg recipients
-    $ trousseau create 4B7D890,28EA78B
+    $ trousseau create 4B7D890,28EA78B  # create a trousseau for two gpg recipients
     trousseau created at $HOME/.trousseau
+```
 
+Trousseau data store consists in single gpg encrypted file residing in your ``$HOME`` directory. Check by yourself.
 
-    # as you can see, trousseau data store consists
-    # in only one encrypted file, in your $HOME
+```bash
     $ cat ~/.trousseau
     -----BEGIN PGP MESSAGE-----
     wcBMA5i2a4x3jHQgAQgAGKAZd5UFauGBMkFz7wi4v4aNTGGpDS81drrevo/Tntdz
@@ -157,73 +155,21 @@ First use of **trousseau** requires the data store to be created. A **trousseau*
 ```
 
 <div class="break"></div>
-*Metadata*
+### Manipulating keys
 
-```bash
-    # If you take a look at the encrypted content of the
-    # trousseau datastore manually using gpg, you can see
-    # that the created trousseau is not empty 
-    $ cat ~/.trousseau | gpg -d -r 4B7D890 --textmode
-    You need a passphrase to unlock the secret key for
-    user: "My Gpg User <MyGpg@mail.com>"
-    2048-bit RSA key, ID 4B7D890, created 2013-05-21 (main key ID 4B7D890)
-
-    gpg: encrypted with 2048-bit RSA key, ID 4B7D890, created 2013-05-21
-      "My Gpg User <MyGpg@mail.com>"
-    {"_meta":{"created_at":"2013-08-12 08:00:20.457477714 +0200 CEST","last_modified_at":"2013-08-12 08:00:20.457586991 +0200 CEST","recipients":["92EDE36B"],"version":"0.1.0"},"data":{}}
-
-
-    # The data attached to the empty trousseau store are
-    # the metadata. Fortunately trousseau exposes a meta
-    # command to output them properly.
-    $ trousseau meta
-    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
-    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
-    Recipients: [4B7D890]
-    TrousseauVersion: 0.1.0c
-````
+Once your trousseau has been created, you're now able to read, write, list, delete it's data. Here's how the fun part goes.
 
 <div class="break"></div>
-*Adding and removing recipients*
+#### Api
 
-```bash
-    # Now suppose you'd like another recipient, which
-    # will then be able to open and update the trousseau store
-    $ trousseau add-recipient 75FE3AB
-    $ trousseau add-recipient 869FA4A
-    $ trousseau meta
-    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
-    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
-    Recipients: [4B7D890, 75FE3AB, 869FA4A]
-    TrousseauVersion: 0.1.0c
-
-
-    # And if you don't want to give your love anymore to some
-    # of the store recipients, just remove him from the list
-    $ trousseau remove-recipient 75FE3AB
-    $ trousseau meta
-    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
-    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
-    Recipients: [4B7D890, 869FA4A]
-    TrousseauVersion: 0.1.0c
-```
+* **get** KEY : Outputs the stored KEY-value pair
+* **set** KEY VALUE : Sets the provided key-value pair in store
+* **del** KEY : Deletes provided key from the store
+* **keys** : Lists the stored keys
+* **show** : Lists the stored key-value pairs
 
 <div class="break"></div>
-#### Getting, setting, deleting, listing keys
-
-Once your trousseau has been created, you're now able to read, write, list, delete it's data and metadata. Here's how the fun part goes.
-
-<div class="break"></div>
-*Api*
-
-* `get KEY` : Outputs the stored KEY-value pair
-* `set KEY VALUE` : Sets the provided key-value pair in store
-* `del KEY` : Deletes provided key from the store
-* `keys` : Lists the stored keys
-* `show` : Lists the stored key-value pairs
-
-<div class="break"></div>
-*Example*
+#### You've got the keys
 
 ```bash
     # Right now the store is empty
@@ -257,36 +203,30 @@ Once your trousseau has been created, you're now able to read, write, list, dele
 ```
 
 <div class="break"></div>
-#### Import/Export to remote storage
+### Importing/Exporting to remote storage
 
-Trousseau was built with data remote storage in mind. As of today only S3 storage is available, but more are to come (don't forget to set your aws credentials environment variables)
-
-<div class="break"></div>
-*Api*
-
-* `push` : Pushes the trousseau data store to remote storage
-* `pull` : Pulls the trousseau data store from remote storage
+Trousseau was built with data remote storages in mind. As of today only S3 and SSH storages are available, but more are to come (don't forget to set your aws credentials environment variables)
 
 <div class="break"></div>
-*S3 Example*
+#### Api
+
+* **push** : Pushes the trousseau data store to remote storage
+* **pull** : Pulls the trousseau data store from remote storage
+
+<div class="break"></div>
+#### S3 Example
 
 Pushing the trousseau data store to Amazon S3 will require some setup:
 
-* Make sure to set aws credentials environment variables
-
-```bash
-    $ export AWS_ACCESS_KEY_ID=myaeccskey
-    $ export AWS_SECRET_ACCESS_KEY=mysecretkey
-```
-
-* You can setup the bucket to push data store into and the remote filename using environment. However, you're also able to provide these parameters as arguments of the **push** and **pull** methods.
+* First, Make sure you've set up the aws credentials environment variables like described in the configuration section of this README.
+* Then you can setup the bucket to push data store into and the remote filename using environment. However, you're also able to provide these parameters as arguments of the **push** and **pull** methods.
 
 ```bash
     $ export TROUSSEAU_S3_FILENAME=trousseau
     $ export TROUSSEAU_S3_BUCKET=mytrousseaubucket
 ```
 
-Once you've to set it up, you're ready to properly push the data store to S3.
+Now that everything is configured properly, you're ready to properly push the data store to S3.
 
 ```bash
     # Considering a non empty trousseau data store
@@ -310,7 +250,9 @@ Once you've to set it up, you're ready to properly push the data store to S3.
 ```
 
 <div class="break"></div>
-*Scp example*
+#### Scp example
+
+*Trousseau* allows you to push your data store to a ssh location. It doesn't need any special setup. So here we can go with a complete example.
 
 ```bash
     # We start with a non empty trousseau data store
@@ -333,6 +275,76 @@ Once you've to set it up, you're ready to properly push the data store to S3.
     $ trousseau show
     abc: 123
     easy as: do re mi    
+```
+
+<div class="subsection-break"></div>
+### Local imports and exports
+
+#### API
+
+* **import** FILENAME: will import a trousseau data store from the local filesystem. The operation **erases** the current trousseau store content.
+* **export** FILENAME: will export the current trousseau data store as `FILENAME` on the local fs.
+
+#### Real world example
+
+```bash
+$ trousseau export testtrousseau.asc  # Fine we've exported our current data store into a single file
+$ mail -f testtrousseau.asc cousin@machin.com  # Let's pretend we've sent it by mail
+
+# Now cousin machin is now able to import the data store
+$ trousseau import testtrousseau.asc
+$ trousseau keys
+cousin_machin:isagreatbuddy
+adams_family:rests in peace, for sure
+```
+
+<div class="break"></div>
+#### Metadata
+
+Trousseau keeps track and exposes all sort of metadata about your store that you can access through the ``meta`` command.
+
+```bash
+    $ trousseau meta
+    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
+    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
+    Recipients: [4B7D890,28EA78B]
+    TrousseauVersion: 0.1.0c
+```
+
+Once again, if you're intersted in how the meta data are stored, go check yourself by decrypting the store content using one of your recipients private key.
+
+```bash
+    $ cat ~/.trousseau | gpg -d -r 4B7D890 --textmode
+    You need a passphrase to unlock the secret key for
+    user: "My Gpg User <MyGpg@mail.com>"
+    2048-bit RSA key, ID 4B7D890, created 2013-05-21 (main key ID 4B7D890)
+
+    gpg: encrypted with 2048-bit RSA key, ID 4B7D890, created 2013-05-21
+      "My Gpg User <MyGpg@mail.com>"
+    {"_meta":{"created_at":"2013-08-12 08:00:20.457477714 +0200 CEST","last_modified_at":"2013-08-12 08:00:20.457586991 +0200 CEST","recipients":["92EDE36B"],"version":"0.1.0"},"data":{}}
+```
+
+<div class="break"></div>
+#### Adding and removing recipients
+
+Okay, so you've created a trousseau data store with two recipients allowed to manipulate it. Now suppose you'd like to add another recipient to be able to open and update the trousseau store; or to remove one.
+``add-recipient`` and ``remove-recipient`` commands can help you with that.
+
+```bash
+    $ trousseau add-recipient 75FE3AB
+    $ trousseau add-recipient 869FA4A
+    $ trousseau meta
+    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
+    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
+    Recipients: [4B7D890, 75FE3AB, 869FA4A]
+    TrousseauVersion: 0.1.0c
+
+    $ trousseau remove-recipient 75FE3AB
+    $ trousseau meta
+    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
+    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
+    Recipients: [4B7D890, 869FA4A]
+    TrousseauVersion: 0.1.0c
 ```
 
 <div class="section-break"></div>
