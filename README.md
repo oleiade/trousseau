@@ -71,8 +71,8 @@ A repository for osx distributions will be provided soon. But for now, please re
 2. Then, just build and copy the `./bin/trousseau` executable to a system *PATH* location
 
 ```bash
-    make
-    sudo cp ./bin/trousseau /usr/local/bin/trousseau
+make
+sudo cp ./bin/trousseau /usr/local/bin/trousseau
 ```
 
 <div class="section-break"></div>
@@ -87,8 +87,8 @@ Export your primary key password as `TROUSSEAU_PASSWORD` environment variable.
 *Example*:
 
 ```bash
-    $ export TROUSSEAU_PASSWORD=mysupperdupperpassword
-    $ trousseau get abc
+$ export TROUSSEAU_PASSWORD=mysupperdupperpassword
+$ trousseau get abc
 ```
 
 <div class="subsection-break"></div>
@@ -98,8 +98,8 @@ If you intend to use the push/pull feature using `S3 <http://http://aws.amazon.c
 `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` variables, like:
 
 ```bash
-    $ export AWS_ACCESS_KEY_ID=myaeccskey && export AWS_SECRET_ACCESS_KEY=mysecretkey
-    $ trousseau pull
+$ export AWS_ACCESS_KEY_ID=myaeccskey && export AWS_SECRET_ACCESS_KEY=mysecretkey
+$ trousseau pull
 ```
 
 <div class="subsection-break"></div>
@@ -129,29 +129,29 @@ First use of **trousseau** requires the data store to be created. A **trousseau*
 #### First steps with the data store
 
 ```bash
-    $ trousseau create 4B7D890,28EA78B  # create a trousseau for two gpg recipients
-    trousseau created at $HOME/.trousseau
+$ trousseau create 4B7D890,28EA78B  # create a trousseau for two gpg recipients
+trousseau created at $HOME/.trousseau
 ```
 
 Trousseau data store consists in single gpg encrypted file residing in your ``$HOME`` directory. Check by yourself.
 
 ```bash
-    $ cat ~/.trousseau
-    -----BEGIN PGP MESSAGE-----
-    wcBMA5i2a4x3jHQgAQgAGKAZd5UFauGBMkFz7wi4v4aNTGGpDS81drrevo/Tntdz
-    rr+PR/GjUlKZxhvG18mr+FuTV6q2DOK3Z0nROs57PLK9Q3ye40Su/Af1vj+LaN4i
-    AAMK9YVpjKaxz+pciUm8nBDkRxp3CLZ9eA2B+1JBy5HgziHY+7KC/dvaubRv0M0J
-    qzYvshIYU0urVQt7oO4WYVQbJ1N0OXV3oAzW4bBBs/p6b8KSUlmvHUr+9r4V1KvU
-    ynpHbp1T2HVPC9uqLgJ+PRjlQ2QsxjezkBntOFMaeMZjq2m2glw90aIGDAPjkMKy
-    42qQbmdrT3+houqeKUrLcVFNOxevVEZLf8N3Qgo/H9LgAeSroddqYkJzOmknxDzP
-    MDk+4TaY4Ljge+G7j+CB4iBsIjrgSefl/4ZU30dJ/DHyL5i3lCCGXXAo2eqfJg2w
-    FZgh+qc8Mbjlz2iMdnC+b8rRwhMTgD1Tyd8vbR1ArPfQh3ThdePwrdyE86CYQZOA
-    MIBfKgTUpWiAtEhM23melF8H3oznrIKt1ZtDsxJEuBCZ86XlC9TF27XFWbnl7rfK
-    jF2kqP3DuuBA5d23HprbN6LjDSJeKbXDvc5LetBI7O5y954n3tMWCB9y4EjkpVAx
-    EWnovjEnnW89uXHaFOBQ4naH4kjg1OHEquCf4Nvgl+S5Pfi875yAKqxxK/+e8GGo
-    4q8UZC7ho/cA
-    =t2zr
-    -----END PGP MESSAGE-----
+$ cat ~/.trousseau
+-----BEGIN PGP MESSAGE-----
+wcBMA5i2a4x3jHQgAQgAGKAZd5UFauGBMkFz7wi4v4aNTGGpDS81drrevo/Tntdz
+rr+PR/GjUlKZxhvG18mr+FuTV6q2DOK3Z0nROs57PLK9Q3ye40Su/Af1vj+LaN4i
+AAMK9YVpjKaxz+pciUm8nBDkRxp3CLZ9eA2B+1JBy5HgziHY+7KC/dvaubRv0M0J
+qzYvshIYU0urVQt7oO4WYVQbJ1N0OXV3oAzW4bBBs/p6b8KSUlmvHUr+9r4V1KvU
+ynpHbp1T2HVPC9uqLgJ+PRjlQ2QsxjezkBntOFMaeMZjq2m2glw90aIGDAPjkMKy
+42qQbmdrT3+houqeKUrLcVFNOxevVEZLf8N3Qgo/H9LgAeSroddqYkJzOmknxDzP
+MDk+4TaY4Ljge+G7j+CB4iBsIjrgSefl/4ZU30dJ/DHyL5i3lCCGXXAo2eqfJg2w
+FZgh+qc8Mbjlz2iMdnC+b8rRwhMTgD1Tyd8vbR1ArPfQh3ThdePwrdyE86CYQZOA
+MIBfKgTUpWiAtEhM23melF8H3oznrIKt1ZtDsxJEuBCZ86XlC9TF27XFWbnl7rfK
+jF2kqP3DuuBA5d23HprbN6LjDSJeKbXDvc5LetBI7O5y954n3tMWCB9y4EjkpVAx
+EWnovjEnnW89uXHaFOBQ4naH4kjg1OHEquCf4Nvgl+S5Pfi875yAKqxxK/+e8GGo
+4q8UZC7ho/cA
+=t2zr
+-----END PGP MESSAGE-----
 ```
 
 <div class="break"></div>
@@ -172,34 +172,34 @@ Once your trousseau has been created, you're now able to read, write, list, dele
 #### You've got the keys
 
 ```bash
-    # Right now the store is empty
-    $ trousseau show
+# Right now the store is empty
+$ trousseau show
 
 
-    # Let's add some data into it
-    $ trousseau set abc 123
-    $ trousseau set "easy as" "do re mi"
-    $ trousseau set oleiade-private-key "`cat ~/.ssh/id_rsa`"
+# Let's add some data into it
+$ trousseau set abc 123
+$ trousseau set "easy as" "do re mi"
+$ trousseau set oleiade-private-key "`cat ~/.ssh/id_rsa`"
 
 
-    # Now let's make sure data has been added
-    $ trousseau keys
-    abc
-    easy as
-    oleiade-private-key
+# Now let's make sure data has been added
+$ trousseau keys
+abc
+easy as
+oleiade-private-key
 
-    $ trousseau get abc
-    123
+$ trousseau get abc
+123
 
-    $ trousseau show
-    abc: 123
-    easy as: do re mi
-    oleiade-private-key: --- BEGIN PRIVATE KEY ---
-    ...
+$ trousseau show
+abc: 123
+easy as: do re mi
+oleiade-private-key: --- BEGIN PRIVATE KEY ---
+...
 
 
-    # Now if you don't need a key anymore, just drop it.
-    $ trousseau del abc  # Now the song lacks something doesn't it?
+# Now if you don't need a key anymore, just drop it.
+$ trousseau del abc  # Now the song lacks something doesn't it?
 ```
 
 <div class="break"></div>
@@ -222,31 +222,32 @@ Pushing the trousseau data store to Amazon S3 will require some setup:
 * Then you can setup the bucket to push data store into and the remote filename using environment. However, you're also able to provide these parameters as arguments of the **push** and **pull** methods.
 
 ```bash
-    $ export TROUSSEAU_S3_FILENAME=trousseau
-    $ export TROUSSEAU_S3_BUCKET=mytrousseaubucket
+$ export TROUSSEAU_S3_FILENAME=trousseau
+$ export TROUSSEAU_S3_BUCKET=mytrousseaubucket
 ```
 
 Now that everything is configured properly, you're ready to properly push the data store to S3.
 
 ```bash
-    # Considering a non empty trousseau data store
-    $ trousseau show
-    abc: 123
-    easy as: do re mi
+# Considering a non empty trousseau data store
+$ trousseau show
+abc: 123
+easy as: do re mi
 
-    # And then you're ready to push
-    $ trousseau push
+# And then you're ready to push
+$ trousseau push
 
 
-    # Now that data store is pushed to S3, let's remove the
-    # local data store and pull it once again to ensure it worked
-    $ rm ~/.trousseau
-    $ trousseau show
-    Trousseau unconfigured: no data store
-    $ trousseau pull
-    $ trousseau show
-    abc: 123
-    easy as: do re mi
+# Now that data store is pushed to S3, let's remove the
+# local data store and pull it once again to ensure it worked
+$ rm ~/.trousseau
+$ trousseau show
+Trousseau unconfigured: no data store
+
+$ trousseau pull
+$ trousseau show
+abc: 123
+easy as: do re mi
 ```
 
 <div class="break"></div>
@@ -255,26 +256,27 @@ Now that everything is configured properly, you're ready to properly push the da
 *Trousseau* allows you to push your data store to a ssh location. It doesn't need any special setup. So here we can go with a complete example.
 
 ```bash
-    # We start with a non empty trousseau data store
-    $ trousseau show
-    abc: 123
-    easy as: do re mi
+# We start with a non empty trousseau data store
+$ trousseau show
+abc: 123
+easy as: do re mi
 
-    # To push it using scp we need to provide it a couple of
-    # basic options
-    $ trousseau push --remote-storage scp --host <myhost> --port <myport> --user <myuser>
+# To push it using scp we need to provide it a couple of
+# basic options
+$ trousseau push --remote-storage scp --host <myhost> --port <myport> --user <myuser>
 
 
-    # Now that data store has been pushed to the remote storage
-    # using scp, let's remove the local data store and pull it
-    # once again to ensure it worked
-    $ rm ~/.trousseau
-    $ trousseau show
-    Trousseau unconfigured: no data store
-    $ trousseau pull --remote-storage scp --host <myhost> --port <myport> --user <myuser>
-    $ trousseau show
-    abc: 123
-    easy as: do re mi    
+# Now that data store has been pushed to the remote storage
+# using scp, let's remove the local data store and pull it
+# once again to ensure it worked
+$ rm ~/.trousseau
+$ trousseau show
+Trousseau unconfigured: no data store
+
+$ trousseau pull --remote-storage scp --host <myhost> --port <myport> --user <myuser>
+$ trousseau show
+abc: 123
+easy as: do re mi    
 ```
 
 <div class="subsection-break"></div>
@@ -293,7 +295,7 @@ $ mail -f testtrousseau.asc cousin@machin.com  # Let's pretend we've sent it by 
 
 # Now cousin machin is now able to import the data store
 $ trousseau import testtrousseau.asc
-$ trousseau keys
+$ trousseau show
 cousin_machin:isagreatbuddy
 adams_family:rests in peace, for sure
 ```
@@ -304,24 +306,24 @@ adams_family:rests in peace, for sure
 Trousseau keeps track and exposes all sort of metadata about your store that you can access through the ``meta`` command.
 
 ```bash
-    $ trousseau meta
-    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
-    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
-    Recipients: [4B7D890,28EA78B]
-    TrousseauVersion: 0.1.0c
+$ trousseau meta
+CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
+LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
+Recipients: [4B7D890,28EA78B]
+TrousseauVersion: 0.1.0c
 ```
 
 Once again, if you're intersted in how the meta data are stored, go check yourself by decrypting the store content using one of your recipients private key.
 
 ```bash
-    $ cat ~/.trousseau | gpg -d -r 4B7D890 --textmode
-    You need a passphrase to unlock the secret key for
-    user: "My Gpg User <MyGpg@mail.com>"
-    2048-bit RSA key, ID 4B7D890, created 2013-05-21 (main key ID 4B7D890)
+$ cat ~/.trousseau | gpg -d -r 4B7D890 --textmode
+You need a passphrase to unlock the secret key for
+user: "My Gpg User <MyGpg@mail.com>"
+2048-bit RSA key, ID 4B7D890, created 2013-05-21 (main key ID 4B7D890)
 
-    gpg: encrypted with 2048-bit RSA key, ID 4B7D890, created 2013-05-21
-      "My Gpg User <MyGpg@mail.com>"
-    {"_meta":{"created_at":"2013-08-12 08:00:20.457477714 +0200 CEST","last_modified_at":"2013-08-12 08:00:20.457586991 +0200 CEST","recipients":["92EDE36B"],"version":"0.1.0"},"data":{}}
+gpg: encrypted with 2048-bit RSA key, ID 4B7D890, created 2013-05-21
+  "My Gpg User <MyGpg@mail.com>"
+{"_meta":{"created_at":"2013-08-12 08:00:20.457477714 +0200 CEST","last_modified_at":"2013-08-12 08:00:20.457586991 +0200 CEST","recipients":["92EDE36B"],"version":"0.1.0"},"data":{}}
 ```
 
 <div class="break"></div>
@@ -331,20 +333,20 @@ Okay, so you've created a trousseau data store with two recipients allowed to ma
 ``add-recipient`` and ``remove-recipient`` commands can help you with that.
 
 ```bash
-    $ trousseau add-recipient 75FE3AB
-    $ trousseau add-recipient 869FA4A
-    $ trousseau meta
-    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
-    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
-    Recipients: [4B7D890, 75FE3AB, 869FA4A]
-    TrousseauVersion: 0.1.0c
+$ trousseau add-recipient 75FE3AB
+$ trousseau add-recipient 869FA4A
+$ trousseau meta
+CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
+LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
+Recipients: [4B7D890, 75FE3AB, 869FA4A]
+TrousseauVersion: 0.1.0c
 
-    $ trousseau remove-recipient 75FE3AB
-    $ trousseau meta
-    CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
-    LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
-    Recipients: [4B7D890, 869FA4A]
-    TrousseauVersion: 0.1.0c
+$ trousseau remove-recipient 75FE3AB
+$ trousseau meta
+CreatedAt: 2013-08-12 08:00:20.457477714 +0200 CEST
+LastModifiedAt: 2013-08-12 08:00:20.457586991 +0200 CEST
+Recipients: [4B7D890, 869FA4A]
+TrousseauVersion: 0.1.0c
 ```
 
 <div class="section-break"></div>
