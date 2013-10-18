@@ -301,7 +301,7 @@ adams_family:rests in peace, for sure
 ```
 
 <div class="break"></div>
-#### Metadata
+### Metadata
 
 Trousseau keeps track and exposes all sort of metadata about your store that you can access through the ``meta`` command.
 
@@ -327,7 +327,7 @@ gpg: encrypted with 2048-bit RSA key, ID 4B7D890, created 2013-05-21
 ```
 
 <div class="break"></div>
-#### Adding and removing recipients
+### Adding and removing recipients
 
 Okay, so you've created a trousseau data store with two recipients allowed to manipulate it. Now suppose you'd like to add another recipient to be able to open and update the trousseau store; or to remove one.
 ``add-recipient`` and ``remove-recipient`` commands can help you with that.
