@@ -68,7 +68,8 @@ A repository for osx distributions will be provided soon. But for now, please re
 ### Build it
 
 1. First, make sure you have a `Go <http://http://golang.org/>` language compiler **>= 1.1.2** (*mandatory*) and `git <http://gitscm.org>` installed.
-2. Then, just build and copy the `./bin/trousseau` executable to a system *PATH* location
+2. Make sure you have the following go system dependencies in your `$PATH`: `bzr, svn, hg, git`
+3. Then, just build and copy the `./bin/trousseau` executable to a system *PATH* location
 
 ```bash
 make
