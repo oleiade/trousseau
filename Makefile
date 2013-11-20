@@ -1,61 +1,67 @@
-SYS_OS := $(shell uname -s)
+#
+# VARIABLES 
+#
 
-TROUSSEAU_PACKAGE := github.com/oleiade/trousseau
-BUILD_SRC := build_src
-BUILD_PATH := ${BUILD_SRC}/src/${TROUSSEAU_PACKAGE}
 
-GIT_ROOT := $(shell git rev-parse --show-toplevel)
-BUILD_DIR := $(CURDIR)/.gopath
+#
+# Golang packages definition
+#
+PROJECT_PACKAGE 	= github.com/oleiade/trousseau
+TROUSSEAU_PACKAGE 	= github.com/oleiade/trousseau/trousseau
 
-GIT_COMMIT = $(shell git rev-parse --short HEAD)
-GIT_STATUS = $(shell test -n "`git status --porcelain`" && echo "+CHANGES")
+#
+# Directories
+#
+GOPATH_DIR 			= $(CURDIR)/.gopath
+SRC_DIR 			= $(GOPATH_DIR)/src
+BIN_DIR 			= $(CURDIR)/bin
 
-GOPATH ?= $(BUILD_DIR)
+PROJECT_DIR 		= $(SRC_DIR)/$(PROJECT_PACKAGE)
+TROUSSEAU_DIR 		= $(SRC_DIR)/$(TROUSSEAU_PACKAGE)
+
+#
+# Executables definition
+#
+TROUSSEAU_BIN = $(BIN_DIR)/trousseau
+
+#
+# GOPATH definition
+#
+GOPATH ?= $(GOPATH_DIR)
 export GOPATH
 
-GO_OPTIONS ?= -a -ldflags=$(LDFLAGS)
-ifeq ($(VERBOSE), 1)
-GO_OPTIONS += -v
-endif
+#
+# Compilations options
+#
+GO_OPTIONS 			= -a 
 
-BUILD_OPTIONS = -a -ldflags "-X main.GITCOMMIT $(GIT_COMMIT)$(GIT_STATUS)"
-COMPILATION_OPTIONS = CGO_ENABLED=0
-LDFLAGS := '-w -d'
 
-SRC_DIR := $(GOPATH)/src
 
-TROUSSEAU_DIR := $(SRC_DIR)/$(TROUSSEAU_PACKAGE)
-TROUSSEAU_MAIN := $(TROUSSEAU_DIR)/trousseau
 
-TROUSSEAU_BIN_RELATIVE := bin/trousseau
-TROUSSEAU_BIN := $(CURDIR)/$(TROUSSEAU_BIN_RELATIVE)
-
-.PHONY: all clean test hack $(TROUSSEAU_BIN) $(TROUSSEAU_DIR)
-
+#
+# Compilation rules
+#
 all: $(TROUSSEAU_BIN)
 
 $(TROUSSEAU_BIN): $(TROUSSEAU_DIR)
 				@mkdir -p $(dir $@)
-				@(cd $(TROUSSEAU_MAIN); $(COMPILATION_OPTIONS) go build $(GO_OPTIONS) $(BUILD_OPTIONS) -o $@)
-				@echo $(TROUSSEAU_BIN_RELATIVE) is created.
+				@cd $<; go build -o $@
+				@echo $@ created.
 
-$(TROUSSEAU_DIR):
+$(PROJECT_DIR):
 				@mkdir -p $(dir $@)
 				@if [ -h $@ ]; then rm -f $@; fi; ln -sf $(CURDIR)/ $@
-				@(cd $(TROUSSEAU_MAIN); go get -d $(GO_OPTIONS))
+
+$(TROUSSEAU_DIR): $(PROJECT_DIR)
+				@cd $<; go get -d
 
 clean:
 	@rm -rf $(dir $(TROUSSEAU_BIN))
 ifeq ($(GOPATH), $(BUILD_DIR))
-		@rm -rf $(BUILD_DIR)
-else ifneq ($(TROUSSEAU_DIR), $(realpath $(TROUSSEAU_DIR)))
-	@rm -f $(TROUSSEAU_DIR)
+	  @rm -rf $(BUILD_DIR)
+else ifneq ($(PROJECT_DIR), $(realpath $(PROJECT_DIR)))
+	  @rm -f $(PROJECT_DIR)
 endif
 
-test:
-	@(go get "github.com/stretchr/testify/assert")
-	@(cd $(TROUSSEAU_DIR); sudo -E go test -v $(GO_OPTIONS))
-
-fmt:
-	@gofmt -s -l -w .
+.PHONY: all clean $(TROUSSEAU_BIN) $(TROUSSEAU_DIR) $(PROJECT_DIR)
 
