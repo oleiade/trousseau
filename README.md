@@ -7,7 +7,7 @@ It stores data in a single multi-recipients encrypted file and can supports both
 
 Create a *trousseau* store, specify which *gpg* recipients are allowed to open and modify it, and adding some key-value pairs to, export it to s3 for example, and re-import it on another device. As simple as that.
 
-Whether you're a devops, a paranoid guy living in a bunker, or the random user who seek a simple way to store it's critical data in safe maneer. *Trousseau* can do something for you.
+Whether you're a devops, a paranoid guy living in a bunker, or the random user who seek a simple way to store it's critical data in secured manner. *Trousseau* can do something for you.
 
 <div class="section-break"></div>
 ## Why
