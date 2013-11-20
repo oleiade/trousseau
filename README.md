@@ -26,7 +26,7 @@ However it has proved being useful to anyone who need to store and eventually sh
 *Trousseau can be useful to you when it comes to*:
 
 * **Store** sensible data: Your brand new shinny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite cvs. No more plain certificates and keys in your repositories and configuration files.
-* **Share** passwords, keys and other critical data with coworkers and servers in your cluster in a safe maneer. *Trousseau* encrypts it's content for the specific recipient you provide it. Only the recipient you intend to be able to import and read-write the *Trousseau* store content will be able to. *Trousseau* proved to be a great way to share some services passwords with your coworkers too!
+* **Share** passwords, keys and other critical data with coworkers and servers in your cluster in a safe manner. *Trousseau* encrypts it's content for the specific recipient you provide it. Only the recipient you intend to be able to import and read-write the *Trousseau* store content will be able to. *Trousseau* proved to be a great way to share some services passwords with your coworkers too!
 * **Deploy** keys to your servers in a safe and normative way. Encrypt the trousseau store for every servers selectively.
 
 <div class="subsection-break"></div>
