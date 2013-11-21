@@ -2,7 +2,7 @@
 
 ## What
 
-*Trousseau* is a **gpg** encrypted key-value store designed to be a *simple*, *safe* and *relient* place for your data.
+*Trousseau* is a **gpg** encrypted key-value store designed to be a *simple*, *safe* and *trustworthy* place for your data.
 It stores data in a single multi-recipients encrypted file and can supports both local and remote storage sources (S3 and ssh so far) import/export.
 
 Create a *trousseau* store, specify which *gpg* recipients are allowed to open and modify it, and adding some key-value pairs to, export it to s3 for example, and re-import it on another device. As simple as that.
@@ -12,10 +12,10 @@ Whether you're a devops, a paranoid guy living in a bunker, or the random user w
 <div class="section-break"></div>
 ## Why
 
-Storing, transporting, and sharing sensible data can be hard, and much more difficult when it comes to automate it.
+Storing, transporting, and sharing sensitive data can be hard, and much more difficult when it comes to automate it.
 
 *Trousseau* was created with private keys transportation and sharing across a servers cluster in mind.
-However it has proved being useful to anyone who need to store and eventually share a passwords store, bank accounts details or even more sensible data.
+However it has proved being useful to anyone who need to store and eventually share a passwords store, bank accounts details or even more sensitive data.
 
 <div class="subsection-break"></div>
 ### Real world use cases
@@ -25,15 +25,15 @@ However it has proved being useful to anyone who need to store and eventually sh
 
 *Trousseau can be useful to you when it comes to*:
 
-* **Store** sensible data: Your brand new shinny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite cvs. No more plain certificates and keys in your repositories and configuration files.
-* **Share** passwords, keys and other critical data with coworkers and servers in your cluster in a safe maneer. *Trousseau* encrypts it's content for the specific recipient you provide it. Only the recipient you intend to be able to import and read-write the *Trousseau* store content will be able to. *Trousseau* proved to be a great way to share some services passwords with your coworkers too!
+* **Store** sensitive data: Your brand new shinny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite cvs. No more plain certificates and keys in your repositories and configuration files.
+* **Share** passwords, keys and other critical data with coworkers and servers in your cluster in a safe maneer. *Trousseau* encrypts its content for the specific recipient you provide it. Only the recipient you intend will be able to import and read-write the *Trousseau* store content. *Trousseau* proved itself to be a great way to share some services passwords with your coworkers too!
 * **Deploy** keys to your servers in a safe and normative way. Encrypt the trousseau store for every servers selectively.
 
 <div class="subsection-break"></div>
 #### For the common users
 
-* **Store** your sensible data like passwords, bank account details, sex tapes involving you and your teachers or whatever comes to your mind in a encrypted store.
-* **Sync** your sensible data store to remote services and easily share it between your unix-like devices.
+* **Store** your sensitive data like passwords, bank account details, sex tapes involving you and your teachers or whatever comes to your mind in an encrypted store.
+* **Sync** your sensitive data store to remote services and easily share it between your unix-like devices.
 
 ## It's open-source
 
@@ -277,7 +277,7 @@ Trousseau unconfigured: no data store
 $ trousseau pull --remote-storage scp --host <myhost> --port <myport> --user <myuser>
 $ trousseau show
 abc: 123
-easy as: do re mi    
+easy as: do re mi
 ```
 
 <div class="subsection-break"></div>
@@ -352,16 +352,16 @@ TrousseauVersion: 0.1.0c
 
 <div class="section-break"></div>
 ## More features to come
- 
+
 * Support for Sftp remote storage
 * Support for GDrive remote storage
 * Support for Dropbox remote storage
 
-* In a further future I might had support for truecrypt encryption
+* In a further future I might add truecrypt encryption
 
 <div class="section-break"></div>
 ## Contribute
- 
+
 * Check for open issues or open a fresh issue to start a discussion around a feature idea or a bug.
 * Fork the repository on GitHub to start making your changes to the **master** branch (or branch off of it).
 * Write tests which shows that the bug was fixed or that the feature works as expected.
