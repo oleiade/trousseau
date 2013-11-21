@@ -5,9 +5,9 @@
 *Trousseau* is a **gpg** encrypted key-value store designed to be a *simple*, *safe* and *trustworthy* place for your data.
 It stores data in a single multi-recipients encrypted file and can supports both local and remote storage sources (S3 and ssh so far) import/export.
 
-Create a *trousseau* store, specify which *gpg* recipients are allowed to open and modify it, and adding some key-value pairs to, export it to s3 for example, and re-import it on another device. As simple as that.
+Create a *trousseau* store, specify which *gpg* recipients are allowed to open and modify it, add some key-value pairs to it, export it to S3 for example, and re-import it on another device. As simple as that.
 
-Whether you're a devops, a paranoid guy living in a bunker, or the random user who seek a simple way to store it's critical data in secured manner. *Trousseau* can do something for you.
+Whether you're a devops, a paranoid guy living in a bunker, or the random user who seeks a simple way to store it's critical data in secured manner. *Trousseau* can do something for you.
 
 <div class="section-break"></div>
 ## Why
@@ -25,9 +25,9 @@ However it has proved being useful to anyone who need to store and eventually sh
 
 *Trousseau can be useful to you when it comes to*:
 
-* **Store** sensitive data: Your brand new shinny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite cvs. No more plain certificates and keys in your repositories and configuration files.
-* **Share** passwords, keys and other critical data with coworkers and servers in your cluster in a safe maneer. *Trousseau* encrypts its content for the specific recipient you provide it. Only the recipient you intend will be able to import and read-write the *Trousseau* store content. *Trousseau* proved itself to be a great way to share some services passwords with your coworkers too!
-* **Deploy** keys to your servers in a safe and normative way. Encrypt the trousseau store for every servers selectively.
+* **Store** sensitive data: Your brand new shiny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite cvs. No more plain certificates and keys in your repositories and configuration files.
+* **Share** passwords, keys and other critical data with co-workers and servers in your cluster in a safe manner. *Trousseau* encrypts its content for the specific recipient you provide it. Only the recipient you intend will be able to import and read-write the *Trousseau* store content. *Trousseau* proved itself to be a great way to share some services passwords with your co-workers too!
+* **Deploy** keys to your servers in a safe and normative way. Encrypt the trousseau store for each server selectively.
 
 <div class="subsection-break"></div>
 #### For the common users
@@ -37,7 +37,7 @@ However it has proved being useful to anyone who need to store and eventually sh
 
 ## It's open-source
 
-*Trousseau* is an open source software under the MIT license.
+*Trousseau* is open source software under the MIT license.
 Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on: see **Contribute**
 
 <div class="section-break"></div>
@@ -46,7 +46,7 @@ Any hackers are welcome to supply ideas, features requests, patches, pull reques
 <div class="subsection-break"></div>
 ### Debian and ubuntu
 
-A bintray debian repository provides *trousseau* packages for *i386*, *x86_64* and *arm* architectures, so you can easily install it.
+A binary debian repository provides *trousseau* packages for *i386*, *x86_64* and *arm* architectures, so you can easily install it.
 Just add the repository to your sources.list:
 
 ```bash
@@ -62,7 +62,7 @@ $ sudo apt-get install trousseau
 <div class="subsection-break"></div>
 ### OSX
 
-A repository for osx distributions will be provided soon. But for now, please refer to the **build** installation.
+A repository for OS X distributions will be provided soon. But for now, please refer to the **build** installation.
 
 <div class="subsection-break"></div>
 ### Build it
@@ -107,8 +107,8 @@ $ trousseau pull
 ### Environment variables (so you know)
 
 * `TROUSSEAU_PASSWORD` (**mandatory**): your *gpg* primary key password that will be used to identify you as one of the trousseau data store recipient and give read/write access.
-* `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (*optional*): Your aws account credentials with proper read/write acces over S3. *Only if you intend to use the S3 remote storage features*
-* `TROUSSEAU_S3_BUCKET` and `TROUSSEAU_S3_FILENAME` (*optional*): The remote s3 bucket the trousseau data should be pushed/pulled from and the expected remote name of the trousseau data store file.
+* `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (*optional*): Your AWS account credentials with proper read/write acces over S3. *Only if you intend to use the S3 remote storage features*
+* `TROUSSEAU_S3_BUCKET` and `TROUSSEAU_S3_FILENAME` (*optional*): The remote S3 bucket the trousseau data should be pushed/pulled from and the expected remote name of the trousseau data store file.
 
 <div class="section-break"></div>
 ## Let's get started
@@ -119,7 +119,7 @@ $ trousseau pull
 First use of **trousseau** requires the data store to be created. A **trousseau** data store is built and maintained for a list of *gpg* recipients who will be the only ones able to decrypt and manipulate it (so don't forget to include yourself ;) )
 
 <div class="break"></div>
-#### Api
+#### API
 
 * **create** [RECIPIENTS ...] : creates the trousseau encrypted datastore for provided recipients and stores it in `$HOME/.trousseau`
 * **meta** : Outputs the store metadata.
@@ -158,10 +158,10 @@ EWnovjEnnW89uXHaFOBQ4naH4kjg1OHEquCf4Nvgl+S5Pfi875yAKqxxK/+e8GGo
 <div class="break"></div>
 ### Manipulating keys
 
-Once your trousseau has been created, you're now able to read, write, list, delete it's data. Here's how the fun part goes.
+Once your trousseau has been created, you're now able to read, write, list, delete its data. Here's how the fun part goes.
 
 <div class="break"></div>
-#### Api
+#### API
 
 * **get** KEY : Outputs the stored KEY-value pair
 * **set** KEY VALUE : Sets the provided key-value pair in store
@@ -206,10 +206,10 @@ $ trousseau del abc  # Now the song lacks something doesn't it?
 <div class="break"></div>
 ### Importing/Exporting to remote storage
 
-Trousseau was built with data remote storages in mind. As of today only S3 and SSH storages are available, but more are to come (don't forget to set your aws credentials environment variables)
+Trousseau was built with data remote storage in mind. As of today only S3 and SSH storages are available, but more are to come (don't forget to set your AWS credentials environment variables)
 
 <div class="break"></div>
-#### Api
+#### API
 
 * **push** : Pushes the trousseau data store to remote storage
 * **pull** : Pulls the trousseau data store from remote storage
@@ -219,7 +219,7 @@ Trousseau was built with data remote storages in mind. As of today only S3 and S
 
 Pushing the trousseau data store to Amazon S3 will require some setup:
 
-* First, Make sure you've set up the aws credentials environment variables like described in the configuration section of this README.
+* First, make sure you've set up the AWS credentials environment variables as described in the configuration section of this README.
 * Then you can setup the bucket to push data store into and the remote filename using environment. However, you're also able to provide these parameters as arguments of the **push** and **pull** methods.
 
 ```bash
@@ -257,7 +257,7 @@ easy as: do re mi
 *Trousseau* allows you to push your data store to a ssh location. It doesn't need any special setup. So here we can go with a complete example.
 
 ```bash
-# We start with a non empty trousseau data store
+# We start with a non-empty trousseau data store
 $ trousseau show
 abc: 123
 easy as: do re mi
@@ -357,14 +357,14 @@ TrousseauVersion: 0.1.0c
 * Support for GDrive remote storage
 * Support for Dropbox remote storage
 
-* In a further future I might add truecrypt encryption
+* In a further future I might add TrueCrypt encryption
 
 <div class="section-break"></div>
 ## Contribute
 
 * Check for open issues or open a fresh issue to start a discussion around a feature idea or a bug.
 * Fork the repository on GitHub to start making your changes to the **master** branch (or branch off of it).
-* Write tests which shows that the bug was fixed or that the feature works as expected.
+* Write tests which show that the bug was fixed or that the feature works as expected.
 * Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS.
 
 
