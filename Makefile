@@ -2,6 +2,7 @@
 # VARIABLES 
 #
 
+TROUSSEAU_VERSION 	= `awk '/TROUSSEAU_VERSION/ { gsub("\"", ""); print $$NF }' $(CURDIR)/constants.go`
 
 #
 # Golang packages definition
@@ -15,6 +16,7 @@ TROUSSEAU_PACKAGE 	= github.com/oleiade/trousseau/trousseau
 GOPATH_DIR 			= $(CURDIR)/.gopath
 SRC_DIR 			= $(GOPATH_DIR)/src
 BIN_DIR 			= $(CURDIR)/bin
+DIST_DIR 			= $(CURDIR)/dist
 
 PROJECT_DIR 		= $(SRC_DIR)/$(PROJECT_PACKAGE)
 TROUSSEAU_DIR 		= $(SRC_DIR)/$(TROUSSEAU_PACKAGE)
@@ -35,7 +37,11 @@ export GOPATH
 #
 GO_OPTIONS 			= -a 
 
-
+#
+# Packaging options
+#
+XC_ARCH 			?= "386 amd64 arm"
+XC_OS 				?= "linux darwin windows freebsd openbsd"
 
 
 #
@@ -62,6 +68,11 @@ ifeq ($(GOPATH), $(BUILD_DIR))
 else ifneq ($(PROJECT_DIR), $(realpath $(PROJECT_DIR)))
 	  @rm -f $(PROJECT_DIR)
 endif
+
+package:
+	@(echo $(TROUSSEAU_VERSION))
+	@(go get github.com/laher/goxc)
+	@(cd $(TROUSSEAU_DIR); goxc -arch=$(XC_ARCH) -os=$(XC_OS) -pv=$(TROUSSEAU_VERSION) -d=$(DIST_DIR) -tasks-="go-test")
 
 .PHONY: all clean $(TROUSSEAU_BIN) $(TROUSSEAU_DIR) $(PROJECT_DIR)
 
