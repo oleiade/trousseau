@@ -1,14 +1,11 @@
 package trousseau
 
-import (
-	"github.com/codegangsta/cli"
-	"os"
-)
+import "github.com/codegangsta/cli"
 
 func PasswordFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"passphrase",
-		os.Getenv(ENV_PASSPHRASE_KEY),
+		GetPassphrase(),
 		"primary gpg key password to decrypt trousseau",
 	}
 }

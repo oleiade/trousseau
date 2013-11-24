@@ -83,20 +83,35 @@ sudo cp ./bin/trousseau /usr/local/bin/trousseau
 ### Gpg passphrase
 
 Every decryption operations will require your *gpg* primary key passphrase.
-As of today, **trousseau** is able to handle your passphrase through the global ``--passphrase`` option, or the environment.
+As of today, **trousseau** is able to handle your passphrase through your system's keyring manager, the system environment or the global option ``--passphrase``.
 
-You can whether export pass you gpg passphrase through the command line option:
+#### Keyring manager
+
+Supported system keyring manager are osx keychain access and linux gnome secret-service and gnome-keychain (more might be added in the future on demand).
+To use the keyring manager you will need to set up the ``TROUSSEAU_KEYRING_SERVICE`` environment variable to the name of they keyring manager key holding the trousseau main gpg key passphrase.
 
 ```bash
-$ trousseau --passhphrase mysupperdupperpassphrase get abc
+$ export TROUSSEAU_KEYRING_SERVICE=my_keyring_key
+$ trousseau get abc
 ```
 
-Or you can pass your primary key passphrase as `TROUSSEAU_PASSPHRASE` environment variable:
+#### Environment variable
+
+Alternatively, you can pass your primary key passphrase as `TROUSSEAU_PASSPHRASE` environment variable:
 
 ```bash
 $ export TROUSSEAU_PASSPHRASE=mysupperdupperpassphrase
 $ trousseau get abc
 ```
+
+#### Passphrase global option
+
+Ultimately, you can pass you gpg passphrase through the command line global option:
+
+```bash
+$ trousseau --passhphrase mysupperdupperpassphrase get abc
+```
+
 
 <div class="subsection-break"></div>
 ### AWS credentials
