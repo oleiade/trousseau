@@ -8,7 +8,7 @@ import (
 func PasswordFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"password",
-		os.Getenv("TROUSSEAU_PASSWORD"),
+		os.Getenv(ENV_PASSPHRASE_KEY),
 		"primary gpg key password to decrypt trousseau",
 	}
 }
