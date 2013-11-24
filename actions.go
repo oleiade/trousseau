@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-func hasEnoughArgs(args []string, expected int) bool {
+// hasExpectedArgs checks whether the number of args are as expected.
+func hasExpectedArgs(args []string, expected int) bool {
 	switch expected {
 	case -1:
 		if len(args) > 0 {
@@ -28,8 +29,8 @@ func hasEnoughArgs(args []string, expected int) bool {
 }
 
 func CreateAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 1) {
-		log.Fatal("Not enough argument supplied to configure command")
+	if !hasExpectedArgs(c.Args(), 1) {
+		log.Fatal("Incorrect number of arguments to 'configure' command")
 	}
 
 	recipients := strings.Split(c.Args()[0], ",")
@@ -48,8 +49,8 @@ func CreateAction(c *cli.Context) {
 }
 
 func PushAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 0) {
-		log.Fatal("Not enough arguments supplied to push command")
+	if !hasExpectedArgs(c.Args(), 0) {
+		log.Fatal("Incorrect number of arguments to 'push' command")
 	}
 
 	environment := NewEnvironment()
@@ -80,8 +81,8 @@ func PushAction(c *cli.Context) {
 }
 
 func PullAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 0) {
-		log.Fatal("Not enough arguments supplied to push command")
+	if !hasExpectedArgs(c.Args(), 0) {
+		log.Fatal("Incorrect number of arguments to 'pull' command")
 	}
 
 	environment := NewEnvironment()
@@ -112,8 +113,8 @@ func PullAction(c *cli.Context) {
 }
 
 func ExportAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 1) {
-		log.Fatal("Not enough argument supplied to export command")
+	if !hasExpectedArgs(c.Args(), 1) {
+		log.Fatal("Incorrect number of arguments to 'export' command")
 	}
 
 	var err error
@@ -141,8 +142,8 @@ func ExportAction(c *cli.Context) {
 }
 
 func ImportAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 1) {
-		log.Fatal("Not enough argument supplied to import command")
+	if !hasExpectedArgs(c.Args(), 1) {
+		log.Fatal("Incorrect number of arguments to 'import' command")
 	}
 
 	var err error
@@ -183,8 +184,8 @@ func ImportAction(c *cli.Context) {
 }
 
 func AddRecipientAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 1) {
-		log.Fatal("Not enough argument supplied to add-recipient command")
+	if !hasExpectedArgs(c.Args(), 1) {
+		log.Fatal("Incorrect number of arguments to 'add-recipient' command")
 	}
 
 	recipient := c.Args()[0]
@@ -215,8 +216,8 @@ func AddRecipientAction(c *cli.Context) {
 }
 
 func RemoveRecipientAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 1) {
-		log.Fatal("Not enough argument supplied to remove-recipient command")
+	if !hasExpectedArgs(c.Args(), 1) {
+		log.Fatal("Incorrect number of arguments to 'remove-recipient' command")
 	}
 
 	recipient := c.Args()[0]
@@ -247,8 +248,8 @@ func RemoveRecipientAction(c *cli.Context) {
 }
 
 func GetAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 1) {
-		log.Fatal("Not enough argument supplied to get command")
+	if !hasExpectedArgs(c.Args(), 1) {
+		log.Fatal("Incorrect number of arguments to 'get' command")
 	}
 
 	store, err := NewEncryptedStoreFromFile(gStorePath)
@@ -265,8 +266,8 @@ func GetAction(c *cli.Context) {
 }
 
 func SetAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 2) {
-		log.Fatal("Not enough argument supplied to set command")
+	if !hasExpectedArgs(c.Args(), 2) {
+		log.Fatal("Incorrect number of arguments to 'set' command")
 	}
 
 	store, err := NewEncryptedStoreFromFile(gStorePath)
@@ -288,8 +289,8 @@ func SetAction(c *cli.Context) {
 }
 
 func DelAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 1) {
-		log.Fatal("Not enough argument supplied to del command")
+	if !hasExpectedArgs(c.Args(), 1) {
+		log.Fatal("Incorrect number of arguments to 'del' command")
 	}
 
 	store, err := NewEncryptedStoreFromFile(gStorePath)
@@ -311,8 +312,8 @@ func DelAction(c *cli.Context) {
 }
 
 func KeysAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 0) {
-		log.Fatal("Not enough argument supplied to keys command")
+	if !hasExpectedArgs(c.Args(), 0) {
+		log.Fatal("Incorrect number of arguments to 'keys' command")
 	}
 
 	store, err := NewEncryptedStoreFromFile(gStorePath)
@@ -331,8 +332,8 @@ func KeysAction(c *cli.Context) {
 }
 
 func ShowAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 0) {
-		log.Fatal("Not enough argument supplied to show command")
+	if !hasExpectedArgs(c.Args(), 0) {
+		log.Fatal("Incorrect number of arguments to 'show' command")
 	}
 
 	store, err := NewEncryptedStoreFromFile(gStorePath)
@@ -351,8 +352,8 @@ func ShowAction(c *cli.Context) {
 }
 
 func MetaAction(c *cli.Context) {
-	if !hasEnoughArgs(c.Args(), 0) {
-		log.Fatal("Not enough argument supplied to show command")
+	if !hasExpectedArgs(c.Args(), 0) {
+		log.Fatal("Incorrect number of arguments to 'meta' command")
 	}
 
 	store, err := NewEncryptedStoreFromFile(gStorePath)
