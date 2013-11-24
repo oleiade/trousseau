@@ -38,7 +38,10 @@ However it has proved being useful to anyone who need to store and eventually sh
 ## It's open-source
 
 *Trousseau* is open source software under the MIT license.
-Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on: see **Contribute**
+Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on.
+Let's make *Trousseau* awesome!
+
+See **Contribute** section.
 
 <div class="section-break"></div>
 ## Installation
