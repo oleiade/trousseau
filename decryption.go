@@ -36,7 +36,7 @@ func initCrypto(keyRingPath, pass string) {
 	password = pass
 }
 
-func decrypt(s string) (string, error) {
+func decrypt(s, password string) (string, error) {
 	if s == "" {
 		return "", nil
 	}
