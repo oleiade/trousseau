@@ -82,10 +82,16 @@ sudo cp ./bin/trousseau /usr/local/bin/trousseau
 <div class="subsection-break"></div>
 ### Gpg password
 
-Every decryption operations will require your *gpg* primary key password. As of today, **trousseau** will handle your password through the environment.
-Export your primary key password as `TROUSSEAU_PASSWORD` environment variable.
+Every decryption operations will require your *gpg* primary key password.
+As of today, **trousseau** is able to handle your passphrase through the global ``--password`` option, or the environment.
 
-*Example*:
+You can whether export pass you gpg password through the command line option:
+
+```bash
+$ trousseau --password mysupperdupperpassword get abc
+```
+
+Or you can pass your primary key password as `TROUSSEAU_PASSWORD` environment variable:
 
 ```bash
 $ export TROUSSEAU_PASSWORD=mysupperdupperpassword

@@ -28,5 +28,10 @@ func main() {
 		trousseau.MetaCommand(),
 	}
 
+    // Application global options
+	app.Flags = []cli.Flag{
+        trousseau.PasswordFlag(),
+	}
+
 	app.Run(os.Args)
 }

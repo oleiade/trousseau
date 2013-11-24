@@ -8,3 +8,7 @@ const (
 	CONFIG_KEY_RECIPIENTS = "recipients"
 	CONFIG_KEY_PASSWORD   = "password"
 )
+
+const (
+    ENV_PASSPHRASE_KEY = "TROUSSEAU_PASSWORD"
+)
