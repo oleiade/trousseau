@@ -9,5 +9,6 @@
 
 ## Open-source contributions import
 
-* ``decryption.go`` and ``encryption.go`` source code was extracted from `couchbaselabs/consolio <https://github.com/couchbaselabs/consolio>`_ with authors authorization.
+* ``decryption.go`` and ``encryption.go`` source code was extracted from [couchbaselabs/consolio](https://github.com/couchbaselabs/consolio) with authors authorization.
+* ``gpgagent.go`` and ``gpgagent_test.go`` source code was extracted from [bradfitz/camlistore](https://github.com/bradfitz/camlistore)
 
