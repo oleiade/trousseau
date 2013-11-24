@@ -190,7 +190,7 @@ func AddRecipientAction(c *cli.Context) {
 
 	recipient := c.Args()[0]
 
-	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("password"))
+	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("passphrase"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func RemoveRecipientAction(c *cli.Context) {
 
 	recipient := c.Args()[0]
 
-	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("password"))
+	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("passphrase"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -252,7 +252,7 @@ func GetAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'get' command")
 	}
 
-	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("password"))
+	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("passphrase"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -270,7 +270,7 @@ func SetAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'set' command")
 	}
 
-	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("password"))
+	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("passphrase"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -293,7 +293,7 @@ func DelAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'del' command")
 	}
 
-	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("password"))
+	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("passphrase"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -316,7 +316,7 @@ func KeysAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'keys' command")
 	}
 
-	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("password"))
+	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("passphrase"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -336,7 +336,7 @@ func ShowAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'show' command")
 	}
 
-	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("password"))
+	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("passphrase"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -356,7 +356,7 @@ func MetaAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'meta' command")
 	}
 
-	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("password"))
+	store, err := NewEncryptedStoreFromFile(gStorePath, c.GlobalString("passphrase"))
 	if err != nil {
 		log.Fatal(err)
 	}
