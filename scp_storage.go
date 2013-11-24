@@ -62,9 +62,9 @@ func (k *Keychain) Key(i int) (key ssh.PublicKey, err error) {
 	if i != 0 {
 		return nil, nil
 	}
-	
-    // Transform the rsa key into an ssh key
-    ssh_publickey, _ := ssh.NewPublicKey(k.key.PublicKey)
+
+	// Transform the rsa key into an ssh key
+	ssh_publickey, _ := ssh.NewPublicKey(k.key.PublicKey)
 
 	return ssh_publickey, nil
 }
