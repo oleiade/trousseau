@@ -42,9 +42,9 @@ var (
 	ErrCancel  = errors.New("gpgagent: Cancel")
 )
 
-// NewConn connects to the GPG Agent as described in the
+// NewGpgAgentConn connects to the GPG Agent as described in the
 // GPG_AGENT_INFO environment variable.
-func NewConn() (*Conn, error) {
+func NewGpgAgentConn() (*Conn, error) {
 	sp := strings.SplitN(os.Getenv("GPG_AGENT_INFO"), ":", 3)
 	if len(sp) == 0 || len(sp[0]) == 0 {
 		return nil, ErrNoAgent

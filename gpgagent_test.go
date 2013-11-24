@@ -28,7 +28,7 @@ func TestPrompt(t *testing.T) {
 		t.Logf("skipping TestPrompt without $TEST_GPGAGENT_LIB == 1")
 		return
 	}
-	conn, err := NewConn()
+	conn, err := NewGpgAgentConn()
 	if err != nil {
 		t.Fatal(err)
 	}
