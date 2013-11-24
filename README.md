@@ -83,7 +83,11 @@ sudo cp ./bin/trousseau /usr/local/bin/trousseau
 ### Gpg passphrase
 
 Every decryption operations will require your *gpg* primary key passphrase.
-As of today, **trousseau** is able to handle your passphrase through your system's keyring manager, the system environment or the global option ``--passphrase``.
+As of today, **trousseau** is able to handle your passphrase through multiple ways:
+* system's keyring manager
+* gpg-agent daemon
+* system environment
+* ``--passphrase`` global option
 
 #### Keyring manager
 
@@ -92,6 +96,16 @@ To use the keyring manager you will need to set up the ``TROUSSEAU_KEYRING_SERVI
 
 ```bash
 $ export TROUSSEAU_KEYRING_SERVICE=my_keyring_key
+$ trousseau get abc
+```
+
+#### Gpg agent
+
+Another authentication method supported is gpg-agent. In order to use it make sure you've started the gpg-agent daemon and exported the ``GPG_AGENT_INFO`` variable, trousseau will do the rest.
+
+```bash
+$ export GPG_AGENT_INFO=path_to_the_gpg_agent_info_file
+$ export TROUSSEAU_MASTER_GPG_ID=myid@mymail.com
 $ trousseau get abc
 ```
 
