@@ -80,21 +80,21 @@ sudo cp ./bin/trousseau /usr/local/bin/trousseau
 ## Prerequisities
 
 <div class="subsection-break"></div>
-### Gpg password
+### Gpg passphrase
 
-Every decryption operations will require your *gpg* primary key password.
-As of today, **trousseau** is able to handle your passphrase through the global ``--password`` option, or the environment.
+Every decryption operations will require your *gpg* primary key passphrase.
+As of today, **trousseau** is able to handle your passphrase through the global ``--passphrase`` option, or the environment.
 
-You can whether export pass you gpg password through the command line option:
+You can whether export pass you gpg passphrase through the command line option:
 
 ```bash
-$ trousseau --password mysupperdupperpassword get abc
+$ trousseau --passhphrase mysupperdupperpassphrase get abc
 ```
 
-Or you can pass your primary key password as `TROUSSEAU_PASSWORD` environment variable:
+Or you can pass your primary key passphrase as `TROUSSEAU_PASSPHRASE` environment variable:
 
 ```bash
-$ export TROUSSEAU_PASSWORD=mysupperdupperpassword
+$ export TROUSSEAU_PASSPHRASE=mysupperdupperpassphrase
 $ trousseau get abc
 ```
 
@@ -112,7 +112,7 @@ $ trousseau pull
 <div class="subsection-break"></div>
 ### Environment variables (so you know)
 
-* `TROUSSEAU_PASSWORD` (**mandatory**): your *gpg* primary key password that will be used to identify you as one of the trousseau data store recipient and give read/write access.
+* `TROUSSEAU_PASSPHRASE` (**mandatory**): your *gpg* primary key passphrase that will be used to identify you as one of the trousseau data store recipient and give read/write access.
 * `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (*optional*): Your AWS account credentials with proper read/write acces over S3. *Only if you intend to use the S3 remote storage features*
 * `TROUSSEAU_S3_BUCKET` and `TROUSSEAU_S3_FILENAME` (*optional*): The remote S3 bucket the trousseau data should be pushed/pulled from and the expected remote name of the trousseau data store file.
 

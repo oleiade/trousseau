@@ -9,9 +9,9 @@ import (
 
 type EncryptedStore struct {
 	DataStore
-	Data        string
-	Encrypted   bool
-	Passphrase  string
+	Data       string
+	Encrypted  bool
+	Passphrase string
 }
 
 func NewEncryptedStore(store *DataStore) *EncryptedStore {
@@ -34,7 +34,7 @@ func NewEncryptedStoreFromFile(filePath, passphrase string) (*EncryptedStore, er
 		DataStore:  *NewDataStore(),
 		Data:       string(encryptedData),
 		Encrypted:  true,
-        Passphrase: passphrase,
+		Passphrase: passphrase,
 	}
 
 	return encryptedStore, nil
