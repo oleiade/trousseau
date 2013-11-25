@@ -55,7 +55,6 @@ func PushAction(c *cli.Context) {
 
 	environment := NewEnvironment()
 	err := environment.OverrideWith(map[string]string{
-		"S3Bucket":       c.String("s3-bucket"),
 		"SshPrivateKey":  c.String("ssh-private-key"),
 		"RemoteFilename": c.String("remote-filename"),
 		"RemoteHost":     c.String("host"),
@@ -70,9 +69,9 @@ func PushAction(c *cli.Context) {
 	case "s3":
         bucket := c.String("s3-bucket")
         remoteFilename := c.String("remote-filename")
-        // region := c.String("s3-region")
+        region := c.String("s3-region")
 
-		err = uploadUsingS3(bucket, remoteFilename)
+		err = uploadUsingS3(bucket, remoteFilename, region)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -91,7 +90,6 @@ func PullAction(c *cli.Context) {
 
 	environment := NewEnvironment()
 	err := environment.OverrideWith(map[string]string{
-		"S3Bucket":       c.String("s3-bucket"),
 		"SshPrivateKey":  c.String("ssh-private-key"),
 		"RemoteFilename": c.String("remote-filename"),
 		"RemoteHost":     c.String("host"),
@@ -104,7 +102,11 @@ func PullAction(c *cli.Context) {
 
 	switch c.String("remote-storage") {
 	case "s3":
-		err = DownloadUsingS3(environment)
+        bucket := c.String("s3-bucket")
+        remoteFilename := c.String("remote-filename")
+        region := c.String("s3-region")
+
+		err = DownloadUsingS3(bucket, remoteFilename, region)
 		if err != nil {
 			log.Fatal(err)
 		}
