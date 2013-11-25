@@ -1,6 +1,9 @@
 package trousseau
 
-import "github.com/codegangsta/cli"
+import (
+    "os"
+    "github.com/codegangsta/cli"
+)
 
 func PasswordFlag() cli.StringFlag {
 	return cli.StringFlag{
