@@ -2,7 +2,7 @@ package trousseau
 
 import (
 	"fmt"
-	"launchpad.net/goamz/aws"
+	"github.com/crowdmob/goamz/aws"
 )
 
 // downloadUsingS3 executes the whole process of pulling
