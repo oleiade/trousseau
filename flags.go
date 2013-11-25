@@ -69,6 +69,14 @@ func RemoteUserFlag() cli.StringFlag {
 	}
 }
 
+func S3RegionFlag() cli.StringFlag {
+    return cli.StringFlag{
+        "s3-region",
+        os.Getenv(ENV_S3_REGION_KEY),
+        "S3 region the trousseau file is hosted on",
+    }
+}
+
 func S3BucketFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"s3-bucket",

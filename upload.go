@@ -8,13 +8,18 @@ import (
 // uploadUsingS3 executes the whole process of pushing
 // the trousseau data store file to s3 remote storage
 // using the provided environment.
-func uploadUsingS3(bucket, remoteFilename string) error {
+func uploadUsingS3(bucket, remoteFilename, region string) error {
 	awsAuth, err := aws.EnvAuth()
 	if err != nil {
 		return err
 	}
 
-	s3Storage := NewS3Storage(awsAuth, bucket, aws.EUWest)
+    awsRegion, ok := aws.Regions[region]
+    if !ok {
+        return fmt.Errorf("Invalid aws region supplied %s", region)
+    }
+
+	s3Storage := NewS3Storage(awsAuth, bucket, awsRegion)
 	err = s3Storage.Connect()
 	if err != nil {
 		return fmt.Errorf("Unable to connect to S3, have you set %s env var?",
