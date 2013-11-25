@@ -146,7 +146,7 @@ $ trousseau pull
 
 * `TROUSSEAU_PASSPHRASE` (**mandatory**): your *gpg* primary key passphrase that will be used to identify you as one of the trousseau data store recipient and give read/write access.
 * `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (*optional*): Your AWS account credentials with proper read/write acces over S3. *Only if you intend to use the S3 remote storage features*
-* `TROUSSEAU_S3_BUCKET` and `TROUSSEAU_S3_FILENAME` (*optional*): The remote S3 bucket the trousseau data should be pushed/pulled from and the expected remote name of the trousseau data store file.
+* `TROUSSEAU_S3_BUCKET`, `TROUSSEAU_S3_REGION` and `TROUSSEAU_S3_FILENAME` (*optional*): The remote S3 bucket the trousseau data should be pushed/pulled from, the bucket's region and the expected remote name of the trousseau data store file.
 
 <div class="section-break"></div>
 ## Let's get started
@@ -255,14 +255,21 @@ Trousseau was built with data remote storage in mind. As of today only S3 and SS
 <div class="break"></div>
 #### S3 Example
 
-Pushing the trousseau data store to Amazon S3 will require some setup:
-
-* First, make sure you've set up the AWS credentials environment variables as described in the configuration section of this README.
-* Then you can setup the bucket to push data store into and the remote filename using environment. However, you're also able to provide these parameters as arguments of the **push** and **pull** methods.
+Pushing the trousseau data store to Amazon S3 will require some setup.
+First, make sure you've set up the AWS credentials environment variables as described in the configuration section of this README.
+Then you can setup the bucket to push data store into and the remote filename using environment:
 
 ```bash
 $ export TROUSSEAU_S3_FILENAME=trousseau
 $ export TROUSSEAU_S3_BUCKET=mytrousseaubucket
+$ export TROUSSEAU_S3_REGION=eu-west-1
+```
+
+Otherwise, you're also able to provide these parameters as arguments of the **push** and **pull** methods.
+Nota: remote filename default value is *trousseau.tsk*
+
+```bash
+$ trousseau push --s3-region us-east-1 --s3-bucket mytrousseaubucket --remote-filename trousseau.tsk
 ```
 
 Now that everything is configured properly, you're ready to properly push the data store to S3.
