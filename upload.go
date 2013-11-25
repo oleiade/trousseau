@@ -2,27 +2,26 @@ package trousseau
 
 import (
 	"fmt"
-	"launchpad.net/goamz/aws"
+	"github.com/crowdmob/goamz/aws"
 )
 
 // uploadUsingS3 executes the whole process of pushing
 // the trousseau data store file to s3 remote storage
 // using the provided environment.
-func uploadUsingS3(env *Environment) error {
+func uploadUsingS3(bucket, remoteFilename string) error {
 	awsAuth, err := aws.EnvAuth()
 	if err != nil {
 		return err
 	}
 
-	s3Storage := NewS3Storage(awsAuth, env.S3Bucket, aws.EUWest)
+	s3Storage := NewS3Storage(awsAuth, bucket, aws.EUWest)
 	err = s3Storage.Connect()
 	if err != nil {
-		return fmt.Errorf("Unable to connect to S3, have you set %s and %s env vars?",
-			"TROUSSEAU_S3_FILENAME",
-			"TROUSSEAU_S3_BUCKET")
+		return fmt.Errorf("Unable to connect to S3, have you set %s env var?",
+		    ENV_S3_BUCKET_KEY)
 	}
 
-	err = s3Storage.Push(env.RemoteFilename)
+	err = s3Storage.Push(remoteFilename)
 	if err != nil {
 		return err
 	}

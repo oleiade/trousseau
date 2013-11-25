@@ -51,8 +51,8 @@ func (ss *S3Storage) Push(remoteName string) error {
 
 		if remoteName == "" {
 			errMsg += fmt.Sprintf("Make sure you've set %s and %s env vars.",
-				"TROUSSEAU_S3_FILENAME",
-				"TROUSSEAU_S3_BUCKET")
+				ENV_S3_FILENAME_KEY,
+				ENV_S3_BUCKET_KEY)
 		} else {
 			errMsg += err.Error()
 		}

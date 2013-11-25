@@ -68,7 +68,11 @@ func PushAction(c *cli.Context) {
 
 	switch c.String("remote-storage") {
 	case "s3":
-		err = uploadUsingS3(environment)
+        bucket := c.String("s3-bucket")
+        remoteFilename := c.String("remote-filename")
+        // region := c.String("s3-region")
+
+		err = uploadUsingS3(bucket, remoteFilename)
 		if err != nil {
 			log.Fatal(err)
 		}
