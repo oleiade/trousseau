@@ -40,7 +40,7 @@ func RemoteStorageFlag() cli.StringFlag {
 func RemoteFilenameFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"remote-filename",
-		"",
+		"trousseau.tsk",
 		"Remote name of the trousseau file",
 	}
 }
