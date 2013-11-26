@@ -53,18 +53,6 @@ func PushAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'push' command")
 	}
 
-	environment := NewEnvironment()
-	err := environment.OverrideWith(map[string]string{
-		"SshPrivateKey":  c.String("ssh-private-key"),
-		"RemoteFilename": c.String("remote-filename"),
-		"RemoteHost":     c.String("host"),
-		"RemotePort":     c.String("port"),
-		"RemoteUser":     c.String("user"),
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	switch c.String("remote-storage") {
 	case "s3":
         bucket := c.String("s3-bucket")
@@ -92,18 +80,6 @@ func PushAction(c *cli.Context) {
 func PullAction(c *cli.Context) {
 	if !hasExpectedArgs(c.Args(), 0) {
 		log.Fatal("Incorrect number of arguments to 'pull' command")
-	}
-
-	environment := NewEnvironment()
-	err := environment.OverrideWith(map[string]string{
-		"SshPrivateKey":  c.String("ssh-private-key"),
-		"RemoteFilename": c.String("remote-filename"),
-		"RemoteHost":     c.String("host"),
-		"RemotePort":     c.String("port"),
-		"RemoteUser":     c.String("user"),
-	})
-	if err != nil {
-		log.Fatal(err)
 	}
 
 	switch c.String("remote-storage") {
