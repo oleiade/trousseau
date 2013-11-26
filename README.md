@@ -92,7 +92,7 @@ As of today, **trousseau** is able to handle your passphrase through multiple wa
 * system environment
 * ``--passphrase`` global option
 
-#### Keyring manager
+##### Keyring manager
 
 Supported system keyring manager are osx keychain access and linux gnome secret-service and gnome-keychain (more might be added in the future on demand).
 To use the keyring manager you will need to set up the ``TROUSSEAU_KEYRING_SERVICE`` environment variable to the name of they keyring manager key holding the trousseau main gpg key passphrase.
@@ -102,7 +102,7 @@ $ export TROUSSEAU_KEYRING_SERVICE=my_keyring_key
 $ trousseau get abc
 ```
 
-#### Gpg agent
+##### Gpg agent
 
 Another authentication method supported is gpg-agent. In order to use it make sure you've started the gpg-agent daemon and exported the ``GPG_AGENT_INFO`` variable, trousseau will do the rest.
 
@@ -112,7 +112,7 @@ $ export TROUSSEAU_MASTER_GPG_ID=myid@mymail.com
 $ trousseau get abc
 ```
 
-#### Environment variable
+##### Environment variable
 
 Alternatively, you can pass your primary key passphrase as `TROUSSEAU_PASSPHRASE` environment variable:
 
@@ -121,7 +121,7 @@ $ export TROUSSEAU_PASSPHRASE=mysupperdupperpassphrase
 $ trousseau get abc
 ```
 
-#### Passphrase global option
+##### Passphrase global option
 
 Ultimately, you can pass you gpg passphrase through the command line global option:
 
