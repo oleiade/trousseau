@@ -3,9 +3,9 @@ package trousseau
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"github.com/crowdmob/goamz/aws"
-    "github.com/crowdmob/goamz/s3"
+	"github.com/crowdmob/goamz/s3"
+	"io/ioutil"
 )
 
 // S3Storage is an implementation of the RemoteStorage

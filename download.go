@@ -14,10 +14,10 @@ func DownloadUsingS3(bucket, remoteFilename, region string) error {
 		return err
 	}
 
-    awsRegion, ok := aws.Regions[region]
-    if !ok {
-        return fmt.Errorf("Invalid aws region supplied %s", region)
-    }
+	awsRegion, ok := aws.Regions[region]
+	if !ok {
+		return fmt.Errorf("Invalid aws region supplied %s", region)
+	}
 
 	s3Storage := NewS3Storage(awsAuth, bucket, awsRegion)
 	err = s3Storage.Connect()
