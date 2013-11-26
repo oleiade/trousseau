@@ -2,8 +2,8 @@ package trousseau
 
 import (
 	"github.com/tmc/keyring"
-	"os"
 	"log"
+	"os"
 )
 
 // GetPassphrase attemps to retrieve the user's gpg master
@@ -25,33 +25,33 @@ func GetPassphrase() string {
 	// system keyring manager.
 	passphrase, _ = keyring.Get(gKeyringService, gKeyringUser)
 	if len(passphrase) > 0 {
-	    return passphrase
+		return passphrase
 	}
 
 	// If passphrase was enither found in the environment nor
 	// system keyring manager try to fetch it from gpg-agent
 	if os.Getenv("GPG_AGENT_INFO") != "" {
-        passphrase, err = GetGpgPassphrase(gMasterGpgId)
-        if err != nil {
-            log.Fatal(err)
-        }
-    }
+		passphrase, err = GetGpgPassphrase(gMasterGpgId)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	return passphrase
 
 }
 
 func GetGpgPassphrase(gpgId string) (string, error) {
-    conn, err := NewGpgAgentConn()
-    if err != nil {
-        return "", err
-    }
+	conn, err := NewGpgAgentConn()
+	if err != nil {
+		return "", err
+	}
 
-    passphraseRequest := &PassphraseRequest{CacheKey: gpgId}
-    passphrase, err := conn.GetPassphrase(passphraseRequest)
-    if err != nil {
-        return "", err
-    }
+	passphraseRequest := &PassphraseRequest{CacheKey: gpgId}
+	passphrase, err := conn.GetPassphrase(passphraseRequest)
+	if err != nil {
+		return "", err
+	}
 
-    return passphrase, nil
+	return passphrase, nil
 }

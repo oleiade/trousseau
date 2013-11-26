@@ -1,8 +1,8 @@
 package trousseau
 
 import (
-    "os"
-    "github.com/codegangsta/cli"
+	"github.com/codegangsta/cli"
+	"os"
 )
 
 func PasswordFlag() cli.StringFlag {
@@ -70,11 +70,11 @@ func RemoteUserFlag() cli.StringFlag {
 }
 
 func S3RegionFlag() cli.StringFlag {
-    return cli.StringFlag{
-        "s3-region",
-        os.Getenv(ENV_S3_REGION_KEY),
-        "S3 region the trousseau file is hosted on",
-    }
+	return cli.StringFlag{
+		"s3-region",
+		os.Getenv(ENV_S3_REGION_KEY),
+		"S3 region the trousseau file is hosted on",
+	}
 }
 
 func S3BucketFlag() cli.StringFlag {
