@@ -1,6 +1,9 @@
 package trousseau
 
-import "github.com/codegangsta/cli"
+import (
+    "os"
+    "github.com/codegangsta/cli"
+)
 
 func PasswordFlag() cli.StringFlag {
 	return cli.StringFlag{
@@ -37,7 +40,7 @@ func RemoteStorageFlag() cli.StringFlag {
 func RemoteFilenameFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"remote-filename",
-		"",
+		"trousseau.tsk",
 		"Remote name of the trousseau file",
 	}
 }
@@ -66,10 +69,18 @@ func RemoteUserFlag() cli.StringFlag {
 	}
 }
 
+func S3RegionFlag() cli.StringFlag {
+    return cli.StringFlag{
+        "s3-region",
+        os.Getenv(ENV_S3_REGION_KEY),
+        "S3 region the trousseau file is hosted on",
+    }
+}
+
 func S3BucketFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"s3-bucket",
-		"",
+		os.Getenv(ENV_S3_BUCKET_KEY),
 		"S3 name of the bucket hosting the trousseau file",
 	}
 }
@@ -77,7 +88,7 @@ func S3BucketFlag() cli.StringFlag {
 func SshPrivateKeyPathFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"ssh-private-key",
-		"",
+		os.Getenv(ENV_SSH_PRIVATE_KEY),
 		"Path to the ssh private key to be used",
 	}
 }
