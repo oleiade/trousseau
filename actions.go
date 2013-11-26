@@ -55,22 +55,22 @@ func PushAction(c *cli.Context) {
 
 	switch c.String("remote-storage") {
 	case "s3":
-        bucket := c.String("s3-bucket")
-        remoteFilename := c.String("remote-filename")
-        region := c.String("s3-region")
+		bucket := c.String("s3-bucket")
+		remoteFilename := c.String("remote-filename")
+		region := c.String("s3-region")
 
-        err := uploadUsingS3(bucket, remoteFilename, region)
+		err := uploadUsingS3(bucket, remoteFilename, region)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "scp":
-        privateKey := c.String("ssh-private-key")
-        remoteFilename := c.String("remote-filename")
-        host := c.String("host")
-        port := c.String("port")
-        user := c.String("user")
+		privateKey := c.String("ssh-private-key")
+		remoteFilename := c.String("remote-filename")
+		host := c.String("host")
+		port := c.String("port")
+		user := c.String("user")
 
-        err := uploadUsingScp(privateKey, remoteFilename, host, port, user)
+		err := uploadUsingScp(privateKey, remoteFilename, host, port, user)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -84,22 +84,22 @@ func PullAction(c *cli.Context) {
 
 	switch c.String("remote-storage") {
 	case "s3":
-        bucket := c.String("s3-bucket")
-        remoteFilename := c.String("remote-filename")
-        region := c.String("s3-region")
+		bucket := c.String("s3-bucket")
+		remoteFilename := c.String("remote-filename")
+		region := c.String("s3-region")
 
-        err := DownloadUsingS3(bucket, remoteFilename, region)
+		err := DownloadUsingS3(bucket, remoteFilename, region)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "scp":
-        privateKey := c.String("ssh-private-key")
-        remoteFilename := c.String("remote-filename")
-        host := c.String("host")
-        port := c.String("port")
-        user := c.String("user")
+		privateKey := c.String("ssh-private-key")
+		remoteFilename := c.String("remote-filename")
+		host := c.String("host")
+		port := c.String("port")
+		user := c.String("user")
 
-        err := DownloadUsingScp(privateKey, remoteFilename, host, port, user)
+		err := DownloadUsingScp(privateKey, remoteFilename, host, port, user)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -14,16 +14,16 @@ func uploadUsingS3(bucket, remoteFilename, region string) error {
 		return err
 	}
 
-    awsRegion, ok := aws.Regions[region]
-    if !ok {
-        return fmt.Errorf("Invalid aws region supplied %s", region)
-    }
+	awsRegion, ok := aws.Regions[region]
+	if !ok {
+		return fmt.Errorf("Invalid aws region supplied %s", region)
+	}
 
 	s3Storage := NewS3Storage(awsAuth, bucket, awsRegion)
 	err = s3Storage.Connect()
 	if err != nil {
 		return fmt.Errorf("Unable to connect to S3, have you set %s env var?",
-		    ENV_S3_BUCKET_KEY)
+			ENV_S3_BUCKET_KEY)
 	}
 
 	err = s3Storage.Push(remoteFilename)
