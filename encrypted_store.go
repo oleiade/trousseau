@@ -64,8 +64,7 @@ func (es *EncryptedStore) Decrypt() error {
 		var err error
 
 		// Decrypt store data
-		environment := NewEnvironment()
-		initCrypto(gSecringFile, environment.Password)
+		initCrypto(gSecringFile, es.Passphrase)
 		es.Data, err = decrypt(es.Data, es.Passphrase)
 		if err != nil {
 			return err

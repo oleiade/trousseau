@@ -53,30 +53,24 @@ func PushAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'push' command")
 	}
 
-	environment := NewEnvironment()
-	err := environment.OverrideWith(map[string]string{
-		"SshPrivateKey":  c.String("ssh-private-key"),
-		"RemoteFilename": c.String("remote-filename"),
-		"RemoteHost":     c.String("host"),
-		"RemotePort":     c.String("port"),
-		"RemoteUser":     c.String("user"),
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	switch c.String("remote-storage") {
 	case "s3":
         bucket := c.String("s3-bucket")
         remoteFilename := c.String("remote-filename")
         region := c.String("s3-region")
 
-		err = uploadUsingS3(bucket, remoteFilename, region)
+        err := uploadUsingS3(bucket, remoteFilename, region)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "scp":
-		err = uploadUsingScp(environment)
+        privateKey := c.String("ssh-private-key")
+        remoteFilename := c.String("remote-filename")
+        host := c.String("host")
+        port := c.String("port")
+        user := c.String("user")
+
+        err := uploadUsingScp(privateKey, remoteFilename, host, port, user)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -88,30 +82,24 @@ func PullAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'pull' command")
 	}
 
-	environment := NewEnvironment()
-	err := environment.OverrideWith(map[string]string{
-		"SshPrivateKey":  c.String("ssh-private-key"),
-		"RemoteFilename": c.String("remote-filename"),
-		"RemoteHost":     c.String("host"),
-		"RemotePort":     c.String("port"),
-		"RemoteUser":     c.String("user"),
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	switch c.String("remote-storage") {
 	case "s3":
         bucket := c.String("s3-bucket")
         remoteFilename := c.String("remote-filename")
         region := c.String("s3-region")
 
-		err = DownloadUsingS3(bucket, remoteFilename, region)
+        err := DownloadUsingS3(bucket, remoteFilename, region)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "scp":
-		err = DownloadUsingScp(environment)
+        privateKey := c.String("ssh-private-key")
+        remoteFilename := c.String("remote-filename")
+        host := c.String("host")
+        port := c.String("port")
+        user := c.String("user")
+
+        err := DownloadUsingScp(privateKey, remoteFilename, host, port, user)
 		if err != nil {
 			log.Fatal(err)
 		}
