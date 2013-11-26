@@ -3,9 +3,9 @@ package trousseau
 import (
 	"errors"
 	"fmt"
+	"github.com/crowdmob/goamz/aws"
+	"github.com/crowdmob/goamz/s3"
 	"io/ioutil"
-	"launchpad.net/goamz/aws"
-	"launchpad.net/goamz/s3"
 )
 
 // S3Storage is an implementation of the RemoteStorage
@@ -45,14 +45,14 @@ func (ss *S3Storage) Push(remoteName string) error {
 		return errors.New("Cannot push trousseau: Store file does not exist")
 	}
 
-	err = ss.connexion.Put(remoteName, data, "text/plain", s3.BucketOwnerFull)
+	err = ss.connexion.Put(remoteName, data, "text/plain", s3.BucketOwnerFull, s3.Options{})
 	if err != nil {
 		errMsg := "Unable to push trousseau file to S3: "
 
 		if remoteName == "" {
 			errMsg += fmt.Sprintf("Make sure you've set %s and %s env vars.",
-				"TROUSSEAU_S3_FILENAME",
-				"TROUSSEAU_S3_BUCKET")
+				ENV_S3_FILENAME_KEY,
+				ENV_S3_BUCKET_KEY)
 		} else {
 			errMsg += err.Error()
 		}

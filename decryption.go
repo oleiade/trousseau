@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	password string
-	keys     openpgp.EntityList
+	passphrase string
+	keys       openpgp.EntityList
 )
 
 func initCrypto(keyRingPath, pass string) {
@@ -33,10 +33,10 @@ func initCrypto(keyRingPath, pass string) {
 		log.Fatalf("Can't read keyring: %v", err)
 	}
 
-	password = pass
+	passphrase = pass
 }
 
-func decrypt(s string) (string, error) {
+func decrypt(s, passphrase string) (string, error) {
 	if s == "" {
 		return "", nil
 	}
@@ -48,7 +48,7 @@ func decrypt(s string) (string, error) {
 
 	d, err := openpgp.ReadMessage(raw.Body, keys,
 		func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
-			kp := []byte(password)
+			kp := []byte(passphrase)
 
 			if symmetric {
 				return kp, nil
@@ -63,7 +63,7 @@ func decrypt(s string) (string, error) {
 
 			return nil, fmt.Errorf("Whether no valid private key for" +
 				"store decryption was available or " +
-				"supplied password was invalid")
+				"supplied passphrase was invalid")
 		},
 		nil)
 	if err != nil {

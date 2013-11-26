@@ -9,8 +9,9 @@ import (
 
 type EncryptedStore struct {
 	DataStore
-	Data      string
-	Encrypted bool
+	Data       string
+	Encrypted  bool
+	Passphrase string
 }
 
 func NewEncryptedStore(store *DataStore) *EncryptedStore {
@@ -23,16 +24,17 @@ func NewEncryptedStore(store *DataStore) *EncryptedStore {
 	}
 }
 
-func NewEncryptedStoreFromFile(filePath string) (*EncryptedStore, error) {
+func NewEncryptedStoreFromFile(filePath, passphrase string) (*EncryptedStore, error) {
 	encryptedData, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, errors.New("trousseau data store file ($HOME/.trousseau) not found")
 	}
 
 	encryptedStore := &EncryptedStore{
-		DataStore: *NewDataStore(),
-		Data:      string(encryptedData),
-		Encrypted: true,
+		DataStore:  *NewDataStore(),
+		Data:       string(encryptedData),
+		Encrypted:  true,
+		Passphrase: passphrase,
 	}
 
 	return encryptedStore, nil
@@ -62,9 +64,8 @@ func (es *EncryptedStore) Decrypt() error {
 		var err error
 
 		// Decrypt store data
-		environment := NewEnvironment()
-		initCrypto(gSecringFile, environment.Password)
-		es.Data, err = decrypt(es.Data)
+		initCrypto(gSecringFile, es.Passphrase)
+		es.Data, err = decrypt(es.Data, es.Passphrase)
 		if err != nil {
 			return err
 		}
