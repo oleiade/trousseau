@@ -1,8 +1,9 @@
 package dsn
 
 import (
+    "fmt"
     "regexp"
-    "strconv"
+    "errors"
 )
 
 type Dsn struct {
@@ -11,11 +12,11 @@ type Dsn struct {
     Id      string
     Secret  string
     Host    string
-    Port    int
+    Port    string
     Path    string
 }
 
-func extractParts(rawdsn string) []string {
+func extractParts(rawdsn string) ([]string, error) {
     re := regexp.MustCompile("(?P<scheme>[a-zA-Z0-9]+)" +
         "?://" +
         "(?P<id>[^:]+)" +
@@ -24,14 +25,23 @@ func extractParts(rawdsn string) []string {
         "?@" +
         "(?P<host>[a-zA-Z0-9]+)" +
         "?:" +
-        "(?P<port>[0-9]+)" +
+        "(?P<port>[a-zA-Z0-9-]+)" +
         "?/" +
-        "(?P<path>[a-zA-Z0-9/]+)")
-    return re.FindStringSubmatch(rawdsn)[1:]
+        "(?P<path>[a-zA-Z0-9/_.-]+)")
+
+    parts := re.FindStringSubmatch(rawdsn)
+    if len(parts) == 0 {
+        return nil, errors.New(fmt.Sprintf("No dsn mathched in %s", rawdsn))
+    }
+
+    return parts[1:], nil
 }
 
 func Parse(rawdsn string) (dsn *Dsn, err error) {
-    parts := extractParts(rawdsn)
+    parts, err := extractParts(rawdsn)
+    if err != nil {
+        return nil, err
+    }
 
     // Init Dsn instance with url parsed informations
     // we can thrust
@@ -41,16 +51,8 @@ func Parse(rawdsn string) (dsn *Dsn, err error) {
         Id: parts[1],
         Secret: parts[2],
         Host: parts[3],
+        Port: parts[4],
         Path: parts[5],
-    }
-
-    // Extract host and port from the parsed URL
-    // instance Host string
-    if port := parts[4]; port != "" {
-        dsn.Port, err = strconv.Atoi(port)
-        if err != nil {
-            return nil, err
-        }
     }
 
     return dsn, nil

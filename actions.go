@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/oleiade/trousseau/dsn"
 )
 
 // hasExpectedArgs checks whether the number of args are as expected.
@@ -49,17 +50,18 @@ func CreateAction(c *cli.Context) {
 }
 
 func PushAction(c *cli.Context) {
-	if !hasExpectedArgs(c.Args(), 0) {
+	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'push' command")
 	}
 
-	switch c.String("remote-storage") {
-	case "s3":
-		bucket := c.String("s3-bucket")
-		remoteFilename := c.String("remote-filename")
-		region := c.String("s3-region")
+    endpointDsn, err := dsn.Parse(c.Args()[0])
+    if err != nil {
+        log.Fatal(err)
+    }
 
-		err := uploadUsingS3(bucket, remoteFilename, region)
+	switch endpointDsn.Scheme {
+	case "s3":
+		err := uploadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,17 +80,18 @@ func PushAction(c *cli.Context) {
 }
 
 func PullAction(c *cli.Context) {
-	if !hasExpectedArgs(c.Args(), 0) {
+	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'pull' command")
 	}
 
-	switch c.String("remote-storage") {
-	case "s3":
-		bucket := c.String("s3-bucket")
-		remoteFilename := c.String("remote-filename")
-		region := c.String("s3-region")
+    endpointDsn, err := dsn.Parse(c.Args()[0])
+    if err != nil {
+        log.Fatal(err)
+    }
 
-		err := DownloadUsingS3(bucket, remoteFilename, region)
+	switch endpointDsn.Scheme {
+	case "s3":
+		err := DownloadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
