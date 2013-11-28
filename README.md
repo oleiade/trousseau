@@ -299,7 +299,9 @@ easy as: do re mi
 <div class="break"></div>
 #### Scp example
 
-*Trousseau* allows you to push your data store to a ssh location. It doesn't need any special setup. So here we can go with a complete example.
+*Trousseau* allows you to push your data store to a ssh location.
+It doesn't need any special setup though if you store you're private ssh rsa key in a custom location you might want to pass it's path with the ``--private-key`` option.
+So here we can go with a complete example.
 
 ```bash
 # We start with a non-empty trousseau data store
