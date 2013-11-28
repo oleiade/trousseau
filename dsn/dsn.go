@@ -17,17 +17,17 @@ type Dsn struct {
 }
 
 func extractParts(rawdsn string) ([]string, error) {
-    re := regexp.MustCompile("(?P<scheme>[a-zA-Z0-9]+)" +
+    re := regexp.MustCompile(NamedExpression("scheme", SCHEME_REGEXP) +
         "?://" +
-        "(?P<id>[^:]+)" +
+        NamedExpression("id", ID_REGEXP) +
         "?:" +
-        "(?P<secret>[^@]+)" +
+        NamedExpression("secret", SECRET_REGEXP) +
         "?@" +
-        "(?P<host>[a-zA-Z0-9]+)" +
+        NamedExpression("host", OrExpressions(BUCKET_REGEXP, HOST_REGEXP)) +
         "?:" +
-        "(?P<port>[a-zA-Z0-9-]+)" +
+        NamedExpression("port", OrExpressions(PORT_REGEXP, REGION_REGEXP)) +
         "?/" +
-        "(?P<path>[a-zA-Z0-9/_.-]+)")
+        NamedExpression("path", PATH_REGEXP))
 
     parts := re.FindStringSubmatch(rawdsn)
     if len(parts) == 0 {
