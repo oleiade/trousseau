@@ -2,6 +2,7 @@ package trousseau
 
 import (
 	"github.com/codegangsta/cli"
+	"path/filepath"
 	"os"
 )
 
@@ -88,7 +89,7 @@ func S3BucketFlag() cli.StringFlag {
 func SshPrivateKeyPathFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"ssh-private-key",
-		os.Getenv(ENV_SSH_PRIVATE_KEY),
+		filepath.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
 		"Path to the ssh private key to be used",
 	}
 }
