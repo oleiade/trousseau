@@ -35,23 +35,23 @@ func uploadUsingS3(dsn *dsn.Dsn) error {
 // uploadUsingScp executes the whole process of pushing
 // the trousseau data store file to scp remote storage
 // using the provided environment.
-func uploadUsingScp(privateKey, remoteFilename, host, port, user string) error {
+func uploadUsingScp(dsn *dsn.Dsn, privateKey string) error {
 	privateKeyContent, err := DecodePrivateKeyFromFile(privateKey)
 	if err != nil {
 		return err
 	}
 
 	keyChain := NewKeychain(privateKeyContent)
-	scpStorage := NewScpStorage(host,
-		port,
-		user,
+	scpStorage := NewScpStorage(dsn.Host,
+		dsn.Port,
+		dsn.Id,
 		keyChain)
 	err = scpStorage.Connect()
 	if err != nil {
 		return err
 	}
 
-	err = scpStorage.Push(remoteFilename)
+	err = scpStorage.Push(dsn.Path)
 	if err != nil {
 		return err
 	}

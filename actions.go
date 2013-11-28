@@ -67,12 +67,8 @@ func PushAction(c *cli.Context) {
 		}
 	case "scp":
 		privateKey := c.String("ssh-private-key")
-		remoteFilename := c.String("remote-filename")
-		host := c.String("host")
-		port := c.String("port")
-		user := c.String("user")
 
-		err := uploadUsingScp(privateKey, remoteFilename, host, port, user)
+        err := uploadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -97,12 +93,8 @@ func PullAction(c *cli.Context) {
 		}
 	case "scp":
 		privateKey := c.String("ssh-private-key")
-		remoteFilename := c.String("remote-filename")
-		host := c.String("host")
-		port := c.String("port")
-		user := c.String("user")
 
-		err := DownloadUsingScp(privateKey, remoteFilename, host, port, user)
+        err := DownloadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
