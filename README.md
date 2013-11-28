@@ -230,6 +230,12 @@ As of today S3 and SSH storages are available (more are to come).
 Moreover, 
 
 <div class="break"></div>
+#### API
+
+* **push** : Pushes the trousseau data store to remote storage
+* **pull** : Pulls the trousseau data store from remote storage
+
+<div class="break"></div>
 #### DSN
 
 In order to make your life easier trousseau allows you to select your export and import sources using a *DSN*.
@@ -244,12 +250,6 @@ In order to make your life easier trousseau allows you to select your export and
 * **host**: Your bucket name is you're targeting *s3*. The host to login to using *scp* otherwise.
 * **port**: The *aws_region* if you're targeting *s3*. The port to login to using *scp* otherwise.
 * **path**: The remote path to push to or retrieve from the trousseau file on a ``push`` or ``pull`` action.
-
-<div class="break"></div>
-#### API
-
-* **push** : Pushes the trousseau data store to remote storage
-* **pull** : Pulls the trousseau data store from remote storage
 
 <div class="break"></div>
 #### S3 Example
