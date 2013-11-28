@@ -4,6 +4,8 @@ import (
     "fmt"
     "regexp"
     "errors"
+
+    "github.com/oleiade/reflections"
 )
 
 type Dsn struct {
@@ -15,6 +17,7 @@ type Dsn struct {
     Port    string
     Path    string
 }
+
 
 func extractParts(rawdsn string) ([]string, error) {
     re := regexp.MustCompile(NamedExpression("scheme", SCHEME_REGEXP) +
@@ -56,4 +59,25 @@ func Parse(rawdsn string) (dsn *Dsn, err error) {
     }
 
     return dsn, nil
+}
+
+func (d *Dsn) SetDefaults(defaults map[string]string) error {
+    for k, v := range defaults {
+        // Check the dsn struct has field
+        value, err := reflections.GetField(d, k)
+        if err != nil {
+            return err
+        }
+
+        // If dsn instance field is set to zero value,
+        // then override it with provided default value
+        if value == "" {
+            err := reflections.SetField(d, k, v)
+            if err != nil {
+                return err
+            }
+        }
+    }
+
+    return nil
 }

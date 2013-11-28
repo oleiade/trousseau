@@ -46,46 +46,6 @@ func RemoteFilenameFlag() cli.StringFlag {
 	}
 }
 
-func RemoteHostFlag() cli.StringFlag {
-	return cli.StringFlag{
-		"host",
-		"",
-		"Remote storage hostname",
-	}
-}
-
-func RemotePortFlag() cli.StringFlag {
-	return cli.StringFlag{
-		"port",
-		"22",
-		"Port to be used for remote storage connexion",
-	}
-}
-
-func RemoteUserFlag() cli.StringFlag {
-	return cli.StringFlag{
-		"user",
-		"",
-		"User to be used for remote storage connexion",
-	}
-}
-
-func S3RegionFlag() cli.StringFlag {
-	return cli.StringFlag{
-		"s3-region",
-		os.Getenv(ENV_S3_REGION_KEY),
-		"S3 region the trousseau file is hosted on",
-	}
-}
-
-func S3BucketFlag() cli.StringFlag {
-	return cli.StringFlag{
-		"s3-bucket",
-		os.Getenv(ENV_S3_BUCKET_KEY),
-		"S3 name of the bucket hosting the trousseau file",
-	}
-}
-
 func SshPrivateKeyPathFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"ssh-private-key",

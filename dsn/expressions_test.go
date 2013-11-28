@@ -19,3 +19,4 @@ func TestNamedOrExpressions(t *testing.T) {
 
     assert.Equal(t, namedExp, "(?P<test>[a-z]|[0-9])")
 }
+

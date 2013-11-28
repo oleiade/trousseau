@@ -61,14 +61,24 @@ func PushAction(c *cli.Context) {
 
 	switch endpointDsn.Scheme {
 	case "s3":
-		err := uploadUsingS3(endpointDsn)
+        err := endpointDsn.SetDefaults(gS3Defaults)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+		err = uploadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-        err := uploadUsingScp(endpointDsn, privateKey)
+        err := endpointDsn.SetDefaults(gScpDefaults)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        err = uploadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,16 +95,27 @@ func PullAction(c *cli.Context) {
         log.Fatal(err)
     }
 
+
 	switch endpointDsn.Scheme {
 	case "s3":
-		err := DownloadUsingS3(endpointDsn)
+        err := endpointDsn.SetDefaults(gS3Defaults)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+		err = DownloadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-        err := DownloadUsingScp(endpointDsn, privateKey)
+        err := endpointDsn.SetDefaults(gScpDefaults)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        err = DownloadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
