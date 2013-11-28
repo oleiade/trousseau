@@ -227,9 +227,12 @@ $ trousseau del abc  # Now the song lacks something doesn't it?
 
 Trousseau was built with data remote storage in mind. Therefore it provides *push* and *pull* actions to export and import the trousseau data store to remote destinations.
 As of today S3 and SSH storages are available (more are to come).
-Moreover, in order to make your life easier trousseau allows you to select your export and import sources using a *DSN*.
+Moreover, 
 
-It's template is: 
+<div class="break"></div>
+#### DSN
+
+In order to make your life easier trousseau allows you to select your export and import sources using a *DSN*.
 
 ```
     {protocol}://{identifier}:{secret}@{host}:{port}/{path}
