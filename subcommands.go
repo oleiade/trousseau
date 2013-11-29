@@ -20,8 +20,6 @@ func PushCommand() cli.Command {
 		Flags: []cli.Flag{
 			OverwriteFlag(),
 			SshPrivateKeyPathFlag(),
-			RemoteStorageFlag(),
-			RemoteFilenameFlag(),
 		},
 	}
 }
@@ -34,8 +32,6 @@ func PullCommand() cli.Command {
 		Flags: []cli.Flag{
 			OverwriteFlag(),
 			SshPrivateKeyPathFlag(),
-			RemoteStorageFlag(),
-			RemoteFilenameFlag(),
 		},
 	}
 }

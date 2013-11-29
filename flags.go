@@ -30,22 +30,6 @@ func YesFlag() cli.StringFlag {
 	}
 }
 
-func RemoteStorageFlag() cli.StringFlag {
-	return cli.StringFlag{
-		"remote-storage",
-		"s3",
-		"Remote storage type to use: s3 or scp",
-	}
-}
-
-func RemoteFilenameFlag() cli.StringFlag {
-	return cli.StringFlag{
-		"remote-filename",
-		"trousseau.tsk",
-		"Remote name of the trousseau file",
-	}
-}
-
 func SshPrivateKeyPathFlag() cli.StringFlag {
 	return cli.StringFlag{
 		"ssh-private-key",
