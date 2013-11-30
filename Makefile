@@ -8,6 +8,7 @@ TROUSSEAU_VERSION = `awk '/TROUSSEAU_VERSION/ { gsub("\"", ""); print $$NF }' $(
 #
 PROJECT_PACKAGE   = github.com/oleiade/trousseau
 TROUSSEAU_PACKAGE = $(PROJECT_PACKAGE)/trousseau
+DSN_PACKAGE 	  = $(PROJECT_PACKAGE)/dsn
 
 #
 # Directories
@@ -19,6 +20,7 @@ DIST_DIR   = $(CURDIR)/dist
 
 PROJECT_DIR   = $(SRC_DIR)/$(PROJECT_PACKAGE)
 TROUSSEAU_DIR = $(SRC_DIR)/$(TROUSSEAU_PACKAGE)
+DSN_DIR 	  = $(SRC_DIR)/$(DSN_PACKAGE)
 
 #
 # Executables definition
@@ -70,6 +72,17 @@ ifeq ($(GOPATH), $(BUILD_DIR))
 else ifneq ($(PROJECT_DIR), $(realpath $(PROJECT_DIR)))
 				@rm -f $(PROJECT_DIR)
 endif
+
+test:
+				@(export GOPATH=$(GOPATH_DIR))
+				@(go test -i)
+				@(echo "--- Testing trousseau package ---")
+				-@(go test -v)
+				@(for package in $(DSN_DIR) $(TROUSSEAU_DIR); do\
+				  echo "--- Testing $$package ---";\
+				  cd $$package && go test -v;\
+				  echo "\n";\
+				  done)
 
 package:
 				@(echo $(TROUSSEAU_VERSION))
