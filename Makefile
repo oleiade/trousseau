@@ -74,15 +74,11 @@ else ifneq ($(PROJECT_DIR), $(realpath $(PROJECT_DIR)))
 endif
 
 test:
-				@(export GOPATH=$(GOPATH_DIR))
 				@(go test -i)
 				@(echo "--- Testing trousseau package ---")
-				-@(go test -v)
-				@(for package in $(DSN_DIR) $(TROUSSEAU_DIR); do\
-				  echo "--- Testing $$package ---";\
-				  cd $$package && go test -v;\
-				  echo "\n";\
-				  done)
+				@(go test -v)
+				@(echo "--- Testing dsn package ---")
+				@(cd $(DSN_DIR); go test -v; cd -)
 
 package:
 				@(echo $(TROUSSEAU_VERSION))
