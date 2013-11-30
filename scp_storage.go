@@ -19,22 +19,30 @@ type ScpStorage struct {
 	connexion *ssh.ClientConn
 
 	Keychain *Keychain
+	Password string
 	User     string
 	Endpoint string
 }
+
+type password string
 
 type Keychain struct {
 	key *rsa.PrivateKey
 }
 
-func NewScpStorage(host, port, user string, keychain *Keychain) *ScpStorage {
+func NewScpStorage(host, port, user, password string, keychain *Keychain) *ScpStorage {
 	return &ScpStorage{
 		Keychain: keychain,
+        Password: password,
 		User:     user,
 		Endpoint: strings.Join([]string{host, port}, ":"),
 		host:     host,
 		port:     port,
 	}
+}
+
+func (p password) Password(_ string) (string, error) {
+    return string(p), nil
 }
 
 func NewKeychain(key *rsa.PrivateKey) *Keychain {
@@ -83,6 +91,7 @@ func (ss *ScpStorage) Connect() error {
 	clientConfig := &ssh.ClientConfig{
 		User: ss.User,
 		Auth: []ssh.ClientAuth{
+		    ssh.ClientAuthPassword(password(ss.Password)),
 			ssh.ClientAuthKeyring(ss.Keychain),
 		},
 	}

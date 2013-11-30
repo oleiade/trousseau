@@ -45,6 +45,7 @@ func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) error {
 	scpStorage := NewScpStorage(dsn.Host,
 		dsn.Port,
 		dsn.Id,
+		dsn.Secret,
 		keyChain)
 	err = scpStorage.Connect()
 	if err != nil {
