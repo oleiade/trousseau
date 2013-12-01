@@ -16,10 +16,7 @@ import (
 	"code.google.com/p/go.crypto/openpgp/armor"
 )
 
-var (
-	passphrase string
-	keys       openpgp.EntityList
-)
+var keys openpgp.EntityList
 
 func initCrypto(keyRingPath, pass string) {
 	f, err := os.Open(keyRingPath)
@@ -32,8 +29,6 @@ func initCrypto(keyRingPath, pass string) {
 	if err != nil {
 		log.Fatalf("Can't read keyring: %v", err)
 	}
-
-	passphrase = pass
 }
 
 func decrypt(s, passphrase string) (string, error) {
