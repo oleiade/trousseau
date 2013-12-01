@@ -65,7 +65,19 @@ $ sudo apt-get install trousseau
 <div class="subsection-break"></div>
 ### OSX
 
-A repository for OS X distributions will be provided soon. But for now, please refer to the **build** installation.
+#### Homebrew
+
+If you're using homebrew just proceed to installation using the provided formula:
+
+```bash
+$ brew install trousseau.rb
+```
+
+*Et voila!*
+
+#### Macports
+
+Coming soon (Don't be shy, if you feel like you could do it, just send pull request ;) )
 
 <div class="subsection-break"></div>
 ### Build it
