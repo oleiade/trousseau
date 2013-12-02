@@ -1,80 +1,77 @@
-package trousseau
+package ssh
 
 import (
 	"bytes"
+	"errors"
 	"code.google.com/p/go.crypto/ssh"
 	"crypto"
 	"crypto/rsa"
+	"crypto/dsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"strings"
 )
 
-type ScpStorage struct {
-	host      string
-	port      string
-	connexion *ssh.ClientConn
-
-	Keychain *Keychain
-	Password string
-	User     string
-	Endpoint string
-}
-
-type password string
-
 type Keychain struct {
-	key *rsa.PrivateKey
+	keys []interface{}
 }
 
-func NewScpStorage(host, port, user, password string, keychain *Keychain) *ScpStorage {
-	return &ScpStorage{
-		Keychain: keychain,
-        Password: password,
-		User:     user,
-		Endpoint: strings.Join([]string{host, port}, ":"),
-		host:     host,
-		port:     port,
-	}
-}
+func (k *Keychain) AddPEMKey(privateKeyPath string) error {
+    var rsakey  interface{}
+    var err     error
 
-func (p password) Password(_ string) (string, error) {
-    return string(p), nil
-}
-
-func NewKeychain(key *rsa.PrivateKey) *Keychain {
-	return &Keychain{
-		key: key,
-	}
-}
-
-func DecodePrivateKeyFromFile(privateKeyPath string) (*rsa.PrivateKey, error) {
 	keyContent, err := ioutil.ReadFile(privateKeyPath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	block, _ := pem.Decode([]byte(keyContent))
-	rsakey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+    if block == nil {
+        return errors.New("no block in key")
+    }
+
+	rsakey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
-		return nil, err
+	    rsakey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
 	}
 
-	return rsakey, nil
+    if err != nil {
+        return err
+    }
+
+	k.keys = append(k.keys, rsakey)
+
+	return nil
+}
+
+func (k *Keychain) AddPEMKeyPassword(key string, password string) (err error) {
+    block, _ := pem.Decode([]byte(key))
+    bytes, _ := x509.DecryptPEMBlock(block, []byte(password))
+    rsakey, err := x509.ParsePKCS1PrivateKey(bytes)
+    if err != nil {
+        return
+    }
+
+    k.keys = append(k.keys, rsakey)
+
+    return
 }
 
 func (k *Keychain) Key(i int) (key ssh.PublicKey, err error) {
-	if i != 0 {
+	if i < 0 || i >= len(k.keys) {
 		return nil, nil
 	}
 
-	// Transform the rsa key into an ssh key
-	ssh_publickey, _ := ssh.NewPublicKey(k.key.PublicKey)
+    switch key := k.keys[i].(type) {
+    case *rsa.PrivateKey:
+        return ssh.NewPublicKey(&key.PublicKey)
+    case *dsa.PrivateKey:
+        return ssh.NewPublicKey(&key.PublicKey)
+    }
 
-	return ssh_publickey, nil
+    return nil, errors.New("ssh: Unknown key type")
 }
 
 func (k *Keychain) Sign(i int, rand io.Reader, data []byte) (sig []byte, err error) {
@@ -82,7 +79,13 @@ func (k *Keychain) Sign(i int, rand io.Reader, data []byte) (sig []byte, err err
 	h := hashFunc.New()
 	h.Write(data)
 	digest := h.Sum(nil)
-	return rsa.SignPKCS1v15(rand, k.key, hashFunc, digest)
+
+    switch key := k.keys[i].(type) {
+    case *rsa.PrivateKey:
+        return rsa.SignPKCS1v15(rand, key, hashFunc, digest)
+    }
+
+    return nil, errors.New("ssh: Unknown key type")
 }
 
 func (ss *ScpStorage) Connect() error {
@@ -104,7 +107,7 @@ func (ss *ScpStorage) Connect() error {
 	return nil
 }
 
-func (ss *ScpStorage) Push(remoteName string) error {
+func (ss *ScpStorage) Push(localPath, remotePath string) error {
 	session, err := ss.connexion.NewSession()
 	if err != nil {
 		return fmt.Errorf("Failed to create session: %s", err.Error())
@@ -115,9 +118,9 @@ func (ss *ScpStorage) Push(remoteName string) error {
 		w, _ := session.StdinPipe()
 		defer w.Close()
 
-		content, _ := ioutil.ReadFile(gStorePath)
+		content, _ := ioutil.ReadFile(localPath)
 
-		fmt.Fprintln(w, "C0755", len(content), remoteName)
+		fmt.Fprintln(w, "C0755", len(content), remotePath)
 		fmt.Fprint(w, string(content))
 		fmt.Fprint(w, "\x00")
 	}()
@@ -129,7 +132,7 @@ func (ss *ScpStorage) Push(remoteName string) error {
 	return nil
 }
 
-func (ss *ScpStorage) Pull(remoteName string) error {
+func (ss *ScpStorage) Pull(remotePath, localPath string) error {
 	session, err := ss.connexion.NewSession()
 	if err != nil {
 		return fmt.Errorf("Failed to create session: %s", err.Error())
@@ -139,11 +142,11 @@ func (ss *ScpStorage) Pull(remoteName string) error {
 	var remoteFileBuffer bytes.Buffer
 	session.Stdout = &remoteFileBuffer
 
-	if err := session.Run(fmt.Sprintf("cat %s", remoteName)); err != nil {
+	if err := session.Run(fmt.Sprintf("cat %s", remotePath)); err != nil {
 		return fmt.Errorf("Failed to run: %s", err.Error())
 	}
 
-	err = ioutil.WriteFile(gStorePath, remoteFileBuffer.Bytes(), 0744)
+	err = ioutil.WriteFile(localPath, remoteFileBuffer.Bytes(), 0744)
 	if err != nil {
 		return err
 	}
