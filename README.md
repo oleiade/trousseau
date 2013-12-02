@@ -402,6 +402,10 @@ TrousseauVersion: 0.1.0c
 * Write tests which show that the bug was fixed or that the feature works as expected.
 * Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS.
 
+## Changelog
+
+See [History](https://github.com/oleiade/trousseau/blob/master/History.md)
+
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/oleiade/trousseau/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
