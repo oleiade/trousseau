@@ -1,4 +1,4 @@
-package trousseau
+package remote
 
 // RemoteStorage is an interface exposing methods to upload
 // trousseau file to a remote based location

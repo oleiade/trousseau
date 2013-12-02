@@ -3,6 +3,7 @@ package trousseau
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
+	"github.com/oleiade/trousseau/dsn"
 	"io"
 	"log"
 	"os"
@@ -49,28 +50,35 @@ func CreateAction(c *cli.Context) {
 }
 
 func PushAction(c *cli.Context) {
-	if !hasExpectedArgs(c.Args(), 0) {
+	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'push' command")
 	}
 
-	switch c.String("remote-storage") {
-	case "s3":
-		bucket := c.String("s3-bucket")
-		remoteFilename := c.String("remote-filename")
-		region := c.String("s3-region")
+	endpointDsn, err := dsn.Parse(c.Args()[0])
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		err := uploadUsingS3(bucket, remoteFilename, region)
+	switch endpointDsn.Scheme {
+	case "s3":
+		err := endpointDsn.SetDefaults(gS3Defaults)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = uploadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "scp":
 		privateKey := c.String("ssh-private-key")
-		remoteFilename := c.String("remote-filename")
-		host := c.String("host")
-		port := c.String("port")
-		user := c.String("user")
 
-		err := uploadUsingScp(privateKey, remoteFilename, host, port, user)
+		err := endpointDsn.SetDefaults(gScpDefaults)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = uploadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,28 +86,35 @@ func PushAction(c *cli.Context) {
 }
 
 func PullAction(c *cli.Context) {
-	if !hasExpectedArgs(c.Args(), 0) {
+	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'pull' command")
 	}
 
-	switch c.String("remote-storage") {
-	case "s3":
-		bucket := c.String("s3-bucket")
-		remoteFilename := c.String("remote-filename")
-		region := c.String("s3-region")
+	endpointDsn, err := dsn.Parse(c.Args()[0])
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		err := DownloadUsingS3(bucket, remoteFilename, region)
+	switch endpointDsn.Scheme {
+	case "s3":
+		err := endpointDsn.SetDefaults(gS3Defaults)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = DownloadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "scp":
 		privateKey := c.String("ssh-private-key")
-		remoteFilename := c.String("remote-filename")
-		host := c.String("host")
-		port := c.String("port")
-		user := c.String("user")
 
-		err := DownloadUsingScp(privateKey, remoteFilename, host, port, user)
+		err := endpointDsn.SetDefaults(gScpDefaults)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = DownloadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
