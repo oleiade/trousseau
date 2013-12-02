@@ -5,6 +5,7 @@ import (
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/remote"
+	"github.com/oleiade/trousseau/remote/ssh"
 )
 
 // uploadUsingS3 executes the whole process of pushing
@@ -37,13 +38,13 @@ func uploadUsingS3(dsn *dsn.Dsn) error {
 // the trousseau data store file to scp remote storage
 // using the provided environment.
 func uploadUsingScp(dsn *dsn.Dsn, privateKey string) error {
-	privateKeyContent, err := remote.DecodePrivateKeyFromFile(privateKey)
+	privateKeyContent, err := ssh.DecodePrivateKeyFromFile(privateKey)
 	if err != nil {
 		return err
 	}
 
-	keyChain := remote.NewKeychain(privateKeyContent)
-	scpStorage := remote.NewScpStorage(dsn.Host,
+	keyChain := ssh.NewKeychain(privateKeyContent)
+	scpStorage := ssh.NewScpStorage(dsn.Host,
 		dsn.Port,
 		dsn.Id,
 		dsn.Secret,
@@ -53,7 +54,7 @@ func uploadUsingScp(dsn *dsn.Dsn, privateKey string) error {
 		return err
 	}
 
-	err = scpStorage.Push(dsn.Path)
+	err = scpStorage.Push(gStorePath, dsn.Path)
 	if err != nil {
 		return err
 	}

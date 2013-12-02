@@ -1,4 +1,4 @@
-package remote
+package ssh
 
 import (
 	"bytes"
@@ -104,7 +104,7 @@ func (ss *ScpStorage) Connect() error {
 	return nil
 }
 
-func (ss *ScpStorage) Push(remoteName string) error {
+func (ss *ScpStorage) Push(localPath, remotePath string) error {
 	session, err := ss.connexion.NewSession()
 	if err != nil {
 		return fmt.Errorf("Failed to create session: %s", err.Error())
@@ -115,9 +115,9 @@ func (ss *ScpStorage) Push(remoteName string) error {
 		w, _ := session.StdinPipe()
 		defer w.Close()
 
-		content, _ := ioutil.ReadFile(gStorePath)
+		content, _ := ioutil.ReadFile(localPath)
 
-		fmt.Fprintln(w, "C0755", len(content), remoteName)
+		fmt.Fprintln(w, "C0755", len(content), remotePath)
 		fmt.Fprint(w, string(content))
 		fmt.Fprint(w, "\x00")
 	}()
@@ -129,7 +129,7 @@ func (ss *ScpStorage) Push(remoteName string) error {
 	return nil
 }
 
-func (ss *ScpStorage) Pull(remoteName string) error {
+func (ss *ScpStorage) Pull(remotePath, localPath string) error {
 	session, err := ss.connexion.NewSession()
 	if err != nil {
 		return fmt.Errorf("Failed to create session: %s", err.Error())
@@ -139,11 +139,11 @@ func (ss *ScpStorage) Pull(remoteName string) error {
 	var remoteFileBuffer bytes.Buffer
 	session.Stdout = &remoteFileBuffer
 
-	if err := session.Run(fmt.Sprintf("cat %s", remoteName)); err != nil {
+	if err := session.Run(fmt.Sprintf("cat %s", remotePath)); err != nil {
 		return fmt.Errorf("Failed to run: %s", err.Error())
 	}
 
-	err = ioutil.WriteFile(gStorePath, remoteFileBuffer.Bytes(), 0744)
+	err = ioutil.WriteFile(localPath, remoteFileBuffer.Bytes(), 0744)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/remote"
+	"github.com/oleiade/trousseau/remote/ssh"
 )
 
 // downloadUsingS3 executes the whole process of pulling
@@ -37,13 +38,13 @@ func DownloadUsingS3(dsn *dsn.Dsn) error {
 // the trousseau data store file from scp remote storage
 // using the provided environment.
 func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) error {
-	privateKeyContent, err := remote.DecodePrivateKeyFromFile(privateKey)
+	privateKeyContent, err := ssh.DecodePrivateKeyFromFile(privateKey)
 	if err != nil {
 		return err
 	}
 
-	keyChain := remote.NewKeychain(privateKeyContent)
-	scpStorage := remote.NewScpStorage(dsn.Host,
+	keyChain := ssh.NewKeychain(privateKeyContent)
+	scpStorage := ssh.NewScpStorage(dsn.Host,
 		dsn.Port,
 		dsn.Id,
 		dsn.Secret,
@@ -53,7 +54,7 @@ func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) error {
 		return err
 	}
 
-	err = scpStorage.Pull(dsn.Path)
+	err = scpStorage.Pull(dsn.Path, gStorePath)
 	if err != nil {
 		return err
 	}
