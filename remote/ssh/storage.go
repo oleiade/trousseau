@@ -1,8 +1,8 @@
 package ssh
 
 import (
-    "strings"
 	"code.google.com/p/go.crypto/ssh"
+	"strings"
 )
 
 type ScpStorage struct {
@@ -19,7 +19,7 @@ type ScpStorage struct {
 func NewScpStorage(host, port, user, password string, keychain *Keychain) *ScpStorage {
 	return &ScpStorage{
 		Keychain: keychain,
-        Password: password,
+		Password: password,
 		User:     user,
 		Endpoint: strings.Join([]string{host, port}, ":"),
 		host:     host,

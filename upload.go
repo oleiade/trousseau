@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
-	"github.com/oleiade/trousseau/remote/ssh"
 	"github.com/oleiade/trousseau/remote/s3"
+	"github.com/oleiade/trousseau/remote/ssh"
 )
 
 // uploadUsingS3 executes the whole process of pushing
 // the trousseau data store file to s3 remote storage
 // using the provided environment.
 func uploadUsingS3(dsn *dsn.Dsn) error {
-    awsAuth := aws.Auth{AccessKey: dsn.Id, SecretKey: dsn.Secret}
+	awsAuth := aws.Auth{AccessKey: dsn.Id, SecretKey: dsn.Secret}
 
 	awsRegion, ok := aws.Regions[dsn.Port]
 	if !ok {
@@ -20,7 +20,7 @@ func uploadUsingS3(dsn *dsn.Dsn) error {
 	}
 
 	s3Storage := s3.NewS3Storage(awsAuth, dsn.Host, awsRegion)
-    err := s3Storage.Connect()
+	err := s3Storage.Connect()
 	if err != nil {
 		return fmt.Errorf("Unable to connect to S3")
 	}
@@ -37,7 +37,7 @@ func uploadUsingS3(dsn *dsn.Dsn) error {
 // the trousseau data store file to scp remote storage
 // using the provided environment.
 func uploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
-    keychain := new(ssh.Keychain)
+	keychain := new(ssh.Keychain)
 	keychain.AddPEMKey(privateKey)
 
 	scpStorage := ssh.NewScpStorage(dsn.Host,

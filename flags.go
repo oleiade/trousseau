@@ -2,8 +2,8 @@ package trousseau
 
 import (
 	"github.com/codegangsta/cli"
-	"path/filepath"
 	"os"
+	"path/filepath"
 )
 
 func PasswordFlag() cli.StringFlag {

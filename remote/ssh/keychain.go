@@ -2,13 +2,13 @@ package ssh
 
 import (
 	"bytes"
-	"errors"
 	"code.google.com/p/go.crypto/ssh"
 	"crypto"
-	"crypto/rsa"
 	"crypto/dsa"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -19,8 +19,8 @@ type Keychain struct {
 }
 
 func (k *Keychain) AddPEMKey(privateKeyPath string) error {
-    var rsakey  interface{}
-    var err     error
+	var rsakey interface{}
+	var err error
 
 	keyContent, err := ioutil.ReadFile(privateKeyPath)
 	if err != nil {
@@ -28,18 +28,18 @@ func (k *Keychain) AddPEMKey(privateKeyPath string) error {
 	}
 
 	block, _ := pem.Decode([]byte(keyContent))
-    if block == nil {
-        return errors.New("no block in key")
-    }
+	if block == nil {
+		return errors.New("no block in key")
+	}
 
 	rsakey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
-	    rsakey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+		rsakey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
 	}
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
 	k.keys = append(k.keys, rsakey)
 
@@ -47,16 +47,16 @@ func (k *Keychain) AddPEMKey(privateKeyPath string) error {
 }
 
 func (k *Keychain) AddPEMKeyPassword(key string, password string) (err error) {
-    block, _ := pem.Decode([]byte(key))
-    bytes, _ := x509.DecryptPEMBlock(block, []byte(password))
-    rsakey, err := x509.ParsePKCS1PrivateKey(bytes)
-    if err != nil {
-        return
-    }
+	block, _ := pem.Decode([]byte(key))
+	bytes, _ := x509.DecryptPEMBlock(block, []byte(password))
+	rsakey, err := x509.ParsePKCS1PrivateKey(bytes)
+	if err != nil {
+		return
+	}
 
-    k.keys = append(k.keys, rsakey)
+	k.keys = append(k.keys, rsakey)
 
-    return
+	return
 }
 
 func (k *Keychain) Key(i int) (key ssh.PublicKey, err error) {
@@ -64,14 +64,14 @@ func (k *Keychain) Key(i int) (key ssh.PublicKey, err error) {
 		return nil, nil
 	}
 
-    switch key := k.keys[i].(type) {
-    case *rsa.PrivateKey:
-        return ssh.NewPublicKey(&key.PublicKey)
-    case *dsa.PrivateKey:
-        return ssh.NewPublicKey(&key.PublicKey)
-    }
+	switch key := k.keys[i].(type) {
+	case *rsa.PrivateKey:
+		return ssh.NewPublicKey(&key.PublicKey)
+	case *dsa.PrivateKey:
+		return ssh.NewPublicKey(&key.PublicKey)
+	}
 
-    return nil, errors.New("ssh: Unknown key type")
+	return nil, errors.New("ssh: Unknown key type")
 }
 
 func (k *Keychain) Sign(i int, rand io.Reader, data []byte) (sig []byte, err error) {
@@ -80,12 +80,12 @@ func (k *Keychain) Sign(i int, rand io.Reader, data []byte) (sig []byte, err err
 	h.Write(data)
 	digest := h.Sum(nil)
 
-    switch key := k.keys[i].(type) {
-    case *rsa.PrivateKey:
-        return rsa.SignPKCS1v15(rand, key, hashFunc, digest)
-    }
+	switch key := k.keys[i].(type) {
+	case *rsa.PrivateKey:
+		return rsa.SignPKCS1v15(rand, key, hashFunc, digest)
+	}
 
-    return nil, errors.New("ssh: Unknown key type")
+	return nil, errors.New("ssh: Unknown key type")
 }
 
 func (ss *ScpStorage) Connect() error {
@@ -94,7 +94,7 @@ func (ss *ScpStorage) Connect() error {
 	clientConfig := &ssh.ClientConfig{
 		User: ss.User,
 		Auth: []ssh.ClientAuth{
-		    ssh.ClientAuthPassword(password(ss.Password)),
+			ssh.ClientAuthPassword(password(ss.Password)),
 			ssh.ClientAuthKeyring(ss.Keychain),
 		},
 	}

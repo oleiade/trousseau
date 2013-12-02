@@ -26,11 +26,10 @@ var gKeyringUser string = os.Getenv(ENV_KEYRING_USER_KEY)
 
 // S3 and Scp dsn default values
 var gS3Defaults map[string]string = map[string]string{
-    "Path": "trousseau.tsk",
+	"Path": "trousseau.tsk",
 }
 var gScpDefaults map[string]string = map[string]string{
-    "Id": os.Getenv("USER"),
-    "Port": "22",
-    "Path": "trousseau.tsk",
+	"Id":   os.Getenv("USER"),
+	"Port": "22",
+	"Path": "trousseau.tsk",
 }
-

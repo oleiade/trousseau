@@ -3,12 +3,12 @@ package trousseau
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
+	"github.com/oleiade/trousseau/dsn"
 	"io"
 	"log"
 	"os"
 	"strings"
 	"time"
-	"github.com/oleiade/trousseau/dsn"
 )
 
 // hasExpectedArgs checks whether the number of args are as expected.
@@ -54,17 +54,17 @@ func PushAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'push' command")
 	}
 
-    endpointDsn, err := dsn.Parse(c.Args()[0])
-    if err != nil {
-        log.Fatal(err)
-    }
+	endpointDsn, err := dsn.Parse(c.Args()[0])
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	switch endpointDsn.Scheme {
 	case "s3":
-        err := endpointDsn.SetDefaults(gS3Defaults)
-        if err != nil {
-            log.Fatal(err)
-        }
+		err := endpointDsn.SetDefaults(gS3Defaults)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		err = uploadUsingS3(endpointDsn)
 		if err != nil {
@@ -73,12 +73,12 @@ func PushAction(c *cli.Context) {
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-        err := endpointDsn.SetDefaults(gScpDefaults)
-        if err != nil {
-            log.Fatal(err)
-        }
+		err := endpointDsn.SetDefaults(gScpDefaults)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-        err = uploadUsingScp(endpointDsn, privateKey)
+		err = uploadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -90,18 +90,17 @@ func PullAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'pull' command")
 	}
 
-    endpointDsn, err := dsn.Parse(c.Args()[0])
-    if err != nil {
-        log.Fatal(err)
-    }
-
+	endpointDsn, err := dsn.Parse(c.Args()[0])
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	switch endpointDsn.Scheme {
 	case "s3":
-        err := endpointDsn.SetDefaults(gS3Defaults)
-        if err != nil {
-            log.Fatal(err)
-        }
+		err := endpointDsn.SetDefaults(gS3Defaults)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		err = DownloadUsingS3(endpointDsn)
 		if err != nil {
@@ -110,12 +109,12 @@ func PullAction(c *cli.Context) {
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-        err := endpointDsn.SetDefaults(gScpDefaults)
-        if err != nil {
-            log.Fatal(err)
-        }
+		err := endpointDsn.SetDefaults(gScpDefaults)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-        err = DownloadUsingScp(endpointDsn, privateKey)
+		err = DownloadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
