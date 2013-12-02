@@ -37,18 +37,15 @@ func DownloadUsingS3(dsn *dsn.Dsn) error {
 // downloadUsingScp executes the whole process of pulling
 // the trousseau data store file from scp remote storage
 // using the provided environment.
-func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) error {
-	privateKeyContent, err := ssh.DecodePrivateKeyFromFile(privateKey)
-	if err != nil {
-		return err
-	}
+func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
+    keychain := new(ssh.Keychain)
+	keychain.AddPEMKey(privateKey)
 
-	keyChain := ssh.NewKeychain(privateKeyContent)
 	scpStorage := ssh.NewScpStorage(dsn.Host,
 		dsn.Port,
 		dsn.Id,
 		dsn.Secret,
-		keyChain)
+		keychain)
 	err = scpStorage.Connect()
 	if err != nil {
 		return err
