@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
-	"github.com/oleiade/trousseau/remote"
 	"github.com/oleiade/trousseau/remote/ssh"
+	"github.com/oleiade/trousseau/remote/s3"
 )
 
 // uploadUsingS3 executes the whole process of pushing
@@ -19,14 +19,13 @@ func uploadUsingS3(dsn *dsn.Dsn) error {
 		return fmt.Errorf("Invalid aws region supplied %s", dsn.Port)
 	}
 
-	s3Storage := remote.NewS3Storage(awsAuth, dsn.Host, awsRegion)
+	s3Storage := s3.NewS3Storage(awsAuth, dsn.Host, awsRegion)
     err := s3Storage.Connect()
 	if err != nil {
-		return fmt.Errorf("Unable to connect to S3, have you set %s env var?",
-			ENV_S3_BUCKET_KEY)
+		return fmt.Errorf("Unable to connect to S3")
 	}
 
-	err = s3Storage.Push(dsn.Path)
+	err = s3Storage.Push(gStorePath, dsn.Path)
 	if err != nil {
 		return err
 	}
