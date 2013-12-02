@@ -12,39 +12,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"strings"
 )
-
-type ScpStorage struct {
-	host      string
-	port      string
-	connexion *ssh.ClientConn
-
-	Keychain *Keychain
-	Password string
-	User     string
-	Endpoint string
-}
-
-type password string
 
 type Keychain struct {
 	keys []interface{}
-}
-
-func NewScpStorage(host, port, user, password string, keychain *Keychain) *ScpStorage {
-	return &ScpStorage{
-		Keychain: keychain,
-        Password: password,
-		User:     user,
-		Endpoint: strings.Join([]string{host, port}, ":"),
-		host:     host,
-		port:     port,
-	}
-}
-
-func (p password) Password(_ string) (string, error) {
-    return string(p), nil
 }
 
 func (k *Keychain) AddPEMKey(privateKeyPath string) error {
