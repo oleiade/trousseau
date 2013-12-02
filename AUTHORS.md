@@ -5,6 +5,7 @@
 ## Contributors
 
 * [Mthamed](https://github.com/mtahmed)
+* [Fernando Alvarez](https://github.com/fern4lvarez) <fa@cloudcontrol.de>
 
 
 ## Open-source contributions import

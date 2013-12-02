@@ -59,7 +59,7 @@ $ echo "deb http://dl.bintray.com/oleiade/deb /" | sudo tee /etc/apt/sources.lis
 And you're ready to go:
 
 ```bash
-$ sudo apt-get install trousseau
+$ sudo apt-get update && sudo apt-get install trousseau
 ```
 
 <div class="subsection-break"></div>
