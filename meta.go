@@ -30,7 +30,7 @@ func (m *Meta) containsRecipient(recipient string) (status bool, index int) {
 func (m *Meta) AddRecipient(recipient string) error {
 	in, _ := m.containsRecipient(recipient)
 	if in {
-		errMsg := fmt.Sprintf("Recipient %s already mapped to store metadata")
+		errMsg := fmt.Sprintf("Recipient %s already mapped to store metadata", recipient)
 		return errors.New(errMsg)
 	} else {
 		m.Recipients = append(m.Recipients, recipient)
