@@ -1,4 +1,4 @@
-package trousseau
+package remote
 
 import (
 	"bytes"

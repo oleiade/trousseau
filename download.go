@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
+	"github.com/oleiade/trousseau/remote"
 )
 
 // downloadUsingS3 executes the whole process of pulling
@@ -17,7 +18,7 @@ func DownloadUsingS3(dsn *dsn.Dsn) error {
 		return fmt.Errorf("Invalid aws region supplied %s", dsn.Port)
 	}
 
-	s3Storage := NewS3Storage(awsAuth, dsn.Host, awsRegion)
+	s3Storage := remote.NewS3Storage(awsAuth, dsn.Host, awsRegion)
     err := s3Storage.Connect()
 	if err != nil {
 		fmt.Errorf("Unable to connect to S3, have you set %s env var?",
@@ -36,13 +37,13 @@ func DownloadUsingS3(dsn *dsn.Dsn) error {
 // the trousseau data store file from scp remote storage
 // using the provided environment.
 func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) error {
-	privateKeyContent, err := DecodePrivateKeyFromFile(privateKey)
+	privateKeyContent, err := remote.DecodePrivateKeyFromFile(privateKey)
 	if err != nil {
 		return err
 	}
 
-	keyChain := NewKeychain(privateKeyContent)
-	scpStorage := NewScpStorage(dsn.Host,
+	keyChain := remote.NewKeychain(privateKeyContent)
+	scpStorage := remote.NewScpStorage(dsn.Host,
 		dsn.Port,
 		dsn.Id,
 		dsn.Secret,
