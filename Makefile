@@ -58,7 +58,9 @@ $(TROUSSEAU_BIN): $(TROUSSEAU_DIR)
 				 export GOPATH=$(OLD_GOPATH);
 
 $(PROJECT_DIR):
-				@mkdir -p $(GOPATH_DIR)
+	   			@mkdir -p $(GOPATH_DIR)
+	   			@mkdir -p $(dir $@)
+	   			@(if [ -h $@ ]; then rm -rf $@; fi; ln -sf $(CURDIR)/ $@)
 
 $(TROUSSEAU_DIR): $(PROJECT_DIR)
 				@export GOPATH=$(GOPATH_DIR); \
