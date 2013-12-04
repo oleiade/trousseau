@@ -65,6 +65,12 @@ $(TROUSSEAU_DIR): $(PROJECT_DIR)
 				 cd $(CURDIR)/trousseau/; go get -d; \
 				 export GOPATH=$(OLD_GOPATH);
 
+install: $(TROUSSEAU_BIN)
+				@if ! [ $(SRC_DIR) -ef $(GOPATH)/src ]; then \
+					cp -dnr --preserve=mode,timestamp $(GOPATH_DIR)/src $(GOPATH); \
+				 fi
+				@cp -d --preserve=mode,timestamp $(TROUSSEAU_BIN) $(BIN_INSTALL_DIR)
+
 clean:
 				@rm -rf $(dir $(TROUSSEAU_BIN))
 ifeq ($(GOPATH), $(BUILD_DIR))
