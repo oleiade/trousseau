@@ -46,7 +46,7 @@ func CreateAction(c *cli.Context) {
 	// Create and write empty store file
 	CreateStoreFile(gStorePath, &meta)
 
-	fmt.Println("trousseau created")
+	fmt.Println("Trousseau data store succesfully created")
 }
 
 func PushAction(c *cli.Context) {
@@ -70,6 +70,7 @@ func PushAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
+        fmt.Printf("Trousseau data store succesfully pushed to s3")
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
@@ -82,11 +83,13 @@ func PushAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
+        fmt.Printf("Trousseau data store succesfully pushed to ssh remote storage")
     case "gist":
         err = uploadUsingGist(endpointDsn)
         if err != nil {
             log.Fatal(err)
         }
+        fmt.Printf("Trousseau data store succesfully pushed to gist")
 	}
 }
 
@@ -111,6 +114,7 @@ func PullAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
+        fmt.Printf("Trousseau data store succesfully pulled from S3")
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
@@ -123,11 +127,13 @@ func PullAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
+        fmt.Printf("Trousseau data store succesfully pulled from ssh remote storage")
 	case "gist":
 	    err = DownloadUsingGist(endpointDsn)
 	    if err != nil {
 	        log.Fatal(err)
 	    }
+        fmt.Printf("Trousseau data store succesfully pulled from gist")
 	default:
 	    if endpointDsn.Scheme == "" {
             log.Fatalf("No dsn scheme supplied")
@@ -135,6 +141,8 @@ func PullAction(c *cli.Context) {
             log.Fatalf("Invalid dsn scheme supplied: %s", endpointDsn.Scheme)
         }
 	}
+
+	fmt.Printf("Trousseau data store succesfully pulled from remote storage")
 }
 
 func ExportAction(c *cli.Context) {
@@ -163,7 +171,7 @@ func ExportAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("trousseau exported")
+	fmt.Printf("Trousseau data store exported to %s", outputFilePath)
 }
 
 func ImportAction(c *cli.Context) {
@@ -205,7 +213,7 @@ func ImportAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("trousseau imported")
+	fmt.Println("Trousseau data store imported")
 }
 
 func AddRecipientAction(c *cli.Context) {
@@ -237,7 +245,7 @@ func AddRecipientAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s added to trousseau recipients", recipient)
+	fmt.Printf("%s recipient added to trousseau data store", recipient)
 }
 
 func RemoveRecipientAction(c *cli.Context) {
@@ -269,7 +277,7 @@ func RemoveRecipientAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s removed from trousseau recipients", recipient)
+	fmt.Printf("%s recipient removed from trousseau data store", recipient)
 }
 
 func GetAction(c *cli.Context) {
