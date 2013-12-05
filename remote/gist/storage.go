@@ -14,7 +14,7 @@ type GistStorage struct {
     User        string
 }
 
-func NewGistStorage(token string) *GistStorage {
+func NewGistStorage(user, token string) *GistStorage {
     transport := &oauth.Transport{
         Token: &oauth.Token{AccessToken: token},
     }
@@ -22,6 +22,7 @@ func NewGistStorage(token string) *GistStorage {
     return &GistStorage{
         transport: transport,
         Token: token,
+        User: user,
     }
 }
 

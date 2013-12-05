@@ -82,6 +82,11 @@ func PushAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
+    case "gist":
+        err = uploadUsingGist(endpointDsn)
+        if err != nil {
+            log.Fatal(err)
+        }
 	}
 }
 
@@ -118,6 +123,11 @@ func PullAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
+	case "gist":
+	    err = DownloadUsingGist(endpointDsn)
+	    if err != nil {
+	        log.Fatal(err)
+	    }
 	}
 }
 

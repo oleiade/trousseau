@@ -6,6 +6,7 @@ import (
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/remote/s3"
 	"github.com/oleiade/trousseau/remote/ssh"
+	"github.com/oleiade/trousseau/remote/gist"
 )
 
 // uploadUsingS3 executes the whole process of pushing
@@ -56,4 +57,19 @@ func uploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
 	}
 
 	return nil
+}
+
+// uploadUsingGist executes the whole process of pushing
+// the trousseau data store file to gist remote storage
+// using the provided dsn informations.
+func uploadUsingGist(dsn *dsn.Dsn) (err error) {
+    gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
+    gistStorage.Connect()
+
+    err = gistStorage.Push(gStorePath, dsn.Path)
+    if err != nil {
+        return err
+    }
+
+    return nil
 }
