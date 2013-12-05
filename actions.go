@@ -128,6 +128,12 @@ func PullAction(c *cli.Context) {
 	    if err != nil {
 	        log.Fatal(err)
 	    }
+	default:
+	    if endpointDsn.Scheme == "" {
+            log.Fatalf("No dsn scheme supplied")
+	    } else {
+            log.Fatalf("Invalid dsn scheme supplied: %s", endpointDsn.Scheme)
+        }
 	}
 }
 
