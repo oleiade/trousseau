@@ -1,8 +1,8 @@
 package trousseau
 
 import (
+	"fmt"
 	"github.com/tmc/keyring"
-	"log"
 	"os"
 )
 
@@ -32,9 +32,10 @@ func GetPassphrase() string {
 	// system keyring manager try to fetch it from gpg-agent
 	if os.Getenv("GPG_AGENT_INFO") != "" {
 		passphrase, err = GetGpgPassphrase(gMasterGpgId)
-		if err != nil {
-			log.Fatal(err)
-		}
+	}
+
+	if err != nil {
+		fmt.Println("[WARNING] No passphrase provided, you won't be able to access trousseau data store\n")
 	}
 
 	return passphrase
