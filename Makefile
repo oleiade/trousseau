@@ -8,19 +8,20 @@ TROUSSEAU_VERSION = `awk '/TROUSSEAU_VERSION/ { gsub("\"", ""); print $$NF }' $(
 #
 PROJECT_PACKAGE   = github.com/oleiade/trousseau
 TROUSSEAU_PACKAGE = $(PROJECT_PACKAGE)/trousseau
-DSN_PACKAGE 	  = $(PROJECT_PACKAGE)/dsn
+DSN_PACKAGE       = $(PROJECT_PACKAGE)/dsn
 
 #
 # Directories
 #
-GOPATH_DIR = $(CURDIR)/.gopath
-SRC_DIR    = $(GOPATH_DIR)/src
-BIN_DIR    = $(CURDIR)/bin
-DIST_DIR   = $(CURDIR)/dist
+GOPATH_DIR      = $(CURDIR)/.gopath
+SRC_DIR         = $(GOPATH_DIR)/src
+BIN_DIR         = $(CURDIR)/bin
+DIST_DIR        = $(CURDIR)/dist
+BIN_INSTALL_DIR = /usr/local/bin/
 
 PROJECT_DIR   = $(SRC_DIR)/$(PROJECT_PACKAGE)
 TROUSSEAU_DIR = $(SRC_DIR)/$(TROUSSEAU_PACKAGE)
-DSN_DIR 	  = $(SRC_DIR)/$(DSN_PACKAGE)
+DSN_DIR       = $(SRC_DIR)/$(DSN_PACKAGE)
 
 #
 # Executables definition

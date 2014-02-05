@@ -4,7 +4,7 @@
 
 ## Contributors
 
-* [Mthamed](https://github.com/mtahmed)
+* [Muhammad Tauqir Ahmad](https://github.com/mtahmed) <mian.muhammad.tauqir.ahmad@gmail.com>
 * [Fernando Alvarez](https://github.com/fern4lvarez) <fa@cloudcontrol.de>
 
 
