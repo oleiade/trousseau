@@ -11,24 +11,6 @@ import (
     "time"
 )
 
-// hasExpectedArgs checks whether the number of args are as expected.
-func hasExpectedArgs(args []string, expected int) bool {
-    switch expected {
-    case -1:
-        if len(args) > 0 {
-            return true
-        } else {
-            return false
-        }
-    default:
-        if len(args) == expected {
-            return true
-        } else {
-            return false
-        }
-    }
-}
-
 func CreateAction(c *cli.Context) {
     if !hasExpectedArgs(c.Args(), 1) {
         log.Fatal("Incorrect number of arguments to 'configure' command")
@@ -182,37 +164,46 @@ func ImportAction(c *cli.Context) {
     var err error
     var inputFilePath string = c.Args()[0]
     var outputFilePath string = gStorePath
+    var strategy *ImportStrategy = new(ImportStrategy)
 
-    imported_store, err := NewEncryptedStoreFromFile(inputFilePath, c.GlobalString("passphrase"))
+    // Transform provided merging startegy flags
+    // into a proper ImportStrategy byte.
+    err = strategy.FromCliContext(c)
     if err != nil {
         log.Fatal(err)
     }
 
-    local_store, err := NewEncryptedStoreFromFile(outputFilePath, c.GlobalString("passphrase"))
+    importedStore, err := NewEncryptedStoreFromFile(inputFilePath, c.GlobalString("passphrase"))
     if err != nil {
         log.Fatal(err)
     }
 
-    err = imported_store.Decrypt()
+    localStore, err := NewEncryptedStoreFromFile(outputFilePath, c.GlobalString("passphrase"))
     if err != nil {
         log.Fatal(err)
     }
 
-    err = local_store.Decrypt()
+    err = importedStore.Decrypt()
     if err != nil {
         log.Fatal(err)
     }
 
-    for key, value := range imported_store.DataStore.Container {
-        local_store.DataStore.Container[key] = value
-    }
-
-    err = local_store.Encrypt()
+    err = localStore.Decrypt()
     if err != nil {
         log.Fatal(err)
     }
 
-    err = local_store.WriteToFile(outputFilePath)
+    err = ImportStore(importedStore, localStore, *strategy)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    err = localStore.Encrypt()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    err = localStore.WriteToFile(outputFilePath)
     if err != nil {
         log.Fatal(err)
     }
@@ -405,5 +396,23 @@ func MetaAction(c *cli.Context) {
 
     for _, pair := range pairs {
         fmt.Printf("%s: %s\n", pair.Key, pair.Value)
+    }
+}
+
+// hasExpectedArgs checks whether the number of args are as expected.
+func hasExpectedArgs(args []string, expected int) bool {
+    switch expected {
+    case -1:
+        if len(args) > 0 {
+            return true
+        } else {
+            return false
+        }
+    default:
+        if len(args) == expected {
+            return true
+        } else {
+            return false
+        }
     }
 }
