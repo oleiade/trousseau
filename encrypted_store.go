@@ -3,6 +3,7 @@ package trousseau
 import (
 	"errors"
 	"fmt"
+	"github.com/oleiade/trousseau/crypto/openpgp"
 	"io/ioutil"
 	"reflect"
 )
@@ -49,8 +50,8 @@ func (es *EncryptedStore) Encrypt() (err error) {
 			return err
 		}
 
-		initPgp(gPubringFile, es.DataStore.Meta.Recipients)
-		es.Data = encrypt(jsonDataStore)
+		gpg.InitPgp(gPubringFile, es.DataStore.Meta.Recipients)
+		es.Data = string(gpg.Encrypt(jsonDataStore))
 		es.Encrypted = true
 	}
 
@@ -64,11 +65,12 @@ func (es *EncryptedStore) Decrypt() error {
 		var err error
 
 		// Decrypt store data
-		initCrypto(gSecringFile, es.Passphrase)
-		es.Data, err = decrypt(es.Data, es.Passphrase)
+		gpg.InitCrypto(gSecringFile, es.Passphrase)
+		data, err := gpg.Decrypt(es.Data, es.Passphrase)
 		if err != nil {
 			return err
 		}
+		es.Data = string(data)
 
 		// If decryption was succesful, set the encrypted
 		// flag to false, and deserialize store content
