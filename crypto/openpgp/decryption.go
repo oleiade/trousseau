@@ -1,4 +1,4 @@
-package trousseau
+package gpg
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ import (
 
 var keys openpgp.EntityList
 
-func initCrypto(keyRingPath, pass string) {
+func InitCrypto(keyRingPath, pass string) {
 	f, err := os.Open(keyRingPath)
 	if err != nil {
 		log.Fatalf("Can't open keyring: %v", err)
@@ -31,14 +31,14 @@ func initCrypto(keyRingPath, pass string) {
 	}
 }
 
-func decrypt(s, passphrase string) (string, error) {
+func Decrypt(s, passphrase string) ([]byte, error) {
 	if s == "" {
-		return "", nil
+		return nil, nil
 	}
 
 	raw, err := armor.Decode(strings.NewReader(s))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	d, err := openpgp.ReadMessage(raw.Body, keys,
@@ -62,9 +62,9 @@ func decrypt(s, passphrase string) (string, error) {
 		},
 		nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	bytes, err := ioutil.ReadAll(d.UnverifiedBody)
-	return string(bytes), err
+	return bytes, err
 }

@@ -1,4 +1,4 @@
-package trousseau
+package gpg
 
 import (
 	"bytes"
@@ -18,7 +18,7 @@ import (
 
 var encryptKeys openpgp.EntityList
 
-func encrypt(s string) string {
+func Encrypt(s string) []byte {
 	buf := &bytes.Buffer{}
 
 	wa, err := armor.Encode(buf, "PGP MESSAGE", nil)
@@ -38,7 +38,7 @@ func encrypt(s string) string {
 	w.Close()
 	wa.Close()
 
-	return buf.String()
+	return buf.Bytes()
 }
 
 func intersectPreferences(a []uint8, b []uint8) (intersection []uint8) {
@@ -75,7 +75,7 @@ func primaryIdentity(e *openpgp.Entity) *openpgp.Identity {
 	return firstIdentity
 }
 
-func initPgp(kr string, keyids []string) {
+func InitPgp(kr string, keyids []string) {
 	f, err := os.Open(kr)
 	if err != nil {
 		log.Fatalf("Can't open keyring: %v", err)
