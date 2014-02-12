@@ -50,8 +50,8 @@ func (es *EncryptedStore) Encrypt() (err error) {
 			return err
 		}
 
-		gpg.InitPgp(gPubringFile, es.DataStore.Meta.Recipients)
-		es.Data = string(gpg.Encrypt(jsonDataStore))
+		openpgp.InitPgp(gPubringFile, es.DataStore.Meta.Recipients)
+		es.Data = string(openpgp.Encrypt(jsonDataStore))
 		es.Encrypted = true
 	}
 
@@ -65,8 +65,8 @@ func (es *EncryptedStore) Decrypt() error {
 		var err error
 
 		// Decrypt store data
-		gpg.InitCrypto(gSecringFile, es.Passphrase)
-		data, err := gpg.Decrypt(es.Data, es.Passphrase)
+		openpgp.InitCrypto(gSecringFile, es.Passphrase)
+		data, err := openpgp.Decrypt(es.Data, es.Passphrase)
 		if err != nil {
 			return err
 		}

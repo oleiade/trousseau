@@ -1,8 +1,8 @@
-package gpg
+package openpgp
 
 import (
-    "os"
-    "path/filepath"
+	"os"
+	"path/filepath"
 )
 
 // Gnupg keyrings files
