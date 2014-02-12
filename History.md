@@ -1,4 +1,13 @@
 
+0.2.1 / 2014-02-12 
+==================
+
+ * Add: gist remote storage support
+ * Fix: project dir linking to gopath
+ * Add: an install rule to Makefile.
+ * Merge branch 'hotfix/0.2_homebrew_formula' into develop
+ * Fix homebrew formula
+
 0.2.0 / 2013-12-02 
 ==================
 
