@@ -1,4 +1,9 @@
 
+0.2.2 / 2014-02-12 
+==================
+
+ * Implement import commadn merging strategies
+
 0.2.1 / 2014-02-12 
 ==================
 
