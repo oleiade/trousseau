@@ -120,6 +120,11 @@ func PullAction(c *cli.Context) {
 			log.Fatal(err)
 		}
 
+		if c.Bool("ask-password") == true {
+			password := PromptForPassword()
+			endpointDsn.Secret = password
+		}
+
 		err = DownloadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
