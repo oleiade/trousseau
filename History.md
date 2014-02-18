@@ -1,8 +1,17 @@
 
+0.2.3 / 2014-02-18 
+==================
+
+ * Scp push/pull support for --ask-password option
+ * Unified store encryption handling
+ * Add encryption algorithm selection constants
+ * Move encryption/decryption functionalities in the crypto package
+ * Add openpgp encryption package
+
 0.2.2 / 2014-02-12 
 ==================
 
- * Implement import commadn merging strategies
+ * Implement import command merging strategies
 
 0.2.1 / 2014-02-12 
 ==================
