@@ -71,6 +71,11 @@ func PushAction(c *cli.Context) {
 			log.Fatal(err)
 		}
 
+		if c.Bool("ask-password") == true {
+			password := PromptForPassword()
+			endpointDsn.Secret = password
+		}
+
 		err = uploadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
@@ -113,6 +118,11 @@ func PullAction(c *cli.Context) {
 		err := endpointDsn.SetDefaults(gScpDefaults)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if c.Bool("ask-password") == true {
+			password := PromptForPassword()
+			endpointDsn.Secret = password
 		}
 
 		err = DownloadUsingScp(endpointDsn, privateKey)
