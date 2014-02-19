@@ -298,8 +298,14 @@ abc: 123
 easy as: do re mi
 
 # To push it using scp we need to provide it a couple of
-# basic options
-$ trousseau push scp://user:password@host:port/remote_file_path
+# basic options.
+# Nota: In order for your remote password not to appear
+# in your shell history, we strongly advise you to use
+# the push/pull --ask-password option instead of supplying
+# the password through the dsn.
+$ trousseau push --ask-password scp://user:@host:port/remote_file_path
+Password: 
+Trousseau data store succesfully pushed to ssh remote storage
 
 
 # Now that data store has been pushed to the remote storage
@@ -309,7 +315,10 @@ $ rm ~/.trousseau
 $ trousseau show
 Trousseau unconfigured: no data store
 
-$ trousseau pull scp://user:password@host:port/remote_file_path
+$ trousseau pull --ask-password scp://user:@host:port/remote_file_path
+Password:
+Trousseau data store succesfully pulled from ssh remote storage
+
 $ trousseau show
 abc: 123
 easy as: do re mi
