@@ -6,14 +6,6 @@ import (
 	"path/filepath"
 )
 
-func PasswordFlag() cli.StringFlag {
-	return cli.StringFlag{
-		Name:  "passphrase",
-		Value: GetPassphrase(),
-		Usage: "primary gpg key password to decrypt trousseau",
-	}
-}
-
 func AskPassword() cli.BoolFlag {
 	return cli.BoolFlag{
 		Name:  "ask-password",

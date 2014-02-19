@@ -14,6 +14,7 @@ var gSecringFile string = filepath.Join(os.Getenv("HOME"), ".gnupg", "secring.gp
 
 // Gnupg trousseau master gpg key id
 var gMasterGpgId string = os.Getenv(ENV_MASTER_GPG_ID_KEY)
+var gPasshphrase string = GetPassphrase()
 
 // Ssh default identity file path
 var gPrivateRsaKeyPath string = filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa")

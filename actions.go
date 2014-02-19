@@ -21,7 +21,7 @@ func CreateAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 		Recipients: recipients,
 	}
 
@@ -195,7 +195,7 @@ func ImportAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	localStore, err := LoadStore(localFilePath, opts)
@@ -230,7 +230,7 @@ func AddRecipientAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -257,7 +257,7 @@ func RemoveRecipientAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -282,7 +282,7 @@ func GetAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -305,7 +305,7 @@ func SetAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -333,7 +333,7 @@ func DelAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -361,7 +361,7 @@ func KeysAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -386,7 +386,7 @@ func ShowAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -411,7 +411,7 @@ func MetaAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: c.GlobalString("passphrase"),
+		Passphrase: gPasshphrase,
 	}
 
 	store, err := LoadStore(gStorePath, opts)
