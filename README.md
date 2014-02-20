@@ -161,7 +161,9 @@ First use of **trousseau** requires the data store to be created. A **trousseau*
 #### First steps with the data store
 
 ```bash
-$ trousseau create 4B7D890,28EA78B  # create a trousseau for two gpg recipients
+# create a trousseau for two gpg recipients
+# both key ids and key email are supported.
+$ trousseau create 4B7D890,foo@bar.com 
 trousseau created at $HOME/.trousseau
 ```
 

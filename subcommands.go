@@ -7,7 +7,7 @@ import (
 func CreateCommand() cli.Command {
 	return cli.Command{
 		Name:   "create",
-		Usage:  "create trousseau",
+		Usage:  "create the trousseau data store",
 		Action: CreateAction,
 	}
 }

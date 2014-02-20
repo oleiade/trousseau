@@ -55,15 +55,16 @@ func InitEncryption(kr string, keyids []string) {
 
 	var hprefs, sprefs []uint8
 
-	for _, w := range keyids {
-		for _, e := range kl {
-			if e.PrimaryKey.KeyIdShortString() == w {
-				pi := primaryIdentity(e)
+	for _, keyId := range keyids {
+		for _, entity := range kl {
+
+			if isEntityKey(keyId, entity) {
+				pi := primaryIdentity(entity)
 				ss := pi.SelfSignature
 
 				hprefs = intersectPreferences(hprefs, ss.PreferredHash)
 				sprefs = intersectPreferences(sprefs, ss.PreferredSymmetric)
-				encryptKeys = append(encryptKeys, e)
+				encryptKeys = append(encryptKeys, entity)
 			}
 		}
 	}
@@ -77,6 +78,20 @@ func InitEncryption(kr string, keyids []string) {
 	if len(sprefs) == 0 {
 		log.Fatalf("No common symmetric ciphers for encryption keys")
 	}
+}
+
+func isEntityKey(keyId string, e *openpgp.Entity) bool {
+	if e.PrimaryKey.KeyIdShortString() == keyId {
+		return true
+	} else {
+		for _, identity := range e.Identities {
+			if identity.UserId.Email == keyId {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func intersectPreferences(a []uint8, b []uint8) (intersection []uint8) {
