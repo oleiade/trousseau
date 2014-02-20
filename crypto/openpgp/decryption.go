@@ -18,19 +18,6 @@ import (
 
 var keys openpgp.EntityList
 
-func InitCrypto(keyRingPath, pass string) {
-	f, err := os.Open(keyRingPath)
-	if err != nil {
-		log.Fatalf("Can't open keyring: %v", err)
-	}
-	defer f.Close()
-
-	keys, err = openpgp.ReadKeyRing(f)
-	if err != nil {
-		log.Fatalf("Can't read keyring: %v", err)
-	}
-}
-
 func Decrypt(s, passphrase string) ([]byte, error) {
 	if s == "" {
 		return nil, nil
@@ -67,4 +54,17 @@ func Decrypt(s, passphrase string) ([]byte, error) {
 
 	bytes, err := ioutil.ReadAll(d.UnverifiedBody)
 	return bytes, err
+}
+
+func InitDecryption(keyRingPath, pass string) {
+	f, err := os.Open(keyRingPath)
+	if err != nil {
+		log.Fatalf("Can't open keyring: %v", err)
+	}
+	defer f.Close()
+
+	keys, err = openpgp.ReadKeyRing(f)
+	if err != nil {
+		log.Fatalf("Can't read keyring: %v", err)
+	}
 }

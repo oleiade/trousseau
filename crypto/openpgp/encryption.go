@@ -41,41 +41,7 @@ func Encrypt(s string) []byte {
 	return buf.Bytes()
 }
 
-func intersectPreferences(a []uint8, b []uint8) (intersection []uint8) {
-	if a == nil {
-		return b
-	}
-
-	var j int
-	for _, v := range a {
-		for _, v2 := range b {
-			if v == v2 {
-				a[j] = v
-				j++
-				break
-			}
-		}
-	}
-
-	return a[:j]
-}
-
-func primaryIdentity(e *openpgp.Entity) *openpgp.Identity {
-	var firstIdentity *openpgp.Identity
-
-	for _, ident := range e.Identities {
-		if firstIdentity == nil {
-			firstIdentity = ident
-		}
-		if ident.SelfSignature.IsPrimaryId != nil && *ident.SelfSignature.IsPrimaryId {
-			return ident
-		}
-	}
-
-	return firstIdentity
-}
-
-func InitPgp(kr string, keyids []string) {
+func InitEncryption(kr string, keyids []string) {
 	f, err := os.Open(kr)
 	if err != nil {
 		log.Fatalf("Can't open keyring: %v", err)
@@ -111,4 +77,38 @@ func InitPgp(kr string, keyids []string) {
 	if len(sprefs) == 0 {
 		log.Fatalf("No common symmetric ciphers for encryption keys")
 	}
+}
+
+func intersectPreferences(a []uint8, b []uint8) (intersection []uint8) {
+	if a == nil {
+		return b
+	}
+
+	var j int
+	for _, v := range a {
+		for _, v2 := range b {
+			if v == v2 {
+				a[j] = v
+				j++
+				break
+			}
+		}
+	}
+
+	return a[:j]
+}
+
+func primaryIdentity(e *openpgp.Entity) *openpgp.Identity {
+	var firstIdentity *openpgp.Identity
+
+	for _, ident := range e.Identities {
+		if firstIdentity == nil {
+			firstIdentity = ident
+		}
+		if ident.SelfSignature.IsPrimaryId != nil && *ident.SelfSignature.IsPrimaryId {
+			return ident
+		}
+	}
+
+	return firstIdentity
 }
