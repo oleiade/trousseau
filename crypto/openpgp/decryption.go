@@ -43,9 +43,8 @@ func Decrypt(s, passphrase string) ([]byte, error) {
 				}
 			}
 
-			return nil, fmt.Errorf("Whether no valid private key for" +
-				"store decryption was available or " +
-				"supplied passphrase was invalid")
+			return nil, fmt.Errorf("Unable to decrypt trousseau data store. " +
+				"Invalid passphrase supplied.")
 		},
 		nil)
 	if err != nil {
