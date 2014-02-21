@@ -58,12 +58,12 @@ func Decrypt(s, passphrase string) ([]byte, error) {
 func InitDecryption(keyRingPath, pass string) {
 	f, err := os.Open(keyRingPath)
 	if err != nil {
-		log.Fatalf("Can't open keyring: %v", err)
+		log.Fatalf("unable to open gnupg keyring: %v", err)
 	}
 	defer f.Close()
 
 	keys, err = openpgp.ReadKeyRing(f)
 	if err != nil {
-		log.Fatalf("Can't read keyring: %v", err)
+		log.Fatalf("unable to read from gnupg keyring: %v", err)
 	}
 }

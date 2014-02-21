@@ -44,13 +44,13 @@ func Encrypt(s string) []byte {
 func InitEncryption(kr string, keyids []string) {
 	f, err := os.Open(kr)
 	if err != nil {
-		log.Fatalf("Can't open keyring: %v", err)
+		log.Fatalf("Unable to open gnupg keyring: %v", err)
 	}
 	defer f.Close()
 
 	kl, err := openpgp.ReadKeyRing(f)
 	if err != nil {
-		log.Fatalf("Can't read keyring: %v", err)
+		log.Fatalf("Unable to read from gnupg keyring: %v", err)
 	}
 
 	var hprefs, sprefs []uint8
