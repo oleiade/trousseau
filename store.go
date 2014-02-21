@@ -53,7 +53,7 @@ func LoadStore(path string, opts *crypto.Options) (*Store, error) {
 
 		f, err = openpgp.OpenFile(path, os.O_RDONLY, opts.Passphrase, opts.Recipients)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("trousseau data store not found (%s)", err.(*os.PathError).Path)
 		}
 		defer f.Close()
 

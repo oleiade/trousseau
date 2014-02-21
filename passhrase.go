@@ -3,6 +3,7 @@ package trousseau
 import (
 	"fmt"
 	"github.com/tmc/keyring"
+	"log"
 	"os"
 )
 
@@ -23,8 +24,8 @@ func GetPassphrase() string {
 
 	// If passphrase wasn't found in env, try to fetch it from
 	// system keyring manager.
-	passphrase, _ = keyring.Get(gKeyringService, gKeyringUser)
-	if len(passphrase) > 0 {
+	passphrase, err = keyring.Get(gKeyringService, gKeyringUser)
+	if err == nil && len(passphrase) > 0 {
 		return passphrase
 	}
 
@@ -35,7 +36,7 @@ func GetPassphrase() string {
 	}
 
 	if err != nil {
-		fmt.Println("[WARNING] No passphrase provided, you won't be able to access trousseau data store\n")
+		fmt.Println("Unable to decrypt trousseau data store: no passphrase provided")
 	}
 
 	return passphrase
