@@ -1,7 +1,6 @@
 package trousseau
 
 import (
-	"fmt"
 	"github.com/tmc/keyring"
 	"log"
 	"os"
@@ -12,8 +11,7 @@ import (
 // to retrieve it from the environment, then it will try to fetch
 // it from the system keyring manager, ultimately it will try
 // to get it from a running gpg-agent daemon.
-func GetPassphrase() string {
-	var passphrase string
+func GetPassphrase() (passphrase string) {
 	var err error
 
 	// Try to retrieve passphrase from env
@@ -25,7 +23,7 @@ func GetPassphrase() string {
 	// If passphrase wasn't found in env, try to fetch it from
 	// system keyring manager.
 	passphrase, err = keyring.Get(gKeyringService, gKeyringUser)
-	if err == nil && len(passphrase) > 0 {
+	if len(passphrase) > 0 {
 		return passphrase
 	}
 
@@ -36,11 +34,10 @@ func GetPassphrase() string {
 	}
 
 	if err != nil {
-		fmt.Println("Unable to decrypt trousseau data store: no passphrase provided")
+		log.Fatal("No passphrase provided. Unable to open data store")
 	}
 
 	return passphrase
-
 }
 
 func GetGpgPassphrase(gpgId string) (string, error) {
