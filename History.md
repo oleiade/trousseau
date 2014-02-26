@@ -1,4 +1,22 @@
 
+0.2.4 / 2014-02-26 
+==================
+
+ * Add gist remote storage usage instructions to README
+ * Rename subcommands to commands
+ * Move vagrant provisioning script into scripts folder
+ * Refactor build to use both a simple Makefile and build script
+ * Move trousseau package files in trousseau dir
+ * Fix #1: Made error message more obvious when gnupg keyring cannot be opened
+ * Remove gnupg globals from trousseau package
+ * Throw fatal error when no passphrase
+ * Enhance logging on missing passphrase or data store
+ * Update error message when no passphrase are supplied
+ * Fix #42: add the ability to declare recipients using their mail
+ * Update openpgp encryption/decryption features naming
+ * Fix #55: remove passphrase cmdline option
+ * Update README scp example to use --ask-password [ref#59]
+
 0.2.3 / 2014-02-18 
 ==================
 
