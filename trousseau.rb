@@ -2,7 +2,7 @@ require 'formula'
 
 class Trousseau < Formula
   homepage 'https://github.com/oleiade/trousseau'
-  url 'https://github.com/oleiade/trousseau/archive/0.2.0.tar.gz'
+  url 'https://github.com/oleiade/trousseau/archive/0.2.4.tar.gz'
   sha1 ''
 
   depends_on 'go' => :build

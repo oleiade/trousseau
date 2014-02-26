@@ -11,8 +11,7 @@ import (
 // to retrieve it from the environment, then it will try to fetch
 // it from the system keyring manager, ultimately it will try
 // to get it from a running gpg-agent daemon.
-func GetPassphrase() string {
-	var passphrase string
+func GetPassphrase() (passphrase string) {
 	var err error
 
 	// Try to retrieve passphrase from env
@@ -23,7 +22,7 @@ func GetPassphrase() string {
 
 	// If passphrase wasn't found in env, try to fetch it from
 	// system keyring manager.
-	passphrase, _ = keyring.Get(gKeyringService, gKeyringUser)
+	passphrase, err = keyring.Get(gKeyringService, gKeyringUser)
 	if len(passphrase) > 0 {
 		return passphrase
 	}
@@ -32,13 +31,13 @@ func GetPassphrase() string {
 	// system keyring manager try to fetch it from gpg-agent
 	if os.Getenv("GPG_AGENT_INFO") != "" {
 		passphrase, err = GetGpgPassphrase(gMasterGpgId)
-		if err != nil {
-			log.Fatal(err)
-		}
+	}
+
+	if err != nil {
+		log.Fatal("No passphrase provided. Unable to open data store")
 	}
 
 	return passphrase
-
 }
 
 func GetGpgPassphrase(gpgId string) (string, error) {

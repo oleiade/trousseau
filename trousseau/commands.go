@@ -7,7 +7,7 @@ import (
 func CreateCommand() cli.Command {
 	return cli.Command{
 		Name:   "create",
-		Usage:  "create trousseau",
+		Usage:  "create the trousseau data store",
 		Action: CreateAction,
 	}
 }
@@ -19,6 +19,7 @@ func PushCommand() cli.Command {
 		Action: PushAction,
 		Flags: []cli.Flag{
 			OverwriteFlag(),
+			AskPassword(),
 			SshPrivateKeyPathFlag(),
 		},
 	}
@@ -31,6 +32,7 @@ func PullCommand() cli.Command {
 		Action: PullAction,
 		Flags: []cli.Flag{
 			OverwriteFlag(),
+			AskPassword(),
 			SshPrivateKeyPathFlag(),
 		},
 	}
@@ -54,6 +56,8 @@ func ImportCommand() cli.Command {
 		Action: ImportAction,
 		Flags: []cli.Flag{
 			OverwriteFlag(),
+			TheirsFlag(),
+			YoursFlag(),
 		},
 	}
 }

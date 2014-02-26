@@ -1,4 +1,4 @@
-package trousseau
+package openpgp
 
 import (
 	"fmt"
@@ -18,27 +18,14 @@ import (
 
 var keys openpgp.EntityList
 
-func initCrypto(keyRingPath, pass string) {
-	f, err := os.Open(keyRingPath)
-	if err != nil {
-		log.Fatalf("Can't open keyring: %v", err)
-	}
-	defer f.Close()
-
-	keys, err = openpgp.ReadKeyRing(f)
-	if err != nil {
-		log.Fatalf("Can't read keyring: %v", err)
-	}
-}
-
-func decrypt(s, passphrase string) (string, error) {
+func Decrypt(s, passphrase string) ([]byte, error) {
 	if s == "" {
-		return "", nil
+		return nil, nil
 	}
 
 	raw, err := armor.Decode(strings.NewReader(s))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	d, err := openpgp.ReadMessage(raw.Body, keys,
@@ -56,15 +43,27 @@ func decrypt(s, passphrase string) (string, error) {
 				}
 			}
 
-			return nil, fmt.Errorf("Whether no valid private key for" +
-				"store decryption was available or " +
-				"supplied passphrase was invalid")
+			return nil, fmt.Errorf("Unable to decrypt trousseau data store. " +
+				"Invalid passphrase supplied.")
 		},
 		nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	bytes, err := ioutil.ReadAll(d.UnverifiedBody)
-	return string(bytes), err
+	return bytes, err
+}
+
+func InitDecryption(keyRingPath, pass string) {
+	f, err := os.Open(keyRingPath)
+	if err != nil {
+		log.Fatalf("unable to open gnupg keyring: %v", err)
+	}
+	defer f.Close()
+
+	keys, err = openpgp.ReadKeyRing(f)
+	if err != nil {
+		log.Fatalf("unable to read from gnupg keyring: %v", err)
+	}
 }

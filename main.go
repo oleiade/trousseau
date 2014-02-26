@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
-	"github.com/oleiade/trousseau"
+	"github.com/oleiade/trousseau/trousseau"
 	"os"
 )
 
@@ -26,11 +26,6 @@ func main() {
 		trousseau.KeysCommand(),
 		trousseau.ShowCommand(),
 		trousseau.MetaCommand(),
-	}
-
-    // Application global options
-	app.Flags = []cli.Flag{
-        trousseau.PasswordFlag(),
 	}
 
 	app.Run(os.Args)
