@@ -321,7 +321,7 @@ abc: 123
 easy as: do re mi
 ```
 
-### Gist example
+#### Gist example
 
 To use the gist remote storage support, you will need to generate a Github [personal access token](https://github.com/settings/applications#personal-access-tokens).
 Once you've generated one, use it as the dsn *password* field as in the following example:
@@ -333,13 +333,9 @@ abc: 123
 easy as: do re mi
 
 # Nota:
-# * In order for your access token not to appear
-#   in your shell history, we strongly advise you to use
-#   the push/pull --ask-password option instead of supplying
-#   the password dsn field.
 # * Gist remote storage doesn't use the host and port dsn fields,
 #   but you still need to provide their ':' separator
-$ trousseau push --ask-password gist://user:@:/gist_name
+$ trousseau push gist://user:mysuppedupertoken@:/gist_name
 Password: 
 Trousseau data store succesfully pushed to gist remote storage
 
@@ -351,7 +347,7 @@ $ rm ~/.trousseau
 $ trousseau show
 Trousseau unconfigured: no data store
 
-$ trousseau pull --ask-password scp://user:@:/gist_name
+$ trousseau pull gist://user:mysupperduppertoken@:/gist_name
 Password:
 Trousseau data store succesfully pulled from gist
 
