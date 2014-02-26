@@ -3,7 +3,7 @@
 ## What
 
 *Trousseau* is a **gpg** encrypted key-value store designed to be a *simple*, *safe* and *trustworthy* place for your data.
-It stores data in a single multi-recipients encrypted file and can supports both local and remote storage sources (S3 and ssh so far) import/export.
+It stores data in a single multi-recipients encrypted file and can supports both local and remote storage sources (S3, ssh, gist so far) import/export.
 
 Create a *trousseau* store, specify which *gpg* recipients are allowed to open and modify it, add some key-value pairs to it, export it to S3 for example, and re-import it on another device. As simple as that.
 
@@ -236,8 +236,7 @@ $ trousseau del abc  # Now the song lacks something doesn't it?
 ### Importing/Exporting to remote storage
 
 Trousseau was built with data remote storage in mind. Therefore it provides *push* and *pull* actions to export and import the trousseau data store to remote destinations.
-As of today S3 and SSH storages are available (more are to come).
-Moreover, 
+As of today S3, SSH and gist storages are available (more are to come).
 
 <div class="break"></div>
 #### API
@@ -316,6 +315,45 @@ Trousseau unconfigured: no data store
 $ trousseau pull --ask-password scp://user:@host:port/remote_file_path
 Password:
 Trousseau data store succesfully pulled from ssh remote storage
+
+$ trousseau show
+abc: 123
+easy as: do re mi
+```
+
+### Gist example
+
+To use the gist remote storage support, you will need to generate a Github [personal access token](https://github.com/settings/applications#personal-access-tokens).
+Once you've generated one, use it as the dsn *password* field as in the following example:
+
+```bash
+# We start with a non-empty trousseau data store
+$ trousseau show
+abc: 123
+easy as: do re mi
+
+# Nota:
+# * In order for your access token not to appear
+#   in your shell history, we strongly advise you to use
+#   the push/pull --ask-password option instead of supplying
+#   the password dsn field.
+# * Gist remote storage doesn't use the host and port dsn fields,
+#   but you still need to provide their ':' separator
+$ trousseau push --ask-password gist://user:@:/gist_name
+Password: 
+Trousseau data store succesfully pushed to gist remote storage
+
+
+# Now that data store has been pushed to gist
+# let's remove the local data store and pull it
+# once again to ensure it worked
+$ rm ~/.trousseau
+$ trousseau show
+Trousseau unconfigured: no data store
+
+$ trousseau pull --ask-password scp://user:@:/gist_name
+Password:
+Trousseau data store succesfully pulled from gist
 
 $ trousseau show
 abc: 123
