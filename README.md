@@ -82,14 +82,10 @@ Coming soon (Don't be shy, if you feel like you could do it, just send pull requ
 <div class="subsection-break"></div>
 ### Build it
 
-1. First, make sure you have a `Go <http://http://golang.org/>` language compiler **>= 1.1.2** (*mandatory*) and `git <http://gitscm.org>` installed.
+1. First, make sure you have a `Go <http://http://golang.org/>` language compiler **>= 1.2** (*mandatory*) and `git <http://gitscm.org>` installed.
 2. Make sure you have the following go system dependencies in your `$PATH`: `bzr, svn, hg, git`
-3. Then, just build and copy the `./bin/trousseau` executable to a system *PATH* location
-
-```bash
-make
-sudo cp ./bin/trousseau /usr/local/bin/trousseau
-```
+3. Ensure your [GOPATH](http://golang.org/doc/code.html#GOPATH) is properly set.
+4. Run ``make``
 
 <div class="section-break"></div>
 ## Prerequisities
