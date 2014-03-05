@@ -1,0 +1,60 @@
+{
+	"ImportPath": "github.com/oleiade/trousseau",
+	"GoVersion": "go1.2",
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/go.crypto/cast5",
+			"Comment": "null-191",
+			"Rev": "7aa593ce8ceaf0199504fff27455bbb60eedabc7"
+		},
+		{
+			"ImportPath": "code.google.com/p/go.crypto/openpgp",
+			"Comment": "null-191",
+			"Rev": "7aa593ce8ceaf0199504fff27455bbb60eedabc7"
+		},
+		{
+			"ImportPath": "code.google.com/p/go.crypto/ssh",
+			"Comment": "null-191",
+			"Rev": "7aa593ce8ceaf0199504fff27455bbb60eedabc7"
+		},
+		{
+			"ImportPath": "code.google.com/p/goauth2/oauth",
+			"Comment": "weekly-43",
+			"Rev": "d4571a95014ff1fdd0055dc0f6b7e977a42b1e5a"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Comment": "1.0.0-39-g8f0575f",
+			"Rev": "8f0575f520013467eb175a5dd30158ed816eeda9"
+		},
+		{
+			"ImportPath": "github.com/crowdmob/goamz/aws",
+			"Rev": "26c9d18f01319c2e192dca8ac8dcd9e7cde01f60"
+		},
+		{
+			"ImportPath": "github.com/crowdmob/goamz/s3",
+			"Rev": "26c9d18f01319c2e192dca8ac8dcd9e7cde01f60"
+		},
+		{
+			"ImportPath": "github.com/google/go-github/github",
+			"Rev": "34a4afeea7e81dd8b333182da906692d72bdea1a"
+		},
+		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Rev": "ec0a78e0f4db229b7897be36596a8944230b857a"
+		},
+		{
+			"ImportPath": "github.com/howeyc/gopass",
+			"Rev": "4cf66881dcc3d6f0071eb6473d95c39e460de696"
+		},
+		{
+			"ImportPath": "github.com/oleiade/reflections",
+			"Comment": "0.1.2-2-g632977f",
+			"Rev": "632977f98cd34d217c4b57d0840ec188b3d3dcaf"
+		},
+		{
+			"ImportPath": "github.com/tmc/keyring",
+			"Rev": "c97358d3b0f2df246afedabacbad24fad4e3246e"
+		}
+	]
+}
