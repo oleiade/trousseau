@@ -1,6 +1,6 @@
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 
-all: deps
+all:
 	@(mkdir -p bin/)
 	@(bash --norc -i ./scripts/build.sh)
 
@@ -9,8 +9,7 @@ cov:
 	@(open /tmp/coverage.html)
 
 deps:
-	@(go get -d -v ./...)
-	@(echo $(DEPS) | xargs -n1 go get -d)
+	@(go get github.com/kr/godep)
 
 test: deps
 	@(go list ./... | xargs -n1 go test)
