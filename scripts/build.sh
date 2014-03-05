@@ -8,18 +8,14 @@ SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 
+# Get the trousseau package dir
+TROUSSEAU_DIR="${DIR}/trousseau"
+
 # Change into that directory
 cd $DIR
 
-# Get the git commit
-GIT_COMMIT=$(git rev-parse HEAD)
-GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
-
-# If we're building on Windows, specify an extension
-EXTENSION=""
-if [ "$(go env GOOS)" = "windows" ]; then
-    EXTENSION=".exe"
-fi
+# Get the version
+VERSION=$(awk '/TROUSSEAU_VERSION/ { gsub("\"", ""); print $NF }' ${TROUSSEAU_DIR}/constants.go)
 
 # Install dependencies
 echo "--> Installing dependencies"
@@ -27,10 +23,7 @@ go get ./...
 
 # Build!
 echo "--> Building"
-go build \
-    -ldflags "-X main.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
-    -v \
-    -o bin/trousseau${EXTENSION}
+go build -ldflags "-X main.VERSION ${VERSION}" -v -o bin/trousseau
 echo "bin/trousseau${EXTENSION} created"
 
 # Copy binary to gopath
