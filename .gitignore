@@ -33,3 +33,7 @@ _testmain.go
 .sudo_as_admin_successful
 .bash_history
 .cache
+
+
+# Documentation files
+docs/build/
