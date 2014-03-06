@@ -3,4 +3,5 @@
 
    setup
    usage
+   contributing
 
