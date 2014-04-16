@@ -83,6 +83,9 @@ func SetCommand() cli.Command {
 		Name:   "set",
 		Usage:  "sets a key value pair in the store",
 		Action: SetAction,
+		Flags: []cli.Flag{
+			FileFlag(),
+		},
 	}
 }
 
