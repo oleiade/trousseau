@@ -322,6 +322,8 @@ func SetAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'set' command")
 	}
 
+  key = c.Args()[0]
+
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
 		Passphrase: gPasshphrase,
