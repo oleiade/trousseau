@@ -6,6 +6,7 @@ import (
 	"github.com/oleiade/trousseau/crypto"
 	"github.com/oleiade/trousseau/dsn"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -299,7 +300,25 @@ func GetAction(c *cli.Context) {
 }
 
 func SetAction(c *cli.Context) {
-	if !hasExpectedArgs(c.Args(), 2) {
+	var key string
+	var value interface{}
+	var err error
+
+	// If the --file flag is provided
+	if c.String("file") != "" && hasExpectedArgs(c.Args(), 1) {
+		// And the file actually exists on file system
+		if pathExists(c.String("file")) {
+			// Then load it's content
+			value, err = ioutil.ReadFile(c.String("file"))
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatalf("Cannot open %s because it doesn't exist", c.String("file"))
+		}
+	} else if c.String("file") == "" && hasExpectedArgs(c.Args(), 2) {
+		value = c.Args()[1]
+	} else {
 		log.Fatal("Incorrect number of arguments to 'set' command")
 	}
 
@@ -313,7 +332,7 @@ func SetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	err = store.Set(c.Args()[0], c.Args()[1])
+	err = store.Set(key, value)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -323,7 +342,7 @@ func SetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("key-value pair set: %s:%s\n", c.Args()[0], c.Args()[1])
+	fmt.Printf("key-value pair set: %s:%s\n", key, value)
 }
 
 func DelAction(c *cli.Context) {

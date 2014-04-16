@@ -49,3 +49,10 @@ func YoursFlag() cli.BoolFlag {
 		Usage: "Keep your current data store values",
 	}
 }
+
+func FileFlag() cli.StringFlag {
+	return cli.StringFlag{
+		Name:  "file",
+		Usage: "Path to the file to be extracted",
+	}
+}
