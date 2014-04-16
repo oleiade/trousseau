@@ -75,7 +75,10 @@ You've got the keys
     # Let's add some data into it
     $ trousseau set abc 123
     $ trousseau set "easy as" "do re mi"
-    $ trousseau set oleiade-private-key "`cat ~/.ssh/id_rsa`"
+
+    # set action supports a --file flag to use the content
+    # of a file as value
+    $ trousseau set oleiade-private-key --file ~/.ssh/id_rsa.pub
 
     # Now let's make sure data has been added
     $ trousseau keys
