@@ -1,3 +1,14 @@
+0.2.6 / 2014-04-17
+==================
+
+ * Fix #69 clean command-line output for its parsing to be easier
+ * Fix #65 Add support for trousseau store selection through env
+ * Fix #67 empty key field
+
+0.2.5 / 2014-04-16
+==================
+
+ * Add a --file option to the set action
 
 0.2.4 / 2014-02-26 
 ==================
