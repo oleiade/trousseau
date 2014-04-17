@@ -2,7 +2,9 @@ package trousseau
 
 const TROUSSEAU_VERSION = "0.2.5"
 
-const STORE_FILENAME = ".trousseau"
+const (
+	DEFAULT_STORE_FILENAME = ".trousseau"
+)
 
 const (
 	CONFIG_KEY_RECIPIENTS = "recipients"
@@ -10,6 +12,7 @@ const (
 )
 
 const (
+	ENV_TROUSSEAU_STORE     = "TROUSSEAU_STORE"
 	ENV_PASSPHRASE_KEY      = "TROUSSEAU_PASSPHRASE"
 	ENV_KEYRING_SERVICE_KEY = "TROUSSEAU_KEYRING_SERVICE"
 	ENV_KEYRING_USER_KEY    = "USER"
