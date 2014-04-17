@@ -174,7 +174,7 @@ func ExportAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Trousseau data store exported to %s", outputFilePath)
+	fmt.Printf("Trousseau data store exported to: %s\n", outputFilePath)
 }
 
 func ImportAction(c *cli.Context) {
@@ -219,7 +219,7 @@ func ImportAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Trousseau data store imported")
+	fmt.Printf("Trousseau data store imported: %s\n", importedFilePath)
 }
 
 func AddRecipientAction(c *cli.Context) {
@@ -246,7 +246,7 @@ func AddRecipientAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s recipient added to trousseau data store", recipient)
+	fmt.Printf("Recipient added to trousseau data store: %s\n", recipient)
 }
 
 func RemoveRecipientAction(c *cli.Context) {
@@ -273,7 +273,7 @@ func RemoveRecipientAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s recipient removed from trousseau data store", recipient)
+	fmt.Printf("Recipient removed from trousseau data store: %s\n", recipient)
 }
 
 func GetAction(c *cli.Context) {
@@ -296,7 +296,7 @@ func GetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s key's value: %s\n", c.Args()[0], value)
+	fmt.Printf("%s\n", value)
 }
 
 func SetAction(c *cli.Context) {
@@ -322,7 +322,7 @@ func SetAction(c *cli.Context) {
 		log.Fatal("Incorrect number of arguments to 'set' command")
 	}
 
-  key = c.Args()[0]
+	key = c.Args()[0]
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
@@ -344,7 +344,7 @@ func SetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("key-value pair set: %s:%s\n", key, value)
+	fmt.Printf("%s:%s\n", key, value)
 }
 
 func DelAction(c *cli.Context) {
@@ -372,7 +372,7 @@ func DelAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s key deleted\n", c.Args()[0])
+	fmt.Printf("deleted: %s\n", c.Args()[0])
 }
 
 func KeysAction(c *cli.Context) {
@@ -420,7 +420,7 @@ func ShowAction(c *cli.Context) {
 		log.Fatal(err)
 	} else {
 		for _, pair := range pairs {
-			fmt.Printf("%s: %s\n", pair.Key, pair.Value)
+			fmt.Printf("%s : %s\n", pair.Key, pair.Value)
 		}
 	}
 }
@@ -446,7 +446,7 @@ func MetaAction(c *cli.Context) {
 	}
 
 	for _, pair := range pairs {
-		fmt.Printf("%s: %s\n", pair.Key, pair.Value)
+		fmt.Printf("%s : %s\n", pair.Key, pair.Value)
 	}
 }
 
