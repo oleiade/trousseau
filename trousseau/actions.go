@@ -296,12 +296,12 @@ func GetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s\n", value)
+	fmt.Printf("%s", value)
 }
 
 func SetAction(c *cli.Context) {
 	var key string
-	var value interface{}
+	var value string
 	var err error
 
 	// If the --file flag is provided
@@ -309,10 +309,12 @@ func SetAction(c *cli.Context) {
 		// And the file actually exists on file system
 		if pathExists(c.String("file")) {
 			// Then load it's content
-			value, err = ioutil.ReadFile(c.String("file"))
+			fileContent, err := ioutil.ReadFile(c.String("file"))
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			value = string(fileContent)
 		} else {
 			log.Fatalf("Cannot open %s because it doesn't exist", c.String("file"))
 		}
@@ -344,7 +346,7 @@ func SetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s:%s\n", key, value)
+	fmt.Printf("%s:%s", key, value)
 }
 
 func DelAction(c *cli.Context) {
@@ -372,7 +374,7 @@ func DelAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("deleted: %s\n", c.Args()[0])
+	fmt.Printf("deleted: %s", c.Args()[0])
 }
 
 func KeysAction(c *cli.Context) {
