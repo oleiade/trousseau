@@ -115,3 +115,9 @@ Ultimately, you can pass you gpg passphrase through the command line global opti
 
     $ trousseau --passhphrase mysupperdupperpassphrase get abc
 
+Environment
+-----------
+
+Trousseau behavior can be controlled through the system environment:
+
+* *TROUSSEAU_STORE* : if you want to have multiple trousseau data store, set this environment variable to the path of the one you want to use. Default is ``$HOME/.trousseau``
