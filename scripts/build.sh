@@ -23,7 +23,7 @@ go get ./...
 
 # Build!
 echo "--> Building"
-go build -ldflags "-X main.VERSION ${VERSION}" -v -o bin/trousseau
+godep go build -ldflags "-X main.VERSION ${VERSION}" -o bin/trousseau
 echo "bin/trousseau${EXTENSION} created"
 
 # Copy binary to gopath
