@@ -20,6 +20,7 @@ func PushCommand() cli.Command {
 		Flags: []cli.Flag{
 			OverwriteFlag(),
 			AskPassword(),
+			VerboseFlag(),
 			SshPrivateKeyPathFlag(),
 		},
 	}
@@ -33,6 +34,7 @@ func PullCommand() cli.Command {
 		Flags: []cli.Flag{
 			OverwriteFlag(),
 			AskPassword(),
+			VerboseFlag(),
 			SshPrivateKeyPathFlag(),
 		},
 	}
@@ -45,6 +47,7 @@ func ExportCommand() cli.Command {
 		Action: ExportAction,
 		Flags: []cli.Flag{
 			OverwriteFlag(),
+			VerboseFlag(),
 		},
 	}
 }
@@ -55,6 +58,7 @@ func ImportCommand() cli.Command {
 		Usage:  "import an encrypted trousseau from local fs",
 		Action: ImportAction,
 		Flags: []cli.Flag{
+			VerboseFlag(),
 			OverwriteFlag(),
 			TheirsFlag(),
 			YoursFlag(),
@@ -67,6 +71,9 @@ func AddRecipientCommand() cli.Command {
 		Name:   "add-recipient",
 		Usage:  "add a recipient to the encrypted trousseau",
 		Action: AddRecipientAction,
+		Flags: []cli.Flag{
+			VerboseFlag(),
+		},
 	}
 }
 
@@ -75,6 +82,9 @@ func RemoveRecipientCommand() cli.Command {
 		Name:   "remove-recipient",
 		Usage:  "remove a recipient of the encrypted trousseau",
 		Action: RemoveRecipientAction,
+		Flags: []cli.Flag{
+			VerboseFlag(),
+		},
 	}
 }
 
@@ -85,6 +95,7 @@ func SetCommand() cli.Command {
 		Action: SetAction,
 		Flags: []cli.Flag{
 			FileFlag(),
+			VerboseFlag(),
 		},
 	}
 }
@@ -102,6 +113,9 @@ func DelCommand() cli.Command {
 		Name:   "del",
 		Usage:  "delete the point key pair from the store",
 		Action: DelAction,
+		Flags: []cli.Flag{
+			VerboseFlag(),
+		},
 	}
 }
 
@@ -110,6 +124,9 @@ func KeysCommand() cli.Command {
 		Name:   "keys",
 		Usage:  "Lists the store keys",
 		Action: KeysAction,
+		Flags: []cli.Flag{
+			VerboseFlag(),
+		},
 	}
 }
 
