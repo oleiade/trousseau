@@ -33,13 +33,13 @@ func ReadPubRing(path string, keyIds []string) (*openpgp.EntityList, error) {
 
 	if len(matchedKeys) != len(keyIds) {
 		fmt.Println("HERE")
-		return nil, fmt.Errorf("Couldn't find all keys")
+		return nil, NewPgpError(ERR_DECRYPTION_KEYS, "Couldn't find all keys")
 	}
 	if len(hprefs) == 0 {
-		return nil, fmt.Errorf("No common hashes for encryption keys")
+		return nil, NewPgpError(ERR_DECRYPTION_HASHES, "No common hashes for encryption keys")
 	}
 	if len(sprefs) == 0 {
-		return nil, fmt.Errorf("No common symmetric ciphers for encryption keys")
+		return nil, NewPgpError(ERR_DECRYPTION_CIPHERS, "No common symmetric ciphers for encryption keys")
 	}
 
 	return &matchedKeys, nil
@@ -55,13 +55,13 @@ func ReadKeyRing(path string) (*openpgp.EntityList, error) {
 
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to open gnupg keyring: %v", err)
+		return nil, NewPgpError(ERR_KEYRING, fmt.Sprintf("Unable to open gnupg keyring: %v", err))
 	}
 	defer f.Close()
 
 	keys, err = openpgp.ReadKeyRing(f)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to read from gnupg keyring: %v", err)
+		return nil, NewPgpError(ERR_KEYRING, fmt.Sprintf("Unable to read from gnupg keyring: %v", err))
 	}
 
 	return &keys, nil

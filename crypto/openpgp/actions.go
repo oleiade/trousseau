@@ -16,16 +16,17 @@ func Encrypt(encryptionKeys *openpgp.EntityList, s string) []byte {
 
 	wa, err := armor.Encode(buf, "PGP MESSAGE", nil)
 	if err != nil {
-		log.Fatalf("Can't make armor: %v", err)
+		NewPgpError(ERR_ENCRYPTION_ENCODING, fmt.Sprintf("Can't make armor: %v", err))
 	}
 
 	w, err := openpgp.Encrypt(wa, *encryptionKeys, nil, nil, nil)
 	if err != nil {
-		log.Fatalf("Error encrypting: %v", err)
+		NewPgpError(ERR_ENCRYPTION_ENCRYPT, fmt.Sprintf("Error encrypting: %v", err))
 	}
+
 	_, err = io.Copy(w, strings.NewReader(s))
 	if err != nil {
-		log.Fatalf("Error encrypting: %v", err)
+		log.Fatalf("Error copying encrypted content: %v", err)
 	}
 
 	w.Close()
