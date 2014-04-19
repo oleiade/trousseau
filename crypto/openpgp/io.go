@@ -51,8 +51,12 @@ func (gf *GpgFile) ReadAll() ([]byte, error) {
 	}
 
 	// Decrypt store data
-	InitDecryption(gSecringFile, gf.passphrase)
-	plainData, err := Decrypt(string(encryptedData), gf.passphrase)
+	decryptionKeys, err := InitDecryption(gSecringFile, gf.passphrase)
+	if err != nil {
+		return nil, err
+	}
+
+	plainData, err := Decrypt(decryptionKeys, string(encryptedData), gf.passphrase)
 	if err != nil {
 		return nil, err
 	}

@@ -3,7 +3,6 @@ package openpgp
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 
@@ -16,9 +15,7 @@ import (
 	"code.google.com/p/go.crypto/openpgp/armor"
 )
 
-var keys openpgp.EntityList
-
-func Decrypt(s, passphrase string) ([]byte, error) {
+func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, error) {
 	if s == "" {
 		return nil, nil
 	}
@@ -28,7 +25,7 @@ func Decrypt(s, passphrase string) ([]byte, error) {
 		return nil, err
 	}
 
-	d, err := openpgp.ReadMessage(raw.Body, keys,
+	d, err := openpgp.ReadMessage(raw.Body, decryptionKeys,
 		func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 			kp := []byte(passphrase)
 
@@ -55,15 +52,20 @@ func Decrypt(s, passphrase string) ([]byte, error) {
 	return bytes, err
 }
 
-func InitDecryption(keyRingPath, pass string) {
+func InitDecryption(keyRingPath, pass string) (*openpgp.EntityList, error) {
+	var keys openpgp.EntityList
+	var err error
+
 	f, err := os.Open(keyRingPath)
 	if err != nil {
-		log.Fatalf("unable to open gnupg keyring: %v", err)
+		return nil, fmt.Errorf("unable to open gnupg keyring: %v", err)
 	}
 	defer f.Close()
 
 	keys, err = openpgp.ReadKeyRing(f)
 	if err != nil {
-		log.Fatalf("unable to read from gnupg keyring: %v", err)
+		return nil, fmt.Errorf("unable to read from gnupg keyring: %v", err)
 	}
+
+	return &keys, nil
 }
