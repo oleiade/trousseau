@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.google.com/p/go.crypto/ssh"
+	"code.google.com/p/gosshold/ssh"
 )
 
 var (
