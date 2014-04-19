@@ -27,6 +27,14 @@ func (m *Meta) containsRecipient(recipient string) (status bool, index int) {
 	return false, -1
 }
 
+func (m *Meta) isLastRecipient(recipient string) bool {
+	if len(m.Recipients) == 1 {
+		return true
+	}
+
+	return false
+}
+
 func (m *Meta) AddRecipient(recipient string) error {
 	in, _ := m.containsRecipient(recipient)
 	if in {
@@ -42,8 +50,10 @@ func (m *Meta) AddRecipient(recipient string) error {
 func (m *Meta) RemoveRecipient(recipient string) error {
 	in, idx := m.containsRecipient(recipient)
 	if !in {
-		errMsg := fmt.Sprintf("Recipient %s not mapped in store metadata", recipient)
+		errMsg := fmt.Sprintf("Unknown recipient: %s", recipient)
 		return errors.New(errMsg)
+	} else if m.isLastRecipient(recipient) {
+		return errors.New("Forbidden: removing last data store recipient")
 	} else {
 		newRecipients := make([]string, len(m.Recipients)-1)
 		copy(newRecipients[0:idx], m.Recipients[0:idx])

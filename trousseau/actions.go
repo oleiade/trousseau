@@ -269,6 +269,9 @@ func RemoveRecipientAction(c *cli.Context) {
 	}
 
 	err = store.Meta.RemoveRecipient(recipient)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = store.Sync()
 	if err != nil {
