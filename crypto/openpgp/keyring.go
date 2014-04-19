@@ -1,64 +1,24 @@
 package openpgp
 
 import (
-	"bytes"
-	"fmt"
-	"io"
-	"log"
-	"os"
-	"strings"
-
-	_ "crypto/ecdsa"
-	_ "crypto/sha1"
-	_ "crypto/sha256"
-	_ "crypto/sha512"
-
 	"code.google.com/p/go.crypto/openpgp"
-	"code.google.com/p/go.crypto/openpgp/armor"
+	"fmt"
+	"os"
 )
 
-func Encrypt(encryptionKeys *openpgp.EntityList, s string) []byte {
-	buf := &bytes.Buffer{}
-
-	wa, err := armor.Encode(buf, "PGP MESSAGE", nil)
-	if err != nil {
-		log.Fatalf("Can't make armor: %v", err)
-	}
-
-	w, err := openpgp.Encrypt(wa, *encryptionKeys, nil, nil, nil)
-	if err != nil {
-		log.Fatalf("Error encrypting: %v", err)
-	}
-	_, err = io.Copy(w, strings.NewReader(s))
-	if err != nil {
-		log.Fatalf("Error encrypting: %v", err)
-	}
-
-	w.Close()
-	wa.Close()
-
-	return buf.Bytes()
-}
-
-func InitEncryption(publicRingPath string, keyids []string) (*openpgp.EntityList, error) {
-	var keys openpgp.EntityList
+func ReadPubRing(path string, keyIds []string) (*openpgp.EntityList, error) {
+	var pubKeys *openpgp.EntityList
+	var matchedKeys openpgp.EntityList
+	var hprefs, sprefs []uint8
 	var err error
 
-	f, err := os.Open(publicRingPath)
+	pubKeys, err = ReadKeyRing(path)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to open gnupg keyring: %v", err)
-	}
-	defer f.Close()
-
-	kl, err := openpgp.ReadKeyRing(f)
-	if err != nil {
-		return nil, fmt.Errorf("Unable to read from gnupg keyring: %v", err)
+		return nil, err
 	}
 
-	var hprefs, sprefs []uint8
-
-	for _, keyId := range keyids {
-		for _, entity := range kl {
+	for _, keyId := range keyIds {
+		for _, entity := range *pubKeys {
 
 			if isEntityKey(keyId, entity) {
 				pi := primaryIdentity(entity)
@@ -66,12 +26,13 @@ func InitEncryption(publicRingPath string, keyids []string) (*openpgp.EntityList
 
 				hprefs = intersectPreferences(hprefs, ss.PreferredHash)
 				sprefs = intersectPreferences(sprefs, ss.PreferredSymmetric)
-				keys = append(keys, entity)
+				matchedKeys = append(matchedKeys, entity)
 			}
 		}
 	}
 
-	if len(keys) != len(keyids) {
+	if len(matchedKeys) != len(keyIds) {
+		fmt.Println("HERE")
 		return nil, fmt.Errorf("Couldn't find all keys")
 	}
 	if len(hprefs) == 0 {
@@ -79,6 +40,28 @@ func InitEncryption(publicRingPath string, keyids []string) (*openpgp.EntityList
 	}
 	if len(sprefs) == 0 {
 		return nil, fmt.Errorf("No common symmetric ciphers for encryption keys")
+	}
+
+	return &matchedKeys, nil
+}
+
+func ReadSecRing(path string) (*openpgp.EntityList, error) {
+	return ReadKeyRing(path)
+}
+
+func ReadKeyRing(path string) (*openpgp.EntityList, error) {
+	var keys openpgp.EntityList
+	var err error
+
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to open gnupg keyring: %v", err)
+	}
+	defer f.Close()
+
+	keys, err = openpgp.ReadKeyRing(f)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to read from gnupg keyring: %v", err)
 	}
 
 	return &keys, nil
