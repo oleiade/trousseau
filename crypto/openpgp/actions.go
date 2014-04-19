@@ -40,12 +40,12 @@ func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, 
 		return nil, nil
 	}
 
-	raw, err := armor.Decode(strings.NewReader(s))
+	armorBlock, err := armor.Decode(strings.NewReader(s))
 	if err != nil {
 		return nil, err
 	}
 
-	d, err := openpgp.ReadMessage(raw.Body, decryptionKeys,
+	d, err := openpgp.ReadMessage(armorBlock.Body, decryptionKeys,
 		func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 			kp := []byte(passphrase)
 
@@ -64,6 +64,7 @@ func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, 
 				"Invalid passphrase supplied.")
 		},
 		nil)
+
 	if err != nil {
 		return nil, err
 	}

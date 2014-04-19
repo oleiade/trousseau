@@ -4,11 +4,13 @@ import (
 	"code.google.com/p/go.crypto/openpgp"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func ReadPubRing(path string, keyIds []string) (*openpgp.EntityList, error) {
 	var pubKeys *openpgp.EntityList
 	var matchedKeys openpgp.EntityList
+	var unmatchedKeyIds []string
 	var hprefs, sprefs []uint8
 	var err error
 
@@ -27,12 +29,20 @@ func ReadPubRing(path string, keyIds []string) (*openpgp.EntityList, error) {
 				hprefs = intersectPreferences(hprefs, ss.PreferredHash)
 				sprefs = intersectPreferences(sprefs, ss.PreferredSymmetric)
 				matchedKeys = append(matchedKeys, entity)
+			} else {
+				unmatchedKeyIds = append(unmatchedKeyIds, keyId)
+
 			}
 		}
 	}
 
+	if len(unmatchedKeyIds) != 0 {
+		errMsg := fmt.Sprintf("The following keys could not be found "+
+			"in the public keyring: %s", strings.Join(unmatchedKeyIds, ", "))
+		return nil, NewPgpError(ERR_DECRYPTION_KEYS, errMsg)
+	}
+
 	if len(matchedKeys) != len(keyIds) {
-		fmt.Println("HERE")
 		return nil, NewPgpError(ERR_DECRYPTION_KEYS, "Couldn't find all keys")
 	}
 	if len(hprefs) == 0 {
@@ -113,4 +123,10 @@ func primaryIdentity(e *openpgp.Entity) *openpgp.Identity {
 	}
 
 	return firstIdentity
+}
+
+func UserIds() []string {
+	var userIds []string
+
+	return userIds
 }
