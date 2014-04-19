@@ -80,8 +80,12 @@ func (gf *GpgFile) Read(b []byte) (n int, err error) {
 // It returns the number of bytes written and an error, if any.
 // Write returns a non-nil error when n != len(b).
 func (gf *GpgFile) Write(p []byte) (n int, err error) {
-	InitEncryption(gPubringFile, gf.Recipients)
-	encData := Encrypt(string(p))
+	encryptionKeys, err := InitEncryption(gPubringFile, gf.Recipients)
+	if err != nil {
+		return 0, err
+	}
+
+	encData := Encrypt(encryptionKeys, string(p))
 
 	return gf.file.Write(encData)
 }

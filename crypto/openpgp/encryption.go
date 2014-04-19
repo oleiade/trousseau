@@ -2,6 +2,7 @@ package openpgp
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -16,9 +17,7 @@ import (
 	"code.google.com/p/go.crypto/openpgp/armor"
 )
 
-var encryptKeys openpgp.EntityList
-
-func Encrypt(s string) []byte {
+func Encrypt(encryptionKeys *openpgp.EntityList, s string) []byte {
 	buf := &bytes.Buffer{}
 
 	wa, err := armor.Encode(buf, "PGP MESSAGE", nil)
@@ -26,7 +25,7 @@ func Encrypt(s string) []byte {
 		log.Fatalf("Can't make armor: %v", err)
 	}
 
-	w, err := openpgp.Encrypt(wa, encryptKeys, nil, nil, nil)
+	w, err := openpgp.Encrypt(wa, *encryptionKeys, nil, nil, nil)
 	if err != nil {
 		log.Fatalf("Error encrypting: %v", err)
 	}
@@ -41,16 +40,19 @@ func Encrypt(s string) []byte {
 	return buf.Bytes()
 }
 
-func InitEncryption(kr string, keyids []string) {
+func InitEncryption(kr string, keyids []string) (*openpgp.EntityList, error) {
+	var keys openpgp.EntityList
+	var err error
+
 	f, err := os.Open(kr)
 	if err != nil {
-		log.Fatalf("Unable to open gnupg keyring: %v", err)
+		return nil, fmt.Errorf("Unable to open gnupg keyring: %v", err)
 	}
 	defer f.Close()
 
 	kl, err := openpgp.ReadKeyRing(f)
 	if err != nil {
-		log.Fatalf("Unable to read from gnupg keyring: %v", err)
+		return nil, fmt.Errorf("Unable to read from gnupg keyring: %v", err)
 	}
 
 	var hprefs, sprefs []uint8
@@ -64,20 +66,22 @@ func InitEncryption(kr string, keyids []string) {
 
 				hprefs = intersectPreferences(hprefs, ss.PreferredHash)
 				sprefs = intersectPreferences(sprefs, ss.PreferredSymmetric)
-				encryptKeys = append(encryptKeys, entity)
+				keys = append(keys, entity)
 			}
 		}
 	}
 
-	if len(encryptKeys) != len(keyids) {
-		log.Fatalf("Couldn't find all keys")
+	if len(keys) != len(keyids) {
+		return nil, fmt.Errorf("Couldn't find all keys")
 	}
 	if len(hprefs) == 0 {
-		log.Fatalf("No common hashes for encryption keys")
+		return nil, fmt.Errorf("No common hashes for encryption keys")
 	}
 	if len(sprefs) == 0 {
-		log.Fatalf("No common symmetric ciphers for encryption keys")
+		return nil, fmt.Errorf("No common symmetric ciphers for encryption keys")
 	}
+
+	return &keys, nil
 }
 
 func isEntityKey(keyId string, e *openpgp.Entity) bool {
