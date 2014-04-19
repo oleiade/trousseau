@@ -52,11 +52,11 @@ func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, 
 	return bytes, err
 }
 
-func InitDecryption(keyRingPath, pass string) (*openpgp.EntityList, error) {
+func InitDecryption(secretRingPath, pass string) (*openpgp.EntityList, error) {
 	var keys openpgp.EntityList
 	var err error
 
-	f, err := os.Open(keyRingPath)
+	f, err := os.Open(secretRingPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open gnupg keyring: %v", err)
 	}

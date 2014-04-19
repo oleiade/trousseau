@@ -40,11 +40,11 @@ func Encrypt(encryptionKeys *openpgp.EntityList, s string) []byte {
 	return buf.Bytes()
 }
 
-func InitEncryption(kr string, keyids []string) (*openpgp.EntityList, error) {
+func InitEncryption(publicRingPath string, keyids []string) (*openpgp.EntityList, error) {
 	var keys openpgp.EntityList
 	var err error
 
-	f, err := os.Open(kr)
+	f, err := os.Open(publicRingPath)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to open gnupg keyring: %v", err)
 	}
