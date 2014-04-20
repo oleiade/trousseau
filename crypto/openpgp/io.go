@@ -91,7 +91,12 @@ func (gf *GpgFile) Write(p []byte) (n int, err error) {
 
 	encData := Encrypt(encryptionKeys, string(p))
 
-	return gf.file.Write(encData)
+	// As we were able to encrypt data, truncate source
+	// file and write to it
+	err = gf.file.Truncate(int64(len(encData)))
+	n, err = gf.file.Write(encData)
+
+	return n, err
 }
 
 // Stat returns the FileInfo structure describing file.
