@@ -303,7 +303,20 @@ func GetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	Logger.Info(value)
+	// If the --file flag is provided
+	if c.String("file") != "" {
+		valueBytes, ok := value.(string)
+		if !ok {
+			log.Fatal(fmt.Sprintf("unable to write %s value to file", c.Args()[0]))
+		}
+
+		err := ioutil.WriteFile(c.String("file"), []byte(valueBytes), 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		Logger.Info(value)
+	}
 }
 
 func SetAction(c *cli.Context) {

@@ -105,6 +105,9 @@ func GetCommand() cli.Command {
 		Name:   "get",
 		Usage:  "get a value from the trousseau",
 		Action: GetAction,
+		Flags: []cli.Flag{
+			FileFlag(),
+		},
 	}
 }
 
