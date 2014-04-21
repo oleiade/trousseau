@@ -1,3 +1,26 @@
+
+0.3.0 / 2013-04-21
+==================
+
+*User experience*
+ * Add verbose flag
+ * Fix #47 add a --file flag to get action
+ * Fix #76 disable default data store truncate on open
+ * Fix #75 prevent from removing the last recipient
+
+*Code and design*
+ * Enhance error reporting when public keys are missing
+ * Implement a custom PgpError type to enhance encryption errors tracking
+ * Allow gnupg keyring files to be selected via sys env
+ * Simplify keyring and encryption/decryption actions definition
+ * Rename keyring related openpgp args to be more obvious
+ * Refactor decryption init to avoid global states
+ * Refactor encryption init to avoid global states
+ * Add goxc configuration file
+ * Replace deprecated go.crypto/ssh package with gosshold/ssh
+ * Implement verbosity option through commands
+ * Add logrus logger in trousseau package
+
 0.2.6 / 2014-04-17
 ==================
 
