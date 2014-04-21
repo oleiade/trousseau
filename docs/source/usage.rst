@@ -58,8 +58,8 @@ Once your trousseau has been created, you're now able to read, write, list, dele
 API
 ---
 
-* **get** KEY : Outputs the stored KEY-value pair
-* **set** KEY VALUE : Sets the provided key-value pair in store
+* **get** KEY [--file]: Outputs the stored KEY-value pair, whether on *stdout* or in pointed ``--file`` option path.
+* **set** KEY [VALUE | --file] : Sets the provided key-value pair in store using provided value or extracting it from path pointed by ``--file`` option.
 * **del** KEY : Deletes provided key from the store
 * **keys** : Lists the stored keys
 * **show** : Lists the stored key-value pairs
@@ -78,13 +78,13 @@ You've got the keys
 
     # set action supports a --file flag to use the content
     # of a file as value
-    $ trousseau set oleiade-private-key --file ~/.ssh/id_rsa.pub
+    $ trousseau set myuser.ssh.public_key --file ~/.ssh/id_rsa.pub
 
     # Now let's make sure data has been added
     $ trousseau keys
     abc
     easy as
-    oleiade-private-key
+    myuser.ssh.public_key --file ~/.ssh/id_rsa.pub
 
     $ trousseau get abc
     123
@@ -92,9 +92,12 @@ You've got the keys
     $ trousseau show
     abc: 123
     easy as: do re mi
-    oleiade-private-key: --- BEGIN PRIVATE KEY ---
+    myuser.ssh.public_key: ssh-rsa 1289eu102ij30192u3e0912e
     ...
 
+    # Whenever you want to export a key value to a file, just use
+    # the get command --file option
+    $ trousseau get myuser.ssh.public_key --file /home/myuser/id_rsa.pub
 
     # Now if you don't need a key anymore, just drop it.
     $ trousseau del abc  # Now the song lacks something doesn't it?
