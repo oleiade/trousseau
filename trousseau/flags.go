@@ -6,6 +6,13 @@ import (
 	"path/filepath"
 )
 
+func VerboseFlag() cli.BoolFlag {
+	return cli.BoolFlag{
+		Name:  "verbose",
+		Usage: "Set trousseau in verbose mode",
+	}
+}
+
 func AskPassword() cli.BoolFlag {
 	return cli.BoolFlag{
 		Name:  "ask-password",

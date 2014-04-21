@@ -81,7 +81,7 @@ func (s *Store) Sync() error {
 		var err error
 
 		f, err = openpgp.OpenFile(s.path,
-			os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
+			os.O_CREATE|os.O_WRONLY,
 			s.encryptionOpts.Passphrase,
 			s.Meta.Recipients)
 		if err != nil {

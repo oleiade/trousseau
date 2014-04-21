@@ -27,6 +27,10 @@ func main() {
 		trousseau.ShowCommand(),
 		trousseau.MetaCommand(),
 	}
+	app.Flags = []cli.Flag{
+		trousseau.VerboseFlag(),
+	}
 
+	trousseau.Logger.Formatter = new(trousseau.RawFormatter)
 	app.Run(os.Args)
 }

@@ -39,7 +39,7 @@ func CreateAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Trousseau data store succesfully created")
+	Logger.Info("Trousseau data store succesfully created")
 }
 
 func PushAction(c *cli.Context) {
@@ -63,7 +63,7 @@ func PushAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Trousseau data store succesfully pushed to s3")
+		Logger.Info("Trousseau data store succesfully pushed to s3")
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
@@ -81,13 +81,13 @@ func PushAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Trousseau data store succesfully pushed to ssh remote storage")
+		Logger.Info("Trousseau data store succesfully pushed to ssh remote storage")
 	case "gist":
 		err = uploadUsingGist(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Trousseau data store succesfully pushed to gist")
+		Logger.Info("Trousseau data store succesfully pushed to gist")
 	}
 }
 
@@ -112,7 +112,7 @@ func PullAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Trousseau data store succesfully pulled from S3")
+		Logger.Info("Trousseau data store succesfully pulled from S3")
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
@@ -130,13 +130,13 @@ func PullAction(c *cli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Trousseau data store succesfully pulled from ssh remote storage")
+		Logger.Info("Trousseau data store succesfully pulled from ssh remote storage")
 	case "gist":
 		err = DownloadUsingGist(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Trousseau data store succesfully pulled from gist")
+		Logger.Info("Trousseau data store succesfully pulled from gist")
 	default:
 		if endpointDsn.Scheme == "" {
 			log.Fatalf("No dsn scheme supplied")
@@ -145,7 +145,7 @@ func PullAction(c *cli.Context) {
 		}
 	}
 
-	fmt.Printf("Trousseau data store succesfully pulled from remote storage")
+	Logger.Info("Trousseau data store succesfully pulled from remote storage")
 }
 
 func ExportAction(c *cli.Context) {
@@ -174,7 +174,7 @@ func ExportAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Trousseau data store exported to: %s\n", outputFilePath)
+	Logger.Info(fmt.Sprintf("Trousseau data store exported to: %s", outputFilePath))
 }
 
 func ImportAction(c *cli.Context) {
@@ -219,7 +219,7 @@ func ImportAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Trousseau data store imported: %s\n", importedFilePath)
+	Logger.Info(fmt.Sprintf("Trousseau data store imported: %s", importedFilePath))
 }
 
 func AddRecipientAction(c *cli.Context) {
@@ -246,7 +246,9 @@ func AddRecipientAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Recipient added to trousseau data store: %s\n", recipient)
+	if c.Bool("verbose") == true {
+		Logger.Info(fmt.Sprintf("Recipient added to trousseau data store: %s", recipient))
+	}
 }
 
 func RemoveRecipientAction(c *cli.Context) {
@@ -267,13 +269,18 @@ func RemoveRecipientAction(c *cli.Context) {
 	}
 
 	err = store.Meta.RemoveRecipient(recipient)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = store.Sync()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Recipient removed from trousseau data store: %s\n", recipient)
+	if c.Bool("verbose") == true {
+		fmt.Printf("Recipient removed from trousseau data store: %s", recipient)
+	}
 }
 
 func GetAction(c *cli.Context) {
@@ -296,7 +303,20 @@ func GetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s", value)
+	// If the --file flag is provided
+	if c.String("file") != "" {
+		valueBytes, ok := value.(string)
+		if !ok {
+			log.Fatal(fmt.Sprintf("unable to write %s value to file", c.Args()[0]))
+		}
+
+		err := ioutil.WriteFile(c.String("file"), []byte(valueBytes), 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		Logger.Info(value)
+	}
 }
 
 func SetAction(c *cli.Context) {
@@ -346,7 +366,9 @@ func SetAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s:%s", key, value)
+	if c.Bool("verbose") == true {
+		Logger.Info(fmt.Sprintf("%s:%s", key, value))
+	}
 }
 
 func DelAction(c *cli.Context) {
@@ -374,7 +396,9 @@ func DelAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("deleted: %s", c.Args()[0])
+	if c.Bool("verbose") == true {
+		Logger.Info(fmt.Sprintf("deleted: %s", c.Args()[0]))
+	}
 }
 
 func KeysAction(c *cli.Context) {
@@ -397,7 +421,7 @@ func KeysAction(c *cli.Context) {
 		log.Fatal(err)
 	} else {
 		for _, k := range keys {
-			fmt.Println(k)
+			Logger.Info(k)
 		}
 	}
 }
@@ -422,7 +446,7 @@ func ShowAction(c *cli.Context) {
 		log.Fatal(err)
 	} else {
 		for _, pair := range pairs {
-			fmt.Printf("%s : %s\n", pair.Key, pair.Value)
+			Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
 		}
 	}
 }
@@ -448,7 +472,7 @@ func MetaAction(c *cli.Context) {
 	}
 
 	for _, pair := range pairs {
-		fmt.Printf("%s : %s\n", pair.Key, pair.Value)
+		Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
 	}
 }
 

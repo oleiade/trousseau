@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/oleiade/trousseau",
-	"GoVersion": "go1.2",
+	"GoVersion": "go1.2.1",
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go.crypto/cast5",
@@ -13,7 +13,7 @@
 			"Rev": "7aa593ce8ceaf0199504fff27455bbb60eedabc7"
 		},
 		{
-			"ImportPath": "code.google.com/p/go.crypto/ssh",
+			"ImportPath": "code.google.com/p/go.crypto/ssh/terminal",
 			"Comment": "null-191",
 			"Rev": "7aa593ce8ceaf0199504fff27455bbb60eedabc7"
 		},
@@ -21,6 +21,19 @@
 			"ImportPath": "code.google.com/p/goauth2/oauth",
 			"Comment": "weekly-43",
 			"Rev": "d4571a95014ff1fdd0055dc0f6b7e977a42b1e5a"
+		},
+		{
+			"ImportPath": "code.google.com/p/gosshold/ssh",
+			"Comment": "null-3",
+			"Rev": "9dd3b6b6e7b3e1b7f30c2b58c5ec5fff6bf9feff"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Rev": "7344642b501993e2ac905f516c9a948f371ec513"
+		},
+		{
+			"ImportPath": "github.com/burke/ttyutils",
+			"Rev": "70f0d73eb47f7033f514f7f8f5138152fe1088fc"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
@@ -42,6 +55,10 @@
 		{
 			"ImportPath": "github.com/google/go-querystring/query",
 			"Rev": "ec0a78e0f4db229b7897be36596a8944230b857a"
+		},
+		{
+			"ImportPath": "github.com/guelfey/go.dbus",
+			"Rev": "f6a3a2366cc39b8479cadc499d3c735fb10fbdda"
 		},
 		{
 			"ImportPath": "github.com/howeyc/gopass",

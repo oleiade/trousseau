@@ -51,8 +51,12 @@ func (gf *GpgFile) ReadAll() ([]byte, error) {
 	}
 
 	// Decrypt store data
-	InitDecryption(gSecringFile, gf.passphrase)
-	plainData, err := Decrypt(string(encryptedData), gf.passphrase)
+	decryptionKeys, err := ReadSecRing(gSecringFile)
+	if err != nil {
+		return nil, err
+	}
+
+	plainData, err := Decrypt(decryptionKeys, string(encryptedData), gf.passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -80,10 +84,19 @@ func (gf *GpgFile) Read(b []byte) (n int, err error) {
 // It returns the number of bytes written and an error, if any.
 // Write returns a non-nil error when n != len(b).
 func (gf *GpgFile) Write(p []byte) (n int, err error) {
-	InitEncryption(gPubringFile, gf.Recipients)
-	encData := Encrypt(string(p))
+	encryptionKeys, err := ReadPubRing(gPubringFile, gf.Recipients)
+	if err != nil {
+		return 0, err
+	}
 
-	return gf.file.Write(encData)
+	encData := Encrypt(encryptionKeys, string(p))
+
+	// As we were able to encrypt data, truncate source
+	// file and write to it
+	err = gf.file.Truncate(int64(len(encData)))
+	n, err = gf.file.Write(encData)
+
+	return n, err
 }
 
 // Stat returns the FileInfo structure describing file.
