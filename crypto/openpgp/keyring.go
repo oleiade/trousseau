@@ -19,9 +19,12 @@ func ReadPubRing(path string, keyIds []string) (*openpgp.EntityList, error) {
 		return nil, err
 	}
 
+	// For each provided key ids, check if it exists
+	// through the gnupg pub ring
 	for _, keyId := range keyIds {
-		for _, entity := range *pubKeys {
+		var matched bool = false
 
+		for _, entity := range *pubKeys {
 			if isEntityKey(keyId, entity) {
 				pi := primaryIdentity(entity)
 				ss := pi.SelfSignature
@@ -29,21 +32,20 @@ func ReadPubRing(path string, keyIds []string) (*openpgp.EntityList, error) {
 				hprefs = intersectPreferences(hprefs, ss.PreferredHash)
 				sprefs = intersectPreferences(sprefs, ss.PreferredSymmetric)
 				matchedKeys = append(matchedKeys, entity)
-			} else {
-				unmatchedKeyIds = append(unmatchedKeyIds, keyId)
-
+				matched = true
 			}
 		}
+
+		if matched == false {
+			unmatchedKeyIds = append(unmatchedKeyIds, keyId)
+		}
+
 	}
 
 	if len(unmatchedKeyIds) != 0 {
 		errMsg := fmt.Sprintf("The following keys could not be found "+
 			"in the public keyring: %s", strings.Join(unmatchedKeyIds, ", "))
 		return nil, NewPgpError(ERR_DECRYPTION_KEYS, errMsg)
-	}
-
-	if len(matchedKeys) != len(keyIds) {
-		return nil, NewPgpError(ERR_DECRYPTION_KEYS, "Couldn't find all keys")
 	}
 	if len(hprefs) == 0 {
 		return nil, NewPgpError(ERR_DECRYPTION_HASHES, "No common hashes for encryption keys")
