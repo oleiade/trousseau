@@ -27,20 +27,20 @@ func CreateAction(c *libcli.Context) {
 		Recipients: recipients,
 	}
 
-	meta := Meta{
+	meta := trousseau.Meta{
 		CreatedAt:        time.Now().String(),
 		LastModifiedAt:   time.Now().String(),
 		Recipients:       recipients,
-		TrousseauVersion: TROUSSEAU_VERSION,
+		TrousseauVersion: trousseau.TROUSSEAU_VERSION,
 	}
 
 	// Create and write empty store file
-	err := CreateStoreFile(trousseau.GetStorePath(), opts, &meta)
+	err := trousseau.CreateStoreFile(trousseau.GetStorePath(), opts, &meta)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	Logger.Info("Trousseau data store succesfully created")
+	trousseau.Logger.Info("Trousseau data store succesfully created")
 }
 
 func PushAction(c *libcli.Context) {
@@ -64,7 +64,7 @@ func PushAction(c *libcli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pushed to s3")
+		trousseau.Logger.Info("Trousseau data store succesfully pushed to s3")
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
@@ -74,7 +74,7 @@ func PushAction(c *libcli.Context) {
 		}
 
 		if c.Bool("ask-password") == true {
-			password := PromptForPassword()
+			password := trousseau.PromptForPassword()
 			endpointDsn.Secret = password
 		}
 
@@ -82,13 +82,13 @@ func PushAction(c *libcli.Context) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pushed to ssh remote storage")
+		trousseau.Logger.Info("Trousseau data store succesfully pushed to ssh remote storage")
 	case "gist":
 		err = trousseau.UploadUsingGist(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pushed to gist")
+		trousseau.Logger.Info("Trousseau data store succesfully pushed to gist")
 	}
 }
 
@@ -109,11 +109,11 @@ func PullAction(c *libcli.Context) {
 			log.Fatal(err)
 		}
 
-		err = DownloadUsingS3(endpointDsn)
+		err = trousseau.DownloadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pulled from S3")
+		trousseau.Logger.Info("Trousseau data store succesfully pulled from S3")
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
@@ -123,21 +123,21 @@ func PullAction(c *libcli.Context) {
 		}
 
 		if c.Bool("ask-password") == true {
-			password := PromptForPassword()
+			password := trousseau.PromptForPassword()
 			endpointDsn.Secret = password
 		}
 
-		err = DownloadUsingScp(endpointDsn, privateKey)
+		err = trousseau.DownloadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pulled from ssh remote storage")
+		trousseau.Logger.Info("Trousseau data store succesfully pulled from ssh remote storage")
 	case "gist":
-		err = DownloadUsingGist(endpointDsn)
+		err = trousseau.DownloadUsingGist(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pulled from gist")
+		trousseau.Logger.Info("Trousseau data store succesfully pulled from gist")
 	default:
 		if endpointDsn.Scheme == "" {
 			log.Fatalf("No dsn scheme supplied")
@@ -146,7 +146,7 @@ func PullAction(c *libcli.Context) {
 		}
 	}
 
-	Logger.Info("Trousseau data store succesfully pulled from remote storage")
+	trousseau.Logger.Info("Trousseau data store succesfully pulled from remote storage")
 }
 
 func ExportAction(c *libcli.Context) {
@@ -175,7 +175,7 @@ func ExportAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	Logger.Info(fmt.Sprintf("Trousseau data store exported to: %s", outputFilePath))
+	trousseau.Logger.Info(fmt.Sprintf("Trousseau data store exported to: %s", outputFilePath))
 }
 
 func ImportAction(c *libcli.Context) {
@@ -186,7 +186,7 @@ func ImportAction(c *libcli.Context) {
 	var err error
 	var importedFilePath string = c.Args()[0]
 	var localFilePath string = trousseau.GetStorePath()
-	var strategy *ImportStrategy = new(ImportStrategy)
+	var strategy *trousseau.ImportStrategy = new(trousseau.ImportStrategy)
 
 	// Transform provided merging startegy flags
 	// into a proper ImportStrategy byte.
@@ -200,17 +200,17 @@ func ImportAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	localStore, err := LoadStore(localFilePath, opts)
+	localStore, err := trousseau.LoadStore(localFilePath, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	importedStore, err := LoadStore(importedFilePath, opts)
+	importedStore, err := trousseau.LoadStore(importedFilePath, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = ImportStore(importedStore, localStore, *strategy)
+	err = trousseau.ImportStore(importedStore, localStore, *strategy)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -220,7 +220,7 @@ func ImportAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	Logger.Info(fmt.Sprintf("Trousseau data store imported: %s", importedFilePath))
+	trousseau.Logger.Info(fmt.Sprintf("Trousseau data store imported: %s", importedFilePath))
 }
 
 func AddRecipientAction(c *libcli.Context) {
@@ -235,7 +235,7 @@ func AddRecipientAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -248,7 +248,7 @@ func AddRecipientAction(c *libcli.Context) {
 	}
 
 	if c.Bool("verbose") == true {
-		Logger.Info(fmt.Sprintf("Recipient added to trousseau data store: %s", recipient))
+		trousseau.Logger.Info(fmt.Sprintf("Recipient added to trousseau data store: %s", recipient))
 	}
 }
 
@@ -264,7 +264,7 @@ func RemoveRecipientAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -294,7 +294,7 @@ func GetAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -316,7 +316,7 @@ func GetAction(c *libcli.Context) {
 			log.Fatal(err)
 		}
 	} else {
-		Logger.Info(value)
+		trousseau.Logger.Info(value)
 	}
 }
 
@@ -328,7 +328,7 @@ func SetAction(c *libcli.Context) {
 	// If the --file flag is provided
 	if c.String("file") != "" && hasExpectedArgs(c.Args(), 1) {
 		// And the file actually exists on file system
-		if pathExists(c.String("file")) {
+		if trousseau.PathExists(c.String("file")) {
 			// Then load it's content
 			fileContent, err := ioutil.ReadFile(c.String("file"))
 			if err != nil {
@@ -352,7 +352,7 @@ func SetAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -368,7 +368,7 @@ func SetAction(c *libcli.Context) {
 	}
 
 	if c.Bool("verbose") == true {
-		Logger.Info(fmt.Sprintf("%s:%s", key, value))
+		trousseau.Logger.Info(fmt.Sprintf("%s:%s", key, value))
 	}
 }
 
@@ -382,7 +382,7 @@ func DelAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -398,7 +398,7 @@ func DelAction(c *libcli.Context) {
 	}
 
 	if c.Bool("verbose") == true {
-		Logger.Info(fmt.Sprintf("deleted: %s", c.Args()[0]))
+		trousseau.Logger.Info(fmt.Sprintf("deleted: %s", c.Args()[0]))
 	}
 }
 
@@ -412,7 +412,7 @@ func KeysAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -422,7 +422,7 @@ func KeysAction(c *libcli.Context) {
 		log.Fatal(err)
 	} else {
 		for _, k := range keys {
-			Logger.Info(k)
+			trousseau.Logger.Info(k)
 		}
 	}
 }
@@ -437,7 +437,7 @@ func ShowAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -447,7 +447,7 @@ func ShowAction(c *libcli.Context) {
 		log.Fatal(err)
 	} else {
 		for _, pair := range pairs {
-			Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
+			trousseau.Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
 		}
 	}
 }
@@ -462,7 +462,7 @@ func MetaAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -473,7 +473,7 @@ func MetaAction(c *libcli.Context) {
 	}
 
 	for _, pair := range pairs {
-		Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
+		trousseau.Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
 	}
 }
 

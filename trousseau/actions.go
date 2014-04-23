@@ -327,7 +327,7 @@ func SetAction(c *cli.Context) {
 	// If the --file flag is provided
 	if c.String("file") != "" && hasExpectedArgs(c.Args(), 1) {
 		// And the file actually exists on file system
-		if pathExists(c.String("file")) {
+		if PathExists(c.String("file")) {
 			// Then load it's content
 			fileContent, err := ioutil.ReadFile(c.String("file"))
 			if err != nil {
