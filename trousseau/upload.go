@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
+	"github.com/oleiade/trousseau/remote/gist"
 	"github.com/oleiade/trousseau/remote/s3"
 	"github.com/oleiade/trousseau/remote/ssh"
-	"github.com/oleiade/trousseau/remote/gist"
 )
 
 // uploadUsingS3 executes the whole process of pushing
 // the trousseau data store file to s3 remote storage
 // using the provided environment.
-func uploadUsingS3(dsn *dsn.Dsn) error {
+func UploadUsingS3(dsn *dsn.Dsn) error {
 	awsAuth := aws.Auth{AccessKey: dsn.Id, SecretKey: dsn.Secret}
 
 	awsRegion, ok := aws.Regions[dsn.Port]
@@ -37,7 +37,7 @@ func uploadUsingS3(dsn *dsn.Dsn) error {
 // uploadUsingScp executes the whole process of pushing
 // the trousseau data store file to scp remote storage
 // using the provided environment.
-func uploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
+func UploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
 	keychain := new(ssh.Keychain)
 	keychain.AddPEMKey(privateKey)
 
@@ -62,14 +62,14 @@ func uploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
 // uploadUsingGist executes the whole process of pushing
 // the trousseau data store file to gist remote storage
 // using the provided dsn informations.
-func uploadUsingGist(dsn *dsn.Dsn) (err error) {
-    gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
-    gistStorage.Connect()
+func UploadUsingGist(dsn *dsn.Dsn) (err error) {
+	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
+	gistStorage.Connect()
 
-    err = gistStorage.Push(gStorePath, dsn.Path)
-    if err != nil {
-        return err
-    }
+	err = gistStorage.Push(gStorePath, dsn.Path)
+	if err != nil {
+		return err
+	}
 
-    return nil
+	return nil
 }

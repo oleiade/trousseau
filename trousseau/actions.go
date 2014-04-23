@@ -59,7 +59,7 @@ func PushAction(c *cli.Context) {
 			log.Fatal(err)
 		}
 
-		err = uploadUsingS3(endpointDsn)
+		err = UploadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -77,13 +77,13 @@ func PushAction(c *cli.Context) {
 			endpointDsn.Secret = password
 		}
 
-		err = uploadUsingScp(endpointDsn, privateKey)
+		err = UploadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
 		Logger.Info("Trousseau data store succesfully pushed to ssh remote storage")
 	case "gist":
-		err = uploadUsingGist(endpointDsn)
+		err = UploadUsingGist(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}

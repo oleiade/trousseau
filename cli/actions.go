@@ -55,12 +55,12 @@ func PushAction(c *libcli.Context) {
 
 	switch endpointDsn.Scheme {
 	case "s3":
-		err := endpointDsn.SetDefaults(gS3Defaults)
+		err := endpointDsn.SetDefaults(trousseau.S3Defaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = uploadUsingS3(endpointDsn)
+		err = trousseau.UploadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -68,7 +68,7 @@ func PushAction(c *libcli.Context) {
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-		err := endpointDsn.SetDefaults(gScpDefaults)
+		err := endpointDsn.SetDefaults(trousseau.ScpDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,13 +78,13 @@ func PushAction(c *libcli.Context) {
 			endpointDsn.Secret = password
 		}
 
-		err = uploadUsingScp(endpointDsn, privateKey)
+		err = trousseau.UploadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
 		Logger.Info("Trousseau data store succesfully pushed to ssh remote storage")
 	case "gist":
-		err = uploadUsingGist(endpointDsn)
+		err = trousseau.UploadUsingGist(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -104,7 +104,7 @@ func PullAction(c *libcli.Context) {
 
 	switch endpointDsn.Scheme {
 	case "s3":
-		err := endpointDsn.SetDefaults(gS3Defaults)
+		err := endpointDsn.SetDefaults(trousseau.S3Defaults)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -117,7 +117,7 @@ func PullAction(c *libcli.Context) {
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-		err := endpointDsn.SetDefaults(gScpDefaults)
+		err := endpointDsn.SetDefaults(trousseau.ScpDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
