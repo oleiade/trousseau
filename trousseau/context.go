@@ -4,7 +4,31 @@ import (
 	"github.com/tmc/keyring"
 	"log"
 	"os"
+	"path/filepath"
 )
+
+// Global variables defining default values for S3 and scp
+// uploads/downloads
+var (
+	S3Defaults map[string]string = map[string]string{
+		"Path": "trousseau.tsk",
+	}
+	ScpDefaults map[string]string = map[string]string{
+		"Id":   os.Getenv("USER"),
+		"Port": "22",
+		"Path": "trousseau.tsk",
+	}
+)
+
+func GetStorePath() string {
+	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
+
+	if envPath != "" {
+		return envPath
+	}
+
+	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
+}
 
 // GetPassphrase attemps to retrieve the user's gpg master
 // key passphrase using multiple methods. First it will attempt
@@ -30,7 +54,7 @@ func GetPassphrase() (passphrase string) {
 	// If passphrase was enither found in the environment nor
 	// system keyring manager try to fetch it from gpg-agent
 	if os.Getenv("GPG_AGENT_INFO") != "" {
-		passphrase, err = GetGpgPassphrase(gMasterGpgId)
+		passphrase, err = getGpgPassphrase(gMasterGpgId)
 	}
 
 	if err != nil {
@@ -40,7 +64,7 @@ func GetPassphrase() (passphrase string) {
 	return passphrase
 }
 
-func GetGpgPassphrase(gpgId string) (string, error) {
+func getGpgPassphrase(gpgId string) (string, error) {
 	conn, err := NewGpgAgentConn()
 	if err != nil {
 		return "", err
