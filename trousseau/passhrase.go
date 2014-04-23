@@ -30,7 +30,7 @@ func GetPassphrase() (passphrase string) {
 	// If passphrase was enither found in the environment nor
 	// system keyring manager try to fetch it from gpg-agent
 	if os.Getenv("GPG_AGENT_INFO") != "" {
-		passphrase, err = GetGpgPassphrase(gMasterGpgId)
+		passphrase, err = getGpgPassphrase(gMasterGpgId)
 	}
 
 	if err != nil {
@@ -40,7 +40,7 @@ func GetPassphrase() (passphrase string) {
 	return passphrase
 }
 
-func GetGpgPassphrase(gpgId string) (string, error) {
+func getGpgPassphrase(gpgId string) (string, error) {
 	conn, err := NewGpgAgentConn()
 	if err != nil {
 		return "", err

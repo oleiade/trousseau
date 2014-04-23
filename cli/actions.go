@@ -5,6 +5,7 @@ import (
 	libcli "github.com/codegangsta/cli"
 	"github.com/oleiade/trousseau/crypto"
 	"github.com/oleiade/trousseau/dsn"
+	"github.com/oleiade/trousseau/trousseau"
 	"io"
 	"io/ioutil"
 	"log"
@@ -22,7 +23,7 @@ func CreateAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 		Recipients: recipients,
 	}
 
@@ -196,7 +197,7 @@ func ImportAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	localStore, err := LoadStore(localFilePath, opts)
@@ -231,7 +232,7 @@ func AddRecipientAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -260,7 +261,7 @@ func RemoveRecipientAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -290,7 +291,7 @@ func GetAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -348,7 +349,7 @@ func SetAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -378,7 +379,7 @@ func DelAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -408,7 +409,7 @@ func KeysAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -433,7 +434,7 @@ func ShowAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	store, err := LoadStore(gStorePath, opts)
@@ -458,7 +459,7 @@ func MetaAction(c *libcli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
 	store, err := LoadStore(gStorePath, opts)
