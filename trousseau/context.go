@@ -4,7 +4,18 @@ import (
 	"github.com/tmc/keyring"
 	"log"
 	"os"
+	"path/filepath"
 )
+
+func GetStorePath() string {
+	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
+
+	if envPath != "" {
+		return envPath
+	}
+
+	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
+}
 
 // GetPassphrase attemps to retrieve the user's gpg master
 // key passphrase using multiple methods. First it will attempt

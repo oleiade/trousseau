@@ -6,15 +6,7 @@ import (
 )
 
 // Global data store file path
-var gStorePath string = func() string {
-	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
-
-	if envPath != "" {
-		return envPath
-	}
-
-	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
-}()
+var gStorePath string = GetStorePath()
 
 // Gnupg trousseau master gpg key id
 var gMasterGpgId string = os.Getenv(ENV_MASTER_GPG_ID_KEY)
