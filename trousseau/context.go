@@ -7,6 +7,19 @@ import (
 	"path/filepath"
 )
 
+// Global variables defining default values for S3 and scp
+// uploads/downloads
+var (
+	S3Defaults map[string]string = map[string]string{
+		"Path": "trousseau.tsk",
+	}
+	ScpDefaults map[string]string = map[string]string{
+		"Id":   os.Getenv("USER"),
+		"Port": "22",
+		"Path": "trousseau.tsk",
+	}
+)
+
 func GetStorePath() string {
 	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
 

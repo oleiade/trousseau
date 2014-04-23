@@ -54,7 +54,7 @@ func PushAction(c *cli.Context) {
 
 	switch endpointDsn.Scheme {
 	case "s3":
-		err := endpointDsn.SetDefaults(gS3Defaults)
+		err := endpointDsn.SetDefaults(S3Defaults)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -67,7 +67,7 @@ func PushAction(c *cli.Context) {
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-		err := endpointDsn.SetDefaults(gScpDefaults)
+		err := endpointDsn.SetDefaults(ScpDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -103,7 +103,7 @@ func PullAction(c *cli.Context) {
 
 	switch endpointDsn.Scheme {
 	case "s3":
-		err := endpointDsn.SetDefaults(gS3Defaults)
+		err := endpointDsn.SetDefaults(S3Defaults)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -116,7 +116,7 @@ func PullAction(c *cli.Context) {
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-		err := endpointDsn.SetDefaults(gScpDefaults)
+		err := endpointDsn.SetDefaults(ScpDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}

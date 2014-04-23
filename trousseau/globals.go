@@ -20,13 +20,3 @@ var gPrivateRsaKeyPath string = filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa
 // keyring
 var gKeyringService string = os.Getenv(ENV_KEYRING_SERVICE_KEY)
 var gKeyringUser string = os.Getenv(ENV_KEYRING_USER_KEY)
-
-// S3 and Scp dsn default values
-var gS3Defaults map[string]string = map[string]string{
-	"Path": "trousseau.tsk",
-}
-var gScpDefaults map[string]string = map[string]string{
-	"Id":   os.Getenv("USER"),
-	"Port": "22",
-	"Path": "trousseau.tsk",
-}
