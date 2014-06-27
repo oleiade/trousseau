@@ -316,7 +316,13 @@ func GetAction(c *libcli.Context) {
 			log.Fatal(err)
 		}
 	} else {
-		trousseau.Logger.Info(value)
+		// Use fmt.Print to support patch processes,
+		// to get the value "as is" without any appended newlines
+		if isPipe(os.Stdout) {
+			fmt.Print(value)
+		} else {
+			trousseau.Logger.Info(value)
+		}
 	}
 }
 
@@ -493,4 +499,15 @@ func hasExpectedArgs(args []string, expected int) bool {
 			return false
 		}
 	}
+}
+
+// Thanks, mrnugget!
+// https://github.com/mrnugget/fzz/blob/master/utils.go#L14-L21
+func isPipe(f *os.File) bool {
+	s, err := f.Stat()
+	if err != nil {
+		return false
+	}
+
+	return s.Mode()&os.ModeNamedPipe != 0
 }
