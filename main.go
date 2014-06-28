@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
+	trousseau_cli "github.com/oleiade/trousseau/cli"
 	"github.com/oleiade/trousseau/trousseau"
 	"os"
 )
@@ -13,22 +14,22 @@ func main() {
 	app.Usage = "handles an encrypted keys store"
 	app.Version = trousseau.TROUSSEAU_VERSION
 	app.Commands = []cli.Command{
-		trousseau.CreateCommand(),
-		trousseau.PushCommand(),
-		trousseau.PullCommand(),
-		trousseau.ExportCommand(),
-		trousseau.ImportCommand(),
-		trousseau.AddRecipientCommand(),
-		trousseau.RemoveRecipientCommand(),
-		trousseau.SetCommand(),
-		trousseau.GetCommand(),
-		trousseau.DelCommand(),
-		trousseau.KeysCommand(),
-		trousseau.ShowCommand(),
-		trousseau.MetaCommand(),
+		trousseau_cli.CreateCommand(),
+		trousseau_cli.PushCommand(),
+		trousseau_cli.PullCommand(),
+		trousseau_cli.ExportCommand(),
+		trousseau_cli.ImportCommand(),
+		trousseau_cli.AddRecipientCommand(),
+		trousseau_cli.RemoveRecipientCommand(),
+		trousseau_cli.SetCommand(),
+		trousseau_cli.GetCommand(),
+		trousseau_cli.DelCommand(),
+		trousseau_cli.KeysCommand(),
+		trousseau_cli.ShowCommand(),
+		trousseau_cli.MetaCommand(),
 	}
 	app.Flags = []cli.Flag{
-		trousseau.VerboseFlag(),
+		trousseau_cli.VerboseFlag(),
 	}
 
 	trousseau.Logger.Formatter = new(trousseau.RawFormatter)

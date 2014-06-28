@@ -1,64 +1,64 @@
-package trousseau
+package cli
 
 import (
-	"github.com/codegangsta/cli"
+	libcli "github.com/codegangsta/cli"
 	"os"
 	"path/filepath"
 )
 
-func VerboseFlag() cli.BoolFlag {
-	return cli.BoolFlag{
+func VerboseFlag() libcli.BoolFlag {
+	return libcli.BoolFlag{
 		Name:  "verbose",
 		Usage: "Set trousseau in verbose mode",
 	}
 }
 
-func AskPassword() cli.BoolFlag {
-	return cli.BoolFlag{
+func AskPassword() libcli.BoolFlag {
+	return libcli.BoolFlag{
 		Name:  "ask-password",
 		Usage: "Prompt for password",
 	}
 }
 
-func YesFlag() cli.StringFlag {
-	return cli.StringFlag{
+func YesFlag() libcli.StringFlag {
+	return libcli.StringFlag{
 		Name:  "yes",
 		Value: "",
 		Usage: "Whatever the question is, answers yes",
 	}
 }
 
-func SshPrivateKeyPathFlag() cli.StringFlag {
-	return cli.StringFlag{
+func SshPrivateKeyPathFlag() libcli.StringFlag {
+	return libcli.StringFlag{
 		Name:  "ssh-private-key",
 		Value: filepath.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
 		Usage: "Path to the ssh private key to be used",
 	}
 }
 
-func OverwriteFlag() cli.BoolFlag {
-	return cli.BoolFlag{
+func OverwriteFlag() libcli.BoolFlag {
+	return libcli.BoolFlag{
 		Name:  "overwrite",
 		Usage: "Overwrite existing trousseau file",
 	}
 }
 
-func TheirsFlag() cli.BoolFlag {
-	return cli.BoolFlag{
+func TheirsFlag() libcli.BoolFlag {
+	return libcli.BoolFlag{
 		Name:  "theirs",
 		Usage: "Keep the imported file value",
 	}
 }
 
-func YoursFlag() cli.BoolFlag {
-	return cli.BoolFlag{
+func YoursFlag() libcli.BoolFlag {
+	return libcli.BoolFlag{
 		Name:  "yours",
 		Usage: "Keep your current data store values",
 	}
 }
 
-func FileFlag() cli.StringFlag {
-	return cli.StringFlag{
+func FileFlag() libcli.StringFlag {
+	return libcli.StringFlag{
 		Name:  "file",
 		Usage: "Path to the file to be extracted",
 	}
