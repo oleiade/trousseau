@@ -24,6 +24,13 @@ To set up zsh autocompletion support for trousseau you will need to:
 
 Now everything should be working fine, even though you should automate these steps in your `~/.zshrc`
 
+## Fish shell
+
+### Installation and configuration
+
+Just put it in your ``~/.config/fish/completions`` directory.
+Yes, as simple as that.
+
 ## Bash
 
 ### Installation
@@ -34,12 +41,3 @@ Now everything should be working fine, even though you should automate these ste
 
 *Todo*
 
-## Fish shell
-
-### Installation
-
-*Todo*
-
-### Configuration
-
-*Todo*
