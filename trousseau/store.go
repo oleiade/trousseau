@@ -8,6 +8,7 @@ import (
 	openpgp "github.com/oleiade/trousseau/crypto/openpgp"
 	"os"
 	"reflect"
+	"sort"
 )
 
 type Store struct {
@@ -196,6 +197,8 @@ func (ds *DataStore) Keys() ([]string, error) {
 		index++
 	}
 
+	// Sort in alphabetical order
+	sort.Strings(keys)
 	return keys, nil
 }
 
