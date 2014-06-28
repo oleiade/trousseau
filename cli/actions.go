@@ -35,7 +35,7 @@ func CreateAction(c *libcli.Context) {
 	}
 
 	// Create and write empty store file
-	err := trousseau.CreateStoreFile(trousseau.GetStorePath(), opts, &meta)
+	err := trousseau.CreateStoreFile(trousseau.InferStorePath(), opts, &meta)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func ExportAction(c *libcli.Context) {
 	}
 
 	var err error
-	var inputFilePath string = trousseau.GetStorePath()
+	var inputFilePath string = trousseau.InferStorePath()
 	var outputFilePath string = c.Args()[0]
 
 	inputFile, err := os.Open(inputFilePath)
@@ -185,7 +185,7 @@ func ImportAction(c *libcli.Context) {
 
 	var err error
 	var importedFilePath string = c.Args()[0]
-	var localFilePath string = trousseau.GetStorePath()
+	var localFilePath string = trousseau.InferStorePath()
 	var strategy *trousseau.ImportStrategy = new(trousseau.ImportStrategy)
 
 	// Transform provided merging startegy flags
@@ -235,7 +235,7 @@ func AddRecipientAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func RemoveRecipientAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -294,7 +294,7 @@ func GetAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -358,7 +358,7 @@ func SetAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -388,7 +388,7 @@ func DelAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -418,7 +418,7 @@ func KeysAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -443,7 +443,7 @@ func ShowAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -468,7 +468,7 @@ func MetaAction(c *libcli.Context) {
 		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}

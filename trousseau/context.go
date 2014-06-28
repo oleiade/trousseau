@@ -20,7 +20,7 @@ var (
 	}
 )
 
-func GetStorePath() string {
+func InferStorePath() string {
 	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
 
 	if envPath != "" {

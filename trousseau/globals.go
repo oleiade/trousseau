@@ -6,7 +6,9 @@ import (
 )
 
 // Global data store file path
-var gStorePath string = GetStorePath()
+var gStorePath string = InferStorePath()
+func SetStorePath(storePath string) { gStorePath = storePath }
+func GetStorePath() string { return gStorePath }
 
 // Gnupg trousseau master gpg key id
 var gMasterGpgId string = os.Getenv(ENV_MASTER_GPG_ID_KEY)
