@@ -1,23 +1,23 @@
-package trousseau
+package cli
 
 import (
-	"github.com/codegangsta/cli"
+	libcli "github.com/codegangsta/cli"
 )
 
-func CreateCommand() cli.Command {
-	return cli.Command{
+func CreateCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "create",
 		Usage:  "create the trousseau data store",
 		Action: CreateAction,
 	}
 }
 
-func PushCommand() cli.Command {
-	return cli.Command{
+func PushCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "push",
 		Usage:  "pushes the trousseau to remote storage",
 		Action: PushAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			OverwriteFlag(),
 			AskPassword(),
 			VerboseFlag(),
@@ -26,12 +26,12 @@ func PushCommand() cli.Command {
 	}
 }
 
-func PullCommand() cli.Command {
-	return cli.Command{
+func PullCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "pull",
 		Usage:  "pull the trousseau from remote storage",
 		Action: PullAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			OverwriteFlag(),
 			AskPassword(),
 			VerboseFlag(),
@@ -40,24 +40,24 @@ func PullCommand() cli.Command {
 	}
 }
 
-func ExportCommand() cli.Command {
-	return cli.Command{
+func ExportCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "export",
 		Usage:  "export the encrypted trousseau to local fs",
 		Action: ExportAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			OverwriteFlag(),
 			VerboseFlag(),
 		},
 	}
 }
 
-func ImportCommand() cli.Command {
-	return cli.Command{
+func ImportCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "import",
 		Usage:  "import an encrypted trousseau from local fs",
 		Action: ImportAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			VerboseFlag(),
 			OverwriteFlag(),
 			TheirsFlag(),
@@ -66,83 +66,83 @@ func ImportCommand() cli.Command {
 	}
 }
 
-func AddRecipientCommand() cli.Command {
-	return cli.Command{
+func AddRecipientCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "add-recipient",
 		Usage:  "add a recipient to the encrypted trousseau",
 		Action: AddRecipientAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			VerboseFlag(),
 		},
 	}
 }
 
-func RemoveRecipientCommand() cli.Command {
-	return cli.Command{
+func RemoveRecipientCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "remove-recipient",
 		Usage:  "remove a recipient of the encrypted trousseau",
 		Action: RemoveRecipientAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			VerboseFlag(),
 		},
 	}
 }
 
-func SetCommand() cli.Command {
-	return cli.Command{
+func SetCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "set",
 		Usage:  "sets a key value pair in the store",
 		Action: SetAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			FileFlag(),
 			VerboseFlag(),
 		},
 	}
 }
 
-func GetCommand() cli.Command {
-	return cli.Command{
+func GetCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "get",
 		Usage:  "get a value from the trousseau",
 		Action: GetAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			FileFlag(),
 		},
 	}
 }
 
-func DelCommand() cli.Command {
-	return cli.Command{
+func DelCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "del",
 		Usage:  "delete the point key pair from the store",
 		Action: DelAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			VerboseFlag(),
 		},
 	}
 }
 
-func KeysCommand() cli.Command {
-	return cli.Command{
+func KeysCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "keys",
 		Usage:  "Lists the store keys",
 		Action: KeysAction,
-		Flags: []cli.Flag{
+		Flags: []libcli.Flag{
 			VerboseFlag(),
 		},
 	}
 }
 
-func ShowCommand() cli.Command {
-	return cli.Command{
+func ShowCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "show",
 		Usage:  "shows trousseau content",
 		Action: ShowAction,
 	}
 }
 
-func MetaCommand() cli.Command {
-	return cli.Command{
+func MetaCommand() libcli.Command {
+	return libcli.Command{
 		Name:   "meta",
 		Usage:  "shows trousseau metadata",
 		Action: MetaAction,

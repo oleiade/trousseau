@@ -1,10 +1,11 @@
-package trousseau
+package cli
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	libcli "github.com/codegangsta/cli"
 	"github.com/oleiade/trousseau/crypto"
 	"github.com/oleiade/trousseau/dsn"
+	"github.com/oleiade/trousseau/trousseau"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,7 +14,7 @@ import (
 	"time"
 )
 
-func CreateAction(c *cli.Context) {
+func CreateAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'configure' command")
 	}
@@ -22,27 +23,27 @@ func CreateAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 		Recipients: recipients,
 	}
 
-	meta := Meta{
+	meta := trousseau.Meta{
 		CreatedAt:        time.Now().String(),
 		LastModifiedAt:   time.Now().String(),
 		Recipients:       recipients,
-		TrousseauVersion: TROUSSEAU_VERSION,
+		TrousseauVersion: trousseau.TROUSSEAU_VERSION,
 	}
 
 	// Create and write empty store file
-	err := CreateStoreFile(gStorePath, opts, &meta)
+	err := trousseau.CreateStoreFile(trousseau.GetStorePath(), opts, &meta)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	Logger.Info("Trousseau data store succesfully created")
+	trousseau.Logger.Info("Trousseau data store succesfully created")
 }
 
-func PushAction(c *cli.Context) {
+func PushAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'push' command")
 	}
@@ -54,44 +55,44 @@ func PushAction(c *cli.Context) {
 
 	switch endpointDsn.Scheme {
 	case "s3":
-		err := endpointDsn.SetDefaults(gS3Defaults)
+		err := endpointDsn.SetDefaults(trousseau.S3Defaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = uploadUsingS3(endpointDsn)
+		err = trousseau.UploadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pushed to s3")
+		trousseau.Logger.Info("Trousseau data store succesfully pushed to s3")
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-		err := endpointDsn.SetDefaults(gScpDefaults)
+		err := endpointDsn.SetDefaults(trousseau.ScpDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if c.Bool("ask-password") == true {
-			password := PromptForPassword()
+			password := trousseau.PromptForPassword()
 			endpointDsn.Secret = password
 		}
 
-		err = uploadUsingScp(endpointDsn, privateKey)
+		err = trousseau.UploadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pushed to ssh remote storage")
+		trousseau.Logger.Info("Trousseau data store succesfully pushed to ssh remote storage")
 	case "gist":
-		err = uploadUsingGist(endpointDsn)
+		err = trousseau.UploadUsingGist(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pushed to gist")
+		trousseau.Logger.Info("Trousseau data store succesfully pushed to gist")
 	}
 }
 
-func PullAction(c *cli.Context) {
+func PullAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'pull' command")
 	}
@@ -103,40 +104,40 @@ func PullAction(c *cli.Context) {
 
 	switch endpointDsn.Scheme {
 	case "s3":
-		err := endpointDsn.SetDefaults(gS3Defaults)
+		err := endpointDsn.SetDefaults(trousseau.S3Defaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = DownloadUsingS3(endpointDsn)
+		err = trousseau.DownloadUsingS3(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pulled from S3")
+		trousseau.Logger.Info("Trousseau data store succesfully pulled from S3")
 	case "scp":
 		privateKey := c.String("ssh-private-key")
 
-		err := endpointDsn.SetDefaults(gScpDefaults)
+		err := endpointDsn.SetDefaults(trousseau.ScpDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if c.Bool("ask-password") == true {
-			password := PromptForPassword()
+			password := trousseau.PromptForPassword()
 			endpointDsn.Secret = password
 		}
 
-		err = DownloadUsingScp(endpointDsn, privateKey)
+		err = trousseau.DownloadUsingScp(endpointDsn, privateKey)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pulled from ssh remote storage")
+		trousseau.Logger.Info("Trousseau data store succesfully pulled from ssh remote storage")
 	case "gist":
-		err = DownloadUsingGist(endpointDsn)
+		err = trousseau.DownloadUsingGist(endpointDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		Logger.Info("Trousseau data store succesfully pulled from gist")
+		trousseau.Logger.Info("Trousseau data store succesfully pulled from gist")
 	default:
 		if endpointDsn.Scheme == "" {
 			log.Fatalf("No dsn scheme supplied")
@@ -145,16 +146,16 @@ func PullAction(c *cli.Context) {
 		}
 	}
 
-	Logger.Info("Trousseau data store succesfully pulled from remote storage")
+	trousseau.Logger.Info("Trousseau data store succesfully pulled from remote storage")
 }
 
-func ExportAction(c *cli.Context) {
+func ExportAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'export' command")
 	}
 
 	var err error
-	var inputFilePath string = gStorePath
+	var inputFilePath string = trousseau.GetStorePath()
 	var outputFilePath string = c.Args()[0]
 
 	inputFile, err := os.Open(inputFilePath)
@@ -174,18 +175,18 @@ func ExportAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	Logger.Info(fmt.Sprintf("Trousseau data store exported to: %s", outputFilePath))
+	trousseau.Logger.Info(fmt.Sprintf("Trousseau data store exported to: %s", outputFilePath))
 }
 
-func ImportAction(c *cli.Context) {
+func ImportAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'import' command")
 	}
 
 	var err error
 	var importedFilePath string = c.Args()[0]
-	var localFilePath string = gStorePath
-	var strategy *ImportStrategy = new(ImportStrategy)
+	var localFilePath string = trousseau.GetStorePath()
+	var strategy *trousseau.ImportStrategy = new(trousseau.ImportStrategy)
 
 	// Transform provided merging startegy flags
 	// into a proper ImportStrategy byte.
@@ -196,20 +197,20 @@ func ImportAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	localStore, err := LoadStore(localFilePath, opts)
+	localStore, err := trousseau.LoadStore(localFilePath, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	importedStore, err := LoadStore(importedFilePath, opts)
+	importedStore, err := trousseau.LoadStore(importedFilePath, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = ImportStore(importedStore, localStore, *strategy)
+	err = trousseau.ImportStore(importedStore, localStore, *strategy)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -219,10 +220,10 @@ func ImportAction(c *cli.Context) {
 		log.Fatal(err)
 	}
 
-	Logger.Info(fmt.Sprintf("Trousseau data store imported: %s", importedFilePath))
+	trousseau.Logger.Info(fmt.Sprintf("Trousseau data store imported: %s", importedFilePath))
 }
 
-func AddRecipientAction(c *cli.Context) {
+func AddRecipientAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'add-recipient' command")
 	}
@@ -231,10 +232,10 @@ func AddRecipientAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(gStorePath, opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -247,11 +248,11 @@ func AddRecipientAction(c *cli.Context) {
 	}
 
 	if c.Bool("verbose") == true {
-		Logger.Info(fmt.Sprintf("Recipient added to trousseau data store: %s", recipient))
+		trousseau.Logger.Info(fmt.Sprintf("Recipient added to trousseau data store: %s", recipient))
 	}
 }
 
-func RemoveRecipientAction(c *cli.Context) {
+func RemoveRecipientAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'remove-recipient' command")
 	}
@@ -260,10 +261,10 @@ func RemoveRecipientAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(gStorePath, opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -283,17 +284,17 @@ func RemoveRecipientAction(c *cli.Context) {
 	}
 }
 
-func GetAction(c *cli.Context) {
+func GetAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'get' command")
 	}
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(gStorePath, opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -315,11 +316,17 @@ func GetAction(c *cli.Context) {
 			log.Fatal(err)
 		}
 	} else {
-		Logger.Info(value)
+		// Use fmt.Print to support patch processes,
+		// to get the value "as is" without any appended newlines
+		if isPipe(os.Stdout) {
+			fmt.Print(value)
+		} else {
+			trousseau.Logger.Info(value)
+		}
 	}
 }
 
-func SetAction(c *cli.Context) {
+func SetAction(c *libcli.Context) {
 	var key string
 	var value string
 	var err error
@@ -327,7 +334,7 @@ func SetAction(c *cli.Context) {
 	// If the --file flag is provided
 	if c.String("file") != "" && hasExpectedArgs(c.Args(), 1) {
 		// And the file actually exists on file system
-		if pathExists(c.String("file")) {
+		if trousseau.PathExists(c.String("file")) {
 			// Then load it's content
 			fileContent, err := ioutil.ReadFile(c.String("file"))
 			if err != nil {
@@ -348,10 +355,10 @@ func SetAction(c *cli.Context) {
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(gStorePath, opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -367,21 +374,21 @@ func SetAction(c *cli.Context) {
 	}
 
 	if c.Bool("verbose") == true {
-		Logger.Info(fmt.Sprintf("%s:%s", key, value))
+		trousseau.Logger.Info(fmt.Sprintf("%s:%s", key, value))
 	}
 }
 
-func DelAction(c *cli.Context) {
+func DelAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'del' command")
 	}
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(gStorePath, opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -397,21 +404,21 @@ func DelAction(c *cli.Context) {
 	}
 
 	if c.Bool("verbose") == true {
-		Logger.Info(fmt.Sprintf("deleted: %s", c.Args()[0]))
+		trousseau.Logger.Info(fmt.Sprintf("deleted: %s", c.Args()[0]))
 	}
 }
 
-func KeysAction(c *cli.Context) {
+func KeysAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 0) {
 		log.Fatal("Incorrect number of arguments to 'keys' command")
 	}
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(gStorePath, opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -421,22 +428,22 @@ func KeysAction(c *cli.Context) {
 		log.Fatal(err)
 	} else {
 		for _, k := range keys {
-			Logger.Info(k)
+			trousseau.Logger.Info(k)
 		}
 	}
 }
 
-func ShowAction(c *cli.Context) {
+func ShowAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 0) {
 		log.Fatal("Incorrect number of arguments to 'show' command")
 	}
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(gStorePath, opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -446,22 +453,22 @@ func ShowAction(c *cli.Context) {
 		log.Fatal(err)
 	} else {
 		for _, pair := range pairs {
-			Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
+			trousseau.Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
 		}
 	}
 }
 
-func MetaAction(c *cli.Context) {
+func MetaAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 0) {
 		log.Fatal("Incorrect number of arguments to 'meta' command")
 	}
 
 	opts := &crypto.Options{
 		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: gPasshphrase,
+		Passphrase: trousseau.GetPassphrase(),
 	}
 
-	store, err := LoadStore(gStorePath, opts)
+	store, err := trousseau.LoadStore(trousseau.GetStorePath(), opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -472,7 +479,7 @@ func MetaAction(c *cli.Context) {
 	}
 
 	for _, pair := range pairs {
-		Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
+		trousseau.Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
 	}
 }
 
@@ -492,4 +499,15 @@ func hasExpectedArgs(args []string, expected int) bool {
 			return false
 		}
 	}
+}
+
+// Thanks, mrnugget!
+// https://github.com/mrnugget/fzz/blob/master/utils.go#L14-L21
+func isPipe(f *os.File) bool {
+	s, err := f.Stat()
+	if err != nil {
+		return false
+	}
+
+	return s.Mode()&os.ModeNamedPipe != 0
 }
