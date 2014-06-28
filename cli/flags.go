@@ -63,3 +63,10 @@ func FileFlag() libcli.StringFlag {
 		Usage: "Path to the file to be extracted",
 	}
 }
+
+func StoreFlag() libcli.StringFlag {
+	return libcli.StringFlag{
+		Name: "store",
+		Usage: "Path to the trousseau data store to use",
+	}
+}

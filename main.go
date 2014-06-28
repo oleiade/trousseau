@@ -30,6 +30,7 @@ func main() {
 	}
 	app.Flags = []cli.Flag{
 		trousseau_cli.VerboseFlag(),
+		trousseau_cli.StoreFlag(),
 	}
 
 	trousseau.Logger.Formatter = new(trousseau.RawFormatter)
