@@ -25,6 +25,8 @@ func InferStorePath() string {
 
 	if envPath != "" {
 		return envPath
+	} else if gStorePath != "" {
+		return gStorePath
 	}
 
 	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)

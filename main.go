@@ -32,6 +32,7 @@ func main() {
 		trousseau_cli.VerboseFlag(),
 		trousseau_cli.StoreFlag(),
 	}
+	app.Before = trousseau_cli.UpdateStorePath
 
 	trousseau.Logger.Formatter = new(trousseau.RawFormatter)
 	app.Run(os.Args)

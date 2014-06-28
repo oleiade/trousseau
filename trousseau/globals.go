@@ -6,7 +6,7 @@ import (
 )
 
 // Global data store file path
-var gStorePath string = InferStorePath()
+var gStorePath string
 func SetStorePath(storePath string) { gStorePath = storePath }
 func GetStorePath() string { return gStorePath }
 
