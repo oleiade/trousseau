@@ -150,6 +150,7 @@ Trousseau behavior can be controlled through the system environment:
 ### Basics
 
 First use of **trousseau** requires the data store to be created. A **trousseau** data store is built and maintained for a list of *gpg* recipients who will be the only ones able to decrypt and manipulate it (so don't forget to include yourself ;) )
+Moreover, you can easily create/select multiple stores using whether the ``--store`` global option or the ``TROUSSEAU_STORE`` environment variable mentioned upper in this *README*.
 
 <div class="break"></div>
 #### API
@@ -158,6 +159,8 @@ First use of **trousseau** requires the data store to be created. A **trousseau*
 * **meta** : Outputs the store metadata.
 * **add-recipient** RECIPIENT : Adds a recipient to the store. The recipient will be able to open and modify the store.
 * **remove-recipient** RECIPIENT : Removes a recipient from the store. The recipient will not be able to open or modify the store.
+
+* ``--store`` [PATH] : select an alternative trousseau data store path. This option is really helpful when you want to manipulate multiple stores.
 
 <div class="break"></div>
 #### First steps with the data store
