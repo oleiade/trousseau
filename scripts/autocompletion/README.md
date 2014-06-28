@@ -33,11 +33,8 @@ Yes, as simple as that.
 
 ## Bash
 
-### Installation
+### Installation and configuration
 
-*Todo*
-
-### Configuration
-
-*Todo*
+Just put it in your ``/etc/bash_completion.d`` folder as ``trousseau`` for example.
+That's it.
 
