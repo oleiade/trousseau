@@ -6,6 +6,7 @@
 
 * [Mthamed](https://github.com/mtahmed)
 * [Fernando Alvarez](https://github.com/fern4lvarez) <fa@cloudcontrol.de>
+* [Chris Aumann](https://github.com/chr4)
 
 
 ## Open-source contributions import
