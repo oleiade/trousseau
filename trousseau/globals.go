@@ -7,12 +7,13 @@ import (
 
 // Global data store file path
 var gStorePath string
+
 func SetStorePath(storePath string) { gStorePath = storePath }
-func GetStorePath() string { return gStorePath }
+func GetStorePath() string          { return gStorePath }
 
 // Gnupg trousseau master gpg key id
 var gMasterGpgId string = os.Getenv(ENV_MASTER_GPG_ID_KEY)
-var gPasshphrase string = GetPassphrase()
+var gPasshphrase string
 
 // Ssh default identity file path
 var gPrivateRsaKeyPath string = filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa")
