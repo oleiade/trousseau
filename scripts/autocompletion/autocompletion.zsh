@@ -24,7 +24,7 @@ _trousseau() {
   case $state in
     trousseaucmd)
       # List of available commands
-      compadd -Q create push pull export import add-recipient remove-recipient set get del keys show meta help
+      compadd -Q create push pull export import add-recipient remove-recipient set get rename del keys show meta help
     ;;
     trousseausubcmd)
       case $words[2] in

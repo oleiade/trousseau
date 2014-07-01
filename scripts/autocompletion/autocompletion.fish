@@ -13,6 +13,8 @@ complete -f -c trousseau -n '__fish_complete_subcommand' -a get -d 'Get a key\'s
 # Set command
 complete -f -c trousseau -n '__fish_complete_subcommand' -a set -d 'Set a store key-value pair'
 
+# Rename command
+complete -f -c trousseau -n '__fish_complete_subcommand' -a rename -d 'rename an existing key'
 
 # Del command
 complete -f -c trousseau -n '__fish_complete_subcommand' -a del -d 'Remove a key-value pair'
