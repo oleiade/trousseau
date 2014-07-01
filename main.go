@@ -1,10 +1,11 @@
 package main
 
 import (
+	"os"
+
 	"github.com/codegangsta/cli"
 	trousseau_cli "github.com/oleiade/trousseau/cli"
 	"github.com/oleiade/trousseau/trousseau"
-	"os"
 )
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 		trousseau_cli.RemoveRecipientCommand(),
 		trousseau_cli.SetCommand(),
 		trousseau_cli.GetCommand(),
+		trousseau_cli.RenameCommand(),
 		trousseau_cli.DelCommand(),
 		trousseau_cli.KeysCommand(),
 		trousseau_cli.ShowCommand(),

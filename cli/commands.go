@@ -111,6 +111,17 @@ func GetCommand() libcli.Command {
 	}
 }
 
+func RenameCommand() libcli.Command {
+	return libcli.Command{
+		Name:   "rename",
+		Usage:  "rename an existing key",
+		Action: RenameAction,
+		Flags: []libcli.Flag{
+			VerboseFlag(),
+		},
+	}
+}
+
 func DelCommand() libcli.Command {
 	return libcli.Command{
 		Name:   "del",

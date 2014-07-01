@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	crypto "github.com/oleiade/trousseau/crypto"
-	openpgp "github.com/oleiade/trousseau/crypto/openpgp"
 	"os"
 	"reflect"
 	"sort"
+
+	crypto "github.com/oleiade/trousseau/crypto"
+	openpgp "github.com/oleiade/trousseau/crypto/openpgp"
 )
 
 type Store struct {
@@ -176,6 +177,27 @@ func (ds *DataStore) Get(key string) (interface{}, error) {
 // SetStoreKey sets a key value pair in the store
 func (ds *DataStore) Set(key string, value interface{}) error {
 	ds.Container[key] = value
+
+	return nil
+}
+
+func (ds *DataStore) Rename(src, dest string) error {
+	value, err := ds.Get(src)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Source key %s does not exist", src))
+	}
+
+	err = ds.Set(dest, value)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Unable to set %s destination key value", dest))
+	}
+
+	err = ds.Del(src)
+	if err != nil {
+		// Rollback
+		delete(ds.Container, dest)
+		return errors.New(fmt.Sprintf("Unable to delete %s source key", dest))
+	}
 
 	return nil
 }

@@ -2,16 +2,17 @@ package cli
 
 import (
 	"fmt"
-	libcli "github.com/codegangsta/cli"
-	"github.com/oleiade/trousseau/crypto"
-	"github.com/oleiade/trousseau/dsn"
-	"github.com/oleiade/trousseau/trousseau"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	libcli "github.com/codegangsta/cli"
+	"github.com/oleiade/trousseau/crypto"
+	"github.com/oleiade/trousseau/dsn"
+	"github.com/oleiade/trousseau/trousseau"
 )
 
 func CreateAction(c *libcli.Context) {
@@ -375,6 +376,36 @@ func SetAction(c *libcli.Context) {
 
 	if c.Bool("verbose") == true {
 		trousseau.Logger.Info(fmt.Sprintf("%s:%s", key, value))
+	}
+}
+
+func RenameAction(c *libcli.Context) {
+	if !hasExpectedArgs(c.Args(), 2) {
+		log.Fatal("Incorrect number of arguments provided to 'rename' command")
+	}
+
+	opts := &crypto.Options{
+		Algorithm:  crypto.GPG_ENCRYPTION,
+		Passphrase: trousseau.GetPassphrase(),
+	}
+
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = store.Rename(c.Args()[0], c.Args()[1])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = store.Sync()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if c.Bool("verbose") == true {
+		trousseau.Logger.Info(fmt.Sprintf("renamed: %s to %s", c.Args()[0], c.Args()[1]))
 	}
 }
 
