@@ -203,6 +203,7 @@ Once your trousseau has been created, you're now able to read, write, list, dele
 
 * **get** KEY [--file]: Outputs the stored KEY-value pair, whether on *stdout* or in pointed ``--file`` option path.
 * **set** KEY [VALUE | --file] : Sets the provided key-value pair in store using provided value or extracting it from path pointed by ``--file`` option.
+* **rename** KEY_NAME NEW_NAME : Renames a store key
 * **del** KEY : Deletes provided key from the store
 * **keys** : Lists the stored keys
 * **show** : Lists the stored key-value pairs
@@ -234,8 +235,16 @@ myuser.ssh.public_key
 $ trousseau get abc
 123
 
+# What about renaming abc key, just for fun?
+$ trousseau rename abc 'my friend jackson'
+$ trousseau keys 
+my friend jackson
+easy as
+myuser.ssh.public_key
+
+
 $ trousseau show
-abc: 123
+my friend jackson: 123
 easy as: do re mi
 myuser.ssh.public_key: ssh-rsa 1289eu102ij30192u3e0912e
 ...
@@ -245,7 +254,7 @@ myuser.ssh.public_key: ssh-rsa 1289eu102ij30192u3e0912e
 $ trousseau get myuser.ssh.public_key --file /home/myuser/id_rsa.pub
 
 # Now if you don't need a key anymore, just drop it.
-$ trousseau del abc  # Now the song lacks something doesn't it?
+$ trousseau del 'my friend jackson' # Now the song lacks something doesn't it?
 ```
 
 <div class="break"></div>
