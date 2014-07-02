@@ -117,6 +117,7 @@ func RenameCommand() libcli.Command {
 		Usage:  "rename an existing key",
 		Action: RenameAction,
 		Flags: []libcli.Flag{
+			OverrideFlag(),
 			VerboseFlag(),
 		},
 	}

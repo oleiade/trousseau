@@ -181,13 +181,26 @@ func (ds *DataStore) Set(key string, value interface{}) error {
 	return nil
 }
 
-func (ds *DataStore) Rename(src, dest string) error {
-	value, err := ds.Get(src)
-	if err != nil {
+// Rename a data store src key to dest. If override parameter
+// is provided with a true value, any existing destination key-value
+// pair will be overriden, otherwise (false) an error will be returned.
+func (ds *DataStore) Rename(src, dest string, override bool) error {
+	var err error
+
+	srcValue, ok := ds.Container[src]
+	if !ok {
 		return errors.New(fmt.Sprintf("Source key %s does not exist", src))
 	}
 
-	err = ds.Set(dest, value)
+	// If destination key already exists, and override flag is
+	// set to false, then return an error
+	_, ok = ds.Container[dest]
+	if ok && override == false {
+		return errors.New(fmt.Sprintf("Destination key %s already exists an override flag was not provided.", dest))
+	}
+
+	// Otherwise update dest value
+	err = ds.Set(dest, srcValue)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Unable to set %s destination key value", dest))
 	}

@@ -394,7 +394,7 @@ func RenameAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	err = store.Rename(c.Args()[0], c.Args()[1])
+	err = store.Rename(c.Args()[0], c.Args()[1], c.Bool("override"))
 	if err != nil {
 		log.Fatal(err)
 	}

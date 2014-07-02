@@ -66,7 +66,14 @@ func FileFlag() libcli.StringFlag {
 
 func StoreFlag() libcli.StringFlag {
 	return libcli.StringFlag{
-		Name: "store",
+		Name:  "store",
 		Usage: "Path to the trousseau data store to use",
+	}
+}
+
+func OverrideFlag() libcli.BoolFlag {
+	return libcli.BoolFlag{
+		Name:  "override",
+		Usage: "Override existing values",
 	}
 }
