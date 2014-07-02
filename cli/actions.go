@@ -224,6 +224,27 @@ func ImportAction(c *libcli.Context) {
 	trousseau.Logger.Info(fmt.Sprintf("Trousseau data store imported: %s", importedFilePath))
 }
 
+func ListRecipientsAction(c *libcli.Context) {
+	if !hasExpectedArgs(c.Args(), 0) {
+		log.Fatal("Incorrect number of arguments provided to 'list-recipients' command")
+	}
+
+	opts := &crypto.Options{
+		Algorithm:  crypto.GPG_ENCRYPTION,
+		Passphrase: trousseau.GetPassphrase(),
+	}
+
+	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	recipients := store.DataStore.Meta.ListRecipients()
+	for _, r := range recipients {
+		trousseau.Logger.Info(r)
+	}
+}
+
 func AddRecipientAction(c *libcli.Context) {
 	if !hasExpectedArgs(c.Args(), 1) {
 		log.Fatal("Incorrect number of arguments to 'add-recipient' command")

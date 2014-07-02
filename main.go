@@ -20,6 +20,7 @@ func main() {
 		trousseau_cli.PullCommand(),
 		trousseau_cli.ExportCommand(),
 		trousseau_cli.ImportCommand(),
+		trousseau_cli.ListRecipientsCommand(),
 		trousseau_cli.AddRecipientCommand(),
 		trousseau_cli.RemoveRecipientCommand(),
 		trousseau_cli.SetCommand(),

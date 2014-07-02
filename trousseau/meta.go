@@ -35,6 +35,10 @@ func (m *Meta) isLastRecipient(recipient string) bool {
 	return false
 }
 
+func (m *Meta) ListRecipients() []string {
+	return m.Recipients
+}
+
 func (m *Meta) AddRecipient(recipient string) error {
 	in, _ := m.containsRecipient(recipient)
 	if in {

@@ -66,6 +66,17 @@ func ImportCommand() libcli.Command {
 	}
 }
 
+func ListRecipientsCommand() libcli.Command {
+	return libcli.Command{
+		Name:   "list-recipients",
+		Usage:  "lists trousseau data store recipients",
+		Action: ListRecipientsAction,
+		Flags: []libcli.Flag{
+			VerboseFlag(),
+		},
+	}
+}
+
 func AddRecipientCommand() libcli.Command {
 	return libcli.Command{
 		Name:   "add-recipient",
