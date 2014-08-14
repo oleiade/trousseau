@@ -62,7 +62,7 @@ $ sudo apt-get update && sudo apt-get install trousseau
 If you're using homebrew just proceed to installation using the provided formula:
 
 ```bash
-$ brew install trousseau.rb
+$ brew install https://raw.githubusercontent.com/oleiade/trousseau/master/trousseau.rb
 ```
 
 *Et voila!*
