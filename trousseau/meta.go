@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"reflect"
 )
 
 type Meta struct {
@@ -11,28 +12,6 @@ type Meta struct {
 	LastModifiedAt   string   `json:"last_modified_at"`
 	Recipients       []string `json:"recipients"`
 	TrousseauVersion string   `json:"version"`
-}
-
-func (m *Meta) updateLastModificationMarker() {
-	m.LastModifiedAt = time.Now().String()
-}
-
-func (m *Meta) containsRecipient(recipient string) (status bool, index int) {
-	for index, r := range m.Recipients {
-		if r == recipient {
-			return true, index
-		}
-	}
-
-	return false, -1
-}
-
-func (m *Meta) isLastRecipient(recipient string) bool {
-	if len(m.Recipients) == 1 {
-		return true
-	}
-
-	return false
 }
 
 func (m *Meta) ListRecipients() []string {
@@ -67,4 +46,40 @@ func (m *Meta) RemoveRecipient(recipient string) error {
 
 	return nil
 
+}
+
+func (m *Meta) updateLastModificationMarker() {
+	m.LastModifiedAt = time.Now().String()
+}
+
+func (m *Meta) containsRecipient(recipient string) (status bool, index int) {
+	for index, r := range m.Recipients {
+		if r == recipient {
+			return true, index
+		}
+	}
+
+	return false, -1
+}
+
+func (m *Meta) isLastRecipient(recipient string) bool {
+	if len(m.Recipients) == 1 {
+		return true
+	}
+
+	return false
+}
+
+func (m *Meta) String() string {
+	var repr string
+	metaType := reflect.TypeOf(*m)
+	metaValue := reflect.ValueOf(*m)
+
+	for i := 0; i < metaType.NumField(); i++ {
+		key := metaType.Field(i).Name
+		value := metaValue.FieldByName(key).Interface()
+		repr += fmt.Sprintf("%s : %v\n", key, value)
+	}
+
+	return repr
 }

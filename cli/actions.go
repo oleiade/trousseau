@@ -10,7 +10,7 @@ import (
 	"time"
 
 	libcli "github.com/codegangsta/cli"
-	"github.com/oleiade/trousseau/crypto"
+//	"github.com/oleiade/trousseau/crypto"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/trousseau"
 )
@@ -22,21 +22,21 @@ func CreateAction(c *libcli.Context) {
 
 	recipients := strings.Split(c.Args()[0], ",")
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-		Recipients: recipients,
-	}
-
 	meta := trousseau.Meta{
 		CreatedAt:        time.Now().String(),
 		LastModifiedAt:   time.Now().String(),
 		Recipients:       recipients,
 		TrousseauVersion: trousseau.TROUSSEAU_VERSION,
 	}
+	store := trousseau.NewStore(&meta)
 
-	// Create and write empty store file
-	err := trousseau.CreateStoreFile(trousseau.InferStorePath(), opts, &meta)
+	tr := trousseau.Trousseau{
+		CryptoType: trousseau.ASYMMETRIC_ENCRYPTION,
+		CryptoAlgorithm: trousseau.GPG_ENCRYPTION,
+	}
+	tr.Encrypt(store)
+
+	err := tr.Write(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -196,17 +196,22 @@ func ImportAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	localStore, err := trousseau.LoadStore(localFilePath, opts)
+	localTr, err := trousseau.OpenTrousseau(localFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	importedStore, err := trousseau.LoadStore(importedFilePath, opts)
+	localStore, err := localTr.Decrypt()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	importedTr, err := trousseau.OpenTrousseau(importedFilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	importedStore, err := importedTr.Decrypt()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -216,7 +221,13 @@ func ImportAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	err = localStore.Sync()
+
+	err = localTr.Encrypt(localStore)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = localTr.Write(localFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -229,17 +240,17 @@ func ListRecipientsAction(c *libcli.Context) {
 		log.Fatal("Incorrect number of arguments provided to 'list-recipients' command")
 	}
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	recipients := store.DataStore.Meta.ListRecipients()
+	store, err := tr.Decrypt()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	recipients := store.Meta.ListRecipients()
 	for _, r := range recipients {
 		trousseau.Logger.Info(r)
 	}
@@ -252,19 +263,27 @@ func AddRecipientAction(c *libcli.Context) {
 
 	recipient := c.Args()[0]
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = store.DataStore.Meta.AddRecipient(recipient)
+	store, err := tr.Decrypt()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err = store.Sync()
+	err = store.Meta.AddRecipient(recipient)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tr.Encrypt(store)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tr.Write(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -281,12 +300,12 @@ func RemoveRecipientAction(c *libcli.Context) {
 
 	recipient := c.Args()[0]
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	store, err := tr.Decrypt()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -296,7 +315,12 @@ func RemoveRecipientAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	err = store.Sync()
+	err = tr.Encrypt(store)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tr.Write(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -311,17 +335,17 @@ func GetAction(c *libcli.Context) {
 		log.Fatal("Incorrect number of arguments to 'get' command")
 	}
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	value, err := store.Get(c.Args()[0])
+	store, err := tr.Decrypt()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	value, err := store.Data.Get(c.Args()[0])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -333,7 +357,7 @@ func GetAction(c *libcli.Context) {
 			log.Fatal(fmt.Sprintf("unable to write %s value to file", c.Args()[0]))
 		}
 
-		err := ioutil.WriteFile(c.String("file"), []byte(valueBytes), 0644)
+		err := ioutil.WriteFile(c.String("file"), []byte(valueBytes), os.FileMode(0644))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -375,22 +399,24 @@ func SetAction(c *libcli.Context) {
 
 	key = c.Args()[0]
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = store.Set(key, value)
+	store, err := tr.Decrypt()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = store.Sync()
+	store.Data.Set(key, value)
+
+	err = tr.Encrypt(store)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tr.Write(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -405,22 +431,27 @@ func RenameAction(c *libcli.Context) {
 		log.Fatal("Incorrect number of arguments provided to 'rename' command")
 	}
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = store.Rename(c.Args()[0], c.Args()[1], c.Bool("override"))
+	store, err := tr.Decrypt()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = store.Sync()
+	err = store.Data.Rename(c.Args()[0], c.Args()[1], c.Bool("overwrite"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tr.Encrypt(store)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tr.Write(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -435,22 +466,24 @@ func DelAction(c *libcli.Context) {
 		log.Fatal("Incorrect number of arguments to 'del' command")
 	}
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = store.Del(c.Args()[0])
+	store, err := tr.Decrypt()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = store.Sync()
+	store.Data.Del(c.Args()[0])
+
+	tr.Encrypt(store)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tr.Write(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -465,23 +498,19 @@ func KeysAction(c *libcli.Context) {
 		log.Fatal("Incorrect number of arguments to 'keys' command")
 	}
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	keys, err := store.Keys()
+	store, err := tr.Decrypt()
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		for _, k := range keys {
-			trousseau.Logger.Info(k)
-		}
+	}
+
+	keys := store.Data.Keys()
+	for _, k := range keys {
+		trousseau.Logger.Info(k)
 	}
 }
 
@@ -490,23 +519,19 @@ func ShowAction(c *libcli.Context) {
 		log.Fatal("Incorrect number of arguments to 'show' command")
 	}
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pairs, err := store.Items()
+	store, err := tr.Decrypt()
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		for _, pair := range pairs {
-			trousseau.Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
-		}
+	}
+
+	items := store.Data.Items()
+	for k, v := range items {
+		trousseau.Logger.Info(fmt.Sprintf("%s : %s", k, v.(string)))
 	}
 }
 
@@ -515,24 +540,17 @@ func MetaAction(c *libcli.Context) {
 		log.Fatal("Incorrect number of arguments to 'meta' command")
 	}
 
-	opts := &crypto.Options{
-		Algorithm:  crypto.GPG_ENCRYPTION,
-		Passphrase: trousseau.GetPassphrase(),
-	}
-
-	store, err := trousseau.LoadStore(trousseau.InferStorePath(), opts)
+	tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pairs, err := store.Metadata()
+	store, err := tr.Decrypt()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, pair := range pairs {
-		trousseau.Logger.Info(fmt.Sprintf("%s : %s", pair.Key, pair.Value))
-	}
+	trousseau.Logger.Info(store.Meta)
 }
 
 // hasExpectedArgs checks whether the number of args are as expected.

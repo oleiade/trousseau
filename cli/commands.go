@@ -12,33 +12,33 @@ func CreateCommand() libcli.Command {
 	}
 }
 
-func PushCommand() libcli.Command {
-	return libcli.Command{
-		Name:   "push",
-		Usage:  "pushes the trousseau to remote storage",
-		Action: PushAction,
-		Flags: []libcli.Flag{
-			OverwriteFlag(),
-			AskPassword(),
-			VerboseFlag(),
-			SshPrivateKeyPathFlag(),
-		},
-	}
-}
-
-func PullCommand() libcli.Command {
-	return libcli.Command{
-		Name:   "pull",
-		Usage:  "pull the trousseau from remote storage",
-		Action: PullAction,
-		Flags: []libcli.Flag{
-			OverwriteFlag(),
-			AskPassword(),
-			VerboseFlag(),
-			SshPrivateKeyPathFlag(),
-		},
-	}
-}
+//func PushCommand() libcli.Command {
+//	return libcli.Command{
+//		Name:   "push",
+//		Usage:  "pushes the trousseau to remote storage",
+//		Action: PushAction,
+//		Flags: []libcli.Flag{
+//			OverwriteFlag(),
+//			AskPassword(),
+//			VerboseFlag(),
+//			SshPrivateKeyPathFlag(),
+//		},
+//	}
+//}
+//
+//func PullCommand() libcli.Command {
+//	return libcli.Command{
+//		Name:   "pull",
+//		Usage:  "pull the trousseau from remote storage",
+//		Action: PullAction,
+//		Flags: []libcli.Flag{
+//			OverwriteFlag(),
+//			AskPassword(),
+//			VerboseFlag(),
+//			SshPrivateKeyPathFlag(),
+//		},
+//	}
+//}
 
 func ExportCommand() libcli.Command {
 	return libcli.Command{
@@ -128,7 +128,7 @@ func RenameCommand() libcli.Command {
 		Usage:  "rename an existing key",
 		Action: RenameAction,
 		Flags: []libcli.Flag{
-			OverrideFlag(),
+			OverwriteFlag(),
 			VerboseFlag(),
 		},
 	}

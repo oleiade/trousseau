@@ -36,13 +36,6 @@ func SshPrivateKeyPathFlag() libcli.StringFlag {
 	}
 }
 
-func OverwriteFlag() libcli.BoolFlag {
-	return libcli.BoolFlag{
-		Name:  "overwrite",
-		Usage: "Overwrite existing trousseau file",
-	}
-}
-
 func TheirsFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
 		Name:  "theirs",
@@ -71,9 +64,9 @@ func StoreFlag() libcli.StringFlag {
 	}
 }
 
-func OverrideFlag() libcli.BoolFlag {
+func OverwriteFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
-		Name:  "override",
-		Usage: "Override existing values",
+		Name:  "overwrite",
+		Usage: "Override existing resources",
 	}
 }
