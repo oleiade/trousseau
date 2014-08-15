@@ -20,6 +20,20 @@ const (
 	ENV_SSH_PRIVATE_KEY     = "TROUSSEAU_PRIVATE_KEY"
 )
 
+// Declare encryption types
+type EncryptionType int
+const (
+	SYMMETRIC_ENCRYPTION EncryptionType = iota
+	ASYMMETRIC_ENCRYPTION EncryptionType
+)
+
+// Declare available encryption algorithms
+type EncryptionAlgorithm int
+const (
+	GPG_ENCRYPTION EncryptionAlgorithm = iota
+	AES_256_ENCRYPTION
+)
+
 // Import strategies enumeration
 const (
 	IMPORT_YOURS     = 0x0
