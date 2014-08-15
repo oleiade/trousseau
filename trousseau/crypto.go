@@ -7,15 +7,15 @@ import (
 // Declare encryption types
 type CryptoType int
 const (
-	SYMMETRIC_ENCRYPTION  CryptoType = iota
-	ASYMMETRIC_ENCRYPTION
+	SYMMETRIC_ENCRYPTION  CryptoType = 0
+	ASYMMETRIC_ENCRYPTION CryptoType = 1
 )
 
 // Declare available encryption algorithms
 type CryptoAlgorithm int
 const (
-	GPG_ENCRYPTION 		CryptoAlgorithm = iota
-	AES_256_ENCRYPTION
+	GPG_ENCRYPTION 		CryptoAlgorithm = 0
+	AES_256_ENCRYPTION  CryptoAlgorithm = 1
 )
 
 func DecryptAsymmetricPGP(encryptedData []byte, passphrase string) ([]byte, error) {
