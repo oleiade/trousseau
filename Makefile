@@ -29,5 +29,9 @@ trousseau: deps
 test: deps
 	@(go list ./... | xargs -n1 go test)
 
-.PNONY: all deps trousseau test
+format:
+	@(go fmt ./...)
+	@(go vet ./...)
+
+.PNONY: all deps trousseau test format 
 
