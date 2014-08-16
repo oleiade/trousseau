@@ -5,25 +5,28 @@ import (
 	"encoding/json"
 
 	"github.com/oleiade/tempura"
+	"os"
 )
 
 func TestOpenTrousseau(t *testing.T) {
 	testData := make(map[string]interface{})
-	testData["encryption_type"] = ASYMMETRIC_ENCRYPTION
-	testData["encryption_algorithm"] = GPG_ENCRYPTION
-	testData["_data"] = "qeiun91inwd918hnd913dn19dni1dn9183nd9138d"
+	testData["crypto_type"] = ASYMMETRIC_ENCRYPTION
+	testData["crypto_algorithm"] = GPG_ENCRYPTION
+	testData["_data"] = []byte("abc")
 
 	jsonData, _ := json.Marshal(&testData)
 	tmp, _ := tempura.FromBytes("/tmp", "trousseau", jsonData)
+	defer tmp.File.Close()
+	defer os.Remove(tmp.File.Name())
 
 	tr, err := OpenTrousseau(tmp.File.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert(t, tr.EncryptionType == ASYMMETRIC_ENCRYPTION, "Wrong encryption type")
-	assert(t, tr.EncryptionAlgorithm == GPG_ENCRYPTION, "Wrong encryption algorithm")
-	assert(t, tr.Store == "qeiun91inwd918hnd913dn19dni1dn9183nd9138d", "Invalid data retrieved")
+	assert(t, tr.CryptoType == ASYMMETRIC_ENCRYPTION, "Wrong encryption type")
+	assert(t, tr.CryptoAlgorithm == GPG_ENCRYPTION, "Wrong encryption algorithm")
+	equals(t, tr.Data, []byte("abc"))
 }
 
 func TestOpenTrousseau_returns_err_when_file_does_not_exist(t *testing.T) {
