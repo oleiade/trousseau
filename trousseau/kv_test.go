@@ -111,7 +111,7 @@ func TestKVStoreItems(t *testing.T) {
 
 	items := kvStore.Items()
 	expected := map[string]interface{}{
-		"abc": 123,
+		"abc":     123,
 		"easy as": "do re mi",
 	}
 	equals(t, items, expected)

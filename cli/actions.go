@@ -10,7 +10,7 @@ import (
 	"time"
 
 	libcli "github.com/codegangsta/cli"
-//	"github.com/oleiade/trousseau/crypto"
+	//	"github.com/oleiade/trousseau/crypto"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/trousseau"
 )
@@ -31,7 +31,7 @@ func CreateAction(c *libcli.Context) {
 	store := trousseau.NewStore(&meta)
 
 	tr := trousseau.Trousseau{
-		CryptoType: trousseau.ASYMMETRIC_ENCRYPTION,
+		CryptoType:      trousseau.ASYMMETRIC_ENCRYPTION,
 		CryptoAlgorithm: trousseau.GPG_ENCRYPTION,
 	}
 	tr.Encrypt(store)
@@ -220,7 +220,6 @@ func ImportAction(c *libcli.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 
 	err = localTr.Encrypt(localStore)
 	if err != nil {

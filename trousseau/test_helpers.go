@@ -3,8 +3,8 @@ package trousseau
 import (
 	"fmt"
 	"path/filepath"
-	"runtime"
 	"reflect"
+	"runtime"
 	"testing"
 )
 

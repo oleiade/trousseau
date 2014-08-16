@@ -3,8 +3,8 @@ package trousseau
 import (
 	"errors"
 	"fmt"
-	"time"
 	"reflect"
+	"time"
 )
 
 type Meta struct {

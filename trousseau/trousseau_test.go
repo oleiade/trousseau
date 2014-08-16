@@ -1,8 +1,8 @@
 package trousseau
 
 import (
-	"testing"
 	"encoding/json"
+	"testing"
 
 	"github.com/oleiade/tempura"
 	"os"

@@ -1,23 +1,22 @@
 package trousseau
 
 import (
-	"io/ioutil"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
-
 type Trousseau struct {
 	// Crypto public configuration attributes
-	CryptoType 		CryptoType 		`json:"crypto_type"`
+	CryptoType      CryptoType      `json:"crypto_type"`
 	CryptoAlgorithm CryptoAlgorithm `json:"crypto_algorithm"`
 
 	// Encrypted data private attribute
-	Data 			[]byte 			`json:"_data"`
+	Data []byte `json:"_data"`
 
 	// Crypto algorithm to decryption
-	cryptoMapping 	map[CryptoAlgorithm]interface{}
+	cryptoMapping map[CryptoAlgorithm]interface{}
 }
 
 func OpenTrousseau(fp string) (*Trousseau, error) {
@@ -64,17 +63,17 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 func (t *Trousseau) Encrypt(store *Store) error {
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
-			plainData, err := json.Marshal(*store)
-			if err != nil {
-				return err
-			}
+		plainData, err := json.Marshal(*store)
+		if err != nil {
+			return err
+		}
 
-			t.Data, err = EncryptAsymmetricPGP(plainData, store.Meta.Recipients)
-			if err != nil {
-				return err
-			}
-		default:
-			return fmt.Errorf("Invalid encryption method provided")
+		t.Data, err = EncryptAsymmetricPGP(plainData, store.Meta.Recipients)
+		if err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("Invalid encryption method provided")
 	}
 
 	return nil

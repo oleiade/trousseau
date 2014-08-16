@@ -1,11 +1,10 @@
 package trousseau
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"sort"
 )
-
 
 type KVStore struct {
 	Container map[string]interface{}

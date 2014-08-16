@@ -16,8 +16,8 @@ func main() {
 	app.Version = trousseau.TROUSSEAU_VERSION
 	app.Commands = []cli.Command{
 		trousseau_cli.CreateCommand(),
-//		trousseau_cli.PushCommand(),
-//		trousseau_cli.PullCommand(),
+		//		trousseau_cli.PushCommand(),
+		//		trousseau_cli.PullCommand(),
 		trousseau_cli.ExportCommand(),
 		trousseau_cli.ImportCommand(),
 		trousseau_cli.ListRecipientsCommand(),
