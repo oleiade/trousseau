@@ -47,6 +47,7 @@ func ExportCommand() libcli.Command {
 		Action: ExportAction,
 		Flags: []libcli.Flag{
 			OverwriteFlag(),
+			PlainFlag(),
 			VerboseFlag(),
 		},
 	}
@@ -59,6 +60,7 @@ func ImportCommand() libcli.Command {
 		Action: ImportAction,
 		Flags: []libcli.Flag{
 			VerboseFlag(),
+			PlainFlag(),
 			OverwriteFlag(),
 			TheirsFlag(),
 			YoursFlag(),

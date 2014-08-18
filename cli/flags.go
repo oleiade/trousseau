@@ -70,3 +70,10 @@ func OverwriteFlag() libcli.BoolFlag {
 		Usage: "Override existing resources",
 	}
 }
+
+func PlainFlag() libcli.BoolFlag {
+	return libcli.BoolFlag{
+		Name: "plain",
+		Usage: "Import or export plain",
+	}
+}

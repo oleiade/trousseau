@@ -12,6 +12,7 @@ import (
 	libcli "github.com/codegangsta/cli"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/trousseau"
+	"encoding/json"
 )
 
 func CreateAction(c *libcli.Context) {
@@ -155,14 +156,8 @@ func ExportAction(c *libcli.Context) {
 	}
 
 	var err error
-	var inputFilePath string = trousseau.InferStorePath()
 	var outputFilePath string = c.Args()[0]
 
-	inputFile, err := os.Open(inputFilePath)
-	defer inputFile.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	outputFile, err := os.Create(outputFilePath)
 	defer outputFile.Close()
@@ -170,9 +165,44 @@ func ExportAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	_, err = io.Copy(outputFile, inputFile)
+	// Make sure the file is readble/writable only
+	// by its owner
+	err = os.Chmod(outputFile.Name(), os.FileMode(0600))
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if c.Bool("plain") == true {
+		tr, err := trousseau.OpenTrousseau(trousseau.InferStorePath())
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		store, err := tr.Decrypt()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		storeBytes, err := json.Marshal(store)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = ioutil.WriteFile(outputFilePath, storeBytes, os.FileMode(0600))
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		inputFile, err := os.Open(trousseau.InferStorePath())
+		defer inputFile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = io.Copy(outputFile, inputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	trousseau.Logger.Info(fmt.Sprintf("Trousseau data store exported to: %s", outputFilePath))
@@ -185,6 +215,7 @@ func ImportAction(c *libcli.Context) {
 
 	var err error
 	var importedFilePath string = c.Args()[0]
+	var importedStore *trousseau.Store = &trousseau.Store{}
 	var localFilePath string = trousseau.InferStorePath()
 	var strategy *trousseau.ImportStrategy = new(trousseau.ImportStrategy)
 
@@ -205,15 +236,29 @@ func ImportAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	importedTr, err := trousseau.OpenTrousseau(importedFilePath)
-	if err != nil {
-		log.Fatal(err)
+
+	if c.Bool("plain") == true {
+		importedData, err := ioutil.ReadFile(importedFilePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = json.Unmarshal(importedData, importedStore)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		importedTr, err := trousseau.OpenTrousseau(importedFilePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		importedStore, err = importedTr.Decrypt()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	importedStore, err := importedTr.Decrypt()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	err = trousseau.ImportStore(importedStore, localStore, *strategy)
 	if err != nil {
