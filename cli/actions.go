@@ -10,7 +10,6 @@ import (
 	"time"
 
 	libcli "github.com/codegangsta/cli"
-	//	"github.com/oleiade/trousseau/crypto"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/trousseau"
 )
