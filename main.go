@@ -30,6 +30,7 @@ func main() {
 		trousseau_cli.KeysCommand(),
 		trousseau_cli.ShowCommand(),
 		trousseau_cli.MetaCommand(),
+		trousseau_cli.UpgradeCommand(),
 	}
 	app.Flags = []cli.Flag{
 		trousseau_cli.VerboseFlag(),

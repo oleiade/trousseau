@@ -596,6 +596,10 @@ func MetaAction(c *libcli.Context) {
 	trousseau.Logger.Info(store.Meta)
 }
 
+func UpgradeAction(c *libcli.Context) {
+	fmt.Println("Upgrading")
+}
+
 // hasExpectedArgs checks whether the number of args are as expected.
 func hasExpectedArgs(args []string, expected int) bool {
 	switch expected {

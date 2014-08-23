@@ -173,3 +173,11 @@ func MetaCommand() libcli.Command {
 		Action: MetaAction,
 	}
 }
+
+func UpgradeCommand() libcli.Command {
+	return libcli.Command{
+		Name: "upgrade",
+		Usage: "Upgrade your data store in place from an older version",
+		Action: UpgradeAction,
+	}
+}
