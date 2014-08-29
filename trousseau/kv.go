@@ -57,7 +57,7 @@ func (kvs *KVStore) Keys() []string {
 	index := 0
 	keys := make([]string, len((*kvs)))
 
-	for key, _ := range (*kvs) {
+	for key, _ := range *kvs {
 		keys[index] = key
 		index++
 	}
@@ -70,7 +70,7 @@ func (kvs *KVStore) Keys() []string {
 func (kvs *KVStore) Items() map[string]interface{} {
 	items := make(map[string]interface{})
 
-	for key, value := range (*kvs) {
+	for key, value := range *kvs {
 		items[key] = value
 	}
 

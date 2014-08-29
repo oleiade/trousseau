@@ -2,20 +2,19 @@ package trousseau
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/oleiade/trousseau/crypto/openpgp"
 	"sort"
-	"fmt"
 )
 
-type VersionMatcher func([]byte)bool
-type UpgradeClosure func([]byte)([]byte, error)
+type VersionMatcher func([]byte) bool
+type UpgradeClosure func([]byte) ([]byte, error)
 
-
-var UpgradeClosures map[string]UpgradeClosure = map[string]UpgradeClosure {
+var UpgradeClosures map[string]UpgradeClosure = map[string]UpgradeClosure{
 	"0.3.0": upgradeZeroDotThreeToNext,
 }
 
-var VersionDiscoverClosures map[string]VersionMatcher = map[string]VersionMatcher {
+var VersionDiscoverClosures map[string]VersionMatcher = map[string]VersionMatcher{
 	"0.3.0": isVersionZeroDotThreeDotZero,
 	"0.3.1": isVersionZeroDotThreeDotOne,
 }
@@ -71,8 +70,8 @@ func DiscoverVersion(d []byte, mapping map[string]VersionMatcher) string {
 }
 
 func isVersionZeroDotThreeDotZero(d []byte) bool {
-	if len(d)>= len(openpgp.PGP_MESSAGE_HEADER) &&
-	   string(d[0:len(openpgp.PGP_MESSAGE_HEADER)]) == openpgp.PGP_MESSAGE_HEADER {
+	if len(d) >= len(openpgp.PGP_MESSAGE_HEADER) &&
+		string(d[0:len(openpgp.PGP_MESSAGE_HEADER)]) == openpgp.PGP_MESSAGE_HEADER {
 		return true
 	}
 
@@ -110,8 +109,8 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	// Declaring and instanciating a type matching
 	// the 0.3 version store format
 	legacyStore := struct {
-		Meta 	map[string]interface{} `json:"_meta"`
-		Data 	map[string]interface{} `json:"data"`
+		Meta map[string]interface{} `json:"_meta"`
+		Data map[string]interface{} `json:"data"`
 	}{
 		Meta: make(map[string]interface{}),
 		Data: make(map[string]interface{}),
@@ -139,10 +138,10 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	// the 0.4 version store format so we can inject the
 	// legacy data  into it
 	newStore := struct {
-		Meta 	map[string]interface{} 	`json:"meta"`
-		Data 	map[string]interface{} 	`json:"store"`
+		Meta map[string]interface{} `json:"meta"`
+		Data map[string]interface{} `json:"store"`
 	}{
-	 	Meta: legacyStore.Meta,
+		Meta: legacyStore.Meta,
 		Data: legacyStore.Data,
 	}
 
@@ -151,7 +150,6 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 
 	// Retrieve legacyStore recipients
 	var recipients []string
@@ -175,13 +173,13 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	// the 0.4 version trousseau data store format
 	// so we can inject the encrypted store into it
 	newTrousseau := struct {
-		CryptoAlgorithm CryptoAlgorithm 	`json:"crypto_algorithm"`
-		CryptoType CryptoType  				`json:"crypto_type"`
-		Data 	[]byte 						`json:"_data"`
+		CryptoAlgorithm CryptoAlgorithm `json:"crypto_algorithm"`
+		CryptoType      CryptoType      `json:"crypto_type"`
+		Data            []byte          `json:"_data"`
 	}{
 		CryptoAlgorithm: GPG_ENCRYPTION,
-		CryptoType: ASYMMETRIC_ENCRYPTION,
-		Data: encryptedData,
+		CryptoType:      ASYMMETRIC_ENCRYPTION,
+		Data:            encryptedData,
 	}
 
 	// Encode the new trousseau data store

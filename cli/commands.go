@@ -176,8 +176,8 @@ func MetaCommand() libcli.Command {
 
 func UpgradeCommand() libcli.Command {
 	return libcli.Command{
-		Name: "upgrade",
-		Usage: "Upgrade your data store to a newer version",
+		Name:   "upgrade",
+		Usage:  "Upgrade your data store to a newer version",
 		Action: UpgradeAction,
 		Flags: []libcli.Flag{
 			YesFlag(),

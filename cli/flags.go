@@ -72,14 +72,14 @@ func OverwriteFlag() libcli.BoolFlag {
 
 func PlainFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
-		Name: "plain",
+		Name:  "plain",
 		Usage: "Import or export plain",
 	}
 }
 
 func NoBackupFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
-		Name: "no-backup",
+		Name:  "no-backup",
 		Usage: "Don't backup store in the process of upgrading it",
 	}
 }

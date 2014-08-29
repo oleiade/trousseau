@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"encoding/json"
 	libcli "github.com/codegangsta/cli"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/trousseau"
-	"encoding/json"
 )
 
 func CreateAction(c *libcli.Context) {
@@ -158,7 +158,6 @@ func ExportAction(c *libcli.Context) {
 	var err error
 	var outputFilePath string = c.Args()[0]
 
-
 	outputFile, err := os.Create(outputFilePath)
 	defer outputFile.Close()
 	if err != nil {
@@ -236,7 +235,6 @@ func ImportAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-
 	if c.Bool("plain") == true {
 		importedData, err := ioutil.ReadFile(importedFilePath)
 		if err != nil {
@@ -258,7 +256,6 @@ func ImportAction(c *libcli.Context) {
 			log.Fatal(err)
 		}
 	}
-
 
 	err = trousseau.ImportStore(importedStore, localStore, *strategy)
 	if err != nil {
@@ -615,8 +612,8 @@ func UpgradeAction(c *libcli.Context) {
 	}
 
 	if c.Bool("yes") == false {
-		fmt.Printf("You are about to upgrade trousseau data " +
-					"store %s (version %s) up to version %s. Proceed? [Y/n] ",
+		fmt.Printf("You are about to upgrade trousseau data "+
+			"store %s (version %s) up to version %s. Proceed? [Y/n] ",
 			trousseau.InferStorePath(), version, trousseau.TROUSSEAU_VERSION)
 		_, err = fmt.Scanf("%s", &proceed)
 		if err != nil {
