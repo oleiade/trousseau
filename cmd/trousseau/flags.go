@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	libcli "github.com/codegangsta/cli"
@@ -8,21 +8,21 @@ import (
 
 func VerboseFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
-		Name:  "verbose",
+		Name:  "verbose, v",
 		Usage: "Set trousseau in verbose mode",
 	}
 }
 
 func AskPassword() libcli.BoolFlag {
 	return libcli.BoolFlag{
-		Name:  "ask-password",
+		Name:  "ask-password, p",
 		Usage: "Prompt for password",
 	}
 }
 
 func YesFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
-		Name:  "yes",
+		Name:  "yes, y",
 		Usage: "Whatever the question is, answers yes",
 	}
 }
@@ -51,14 +51,14 @@ func YoursFlag() libcli.BoolFlag {
 
 func FileFlag() libcli.StringFlag {
 	return libcli.StringFlag{
-		Name:  "file",
+		Name:  "file, f",
 		Usage: "Path to the file to be extracted",
 	}
 }
 
 func StoreFlag() libcli.StringFlag {
 	return libcli.StringFlag{
-		Name:  "store",
+		Name:  "store, s",
 		Usage: "Path to the trousseau data store to use",
 	}
 }

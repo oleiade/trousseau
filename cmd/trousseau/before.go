@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	libcli "github.com/codegangsta/cli"
