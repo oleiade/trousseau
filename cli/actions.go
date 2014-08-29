@@ -607,6 +607,13 @@ func UpgradeAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
+	// Write a backup of the old store file inplace
+	err = ioutil.WriteFile(trousseau.InferStorePath() + ".bkp", data, os.FileMode(0700))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Overwrite source legacy store with the new version content
 	err = ioutil.WriteFile(trousseau.InferStorePath(), newStoreFile, os.FileMode(0700))
 	if err != nil {
 		log.Fatal(err)
