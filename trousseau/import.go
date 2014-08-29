@@ -12,17 +12,17 @@ type ImportStrategy uint32
 func ImportStore(src, dest *Store, strategy ImportStrategy) error {
 	switch strategy {
 	case IMPORT_YOURS:
-		for key, value := range src.Data.Container {
-			if _, ok := dest.Data.Container[key]; !ok {
-				dest.Data.Container[key] = value
+		for key, value := range src.Data {
+			if _, ok := dest.Data[key]; !ok {
+				dest.Data[key] = value
 			}
 		}
 	case IMPORT_THEIRS:
-		for key, value := range src.Data.Container {
-			dest.Data.Container[key] = value
+		for key, value := range src.Data {
+			dest.Data[key] = value
 		}
 	case IMPORT_OVERWRITE:
-		dest.Data.Container = src.Data.Container
+		dest.Data = src.Data
 	}
 
 	return nil

@@ -38,9 +38,7 @@ func OpenTrousseau(fp string) (*Trousseau, error) {
 }
 
 func (t *Trousseau) Decrypt() (*Store, error) {
-	var store *Store = &Store{
-		Data: NewKVStore(),
-	}
+	var store Store
 
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
@@ -49,7 +47,7 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 			return nil, err
 		}
 
-		err = json.Unmarshal(plainData, store)
+		err = json.Unmarshal(plainData, &store)
 		if err != nil {
 			return nil, err
 		}
@@ -57,7 +55,7 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 		return nil, fmt.Errorf("Invalid encryption method provided")
 	}
 
-	return store, nil
+	return &store, nil
 }
 
 func (t *Trousseau) Encrypt(store *Store) error {
