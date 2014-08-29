@@ -25,8 +25,6 @@ func UpgradeFrom(startVersion string, d []byte, mapping map[string]UpgradeClosur
 	var out []byte = d
 	var err error
 
-	fmt.Printf("Upgrading trousseau data store from version %s\n", startVersion)
-
 	for version, _ := range mapping {
 		if version >= startVersion {
 			versions = append(versions, version)
@@ -34,13 +32,21 @@ func UpgradeFrom(startVersion string, d []byte, mapping map[string]UpgradeClosur
 	}
 	sort.Strings(versions)
 
-	for _, version := range versions {
+	for idx, version := range versions {
+		var versionRepr string
+
+		if idx == (len(versions) - 1) {
+			versionRepr = TROUSSEAU_VERSION
+		} else {
+			versionRepr = version
+		}
+
 		upgradeClosure := mapping[version]
 		out, err = upgradeClosure(out)
 		if err != nil {
-			return nil, fmt.Errorf("Upgrading trousseau data store to version %s: failure\nReason: %s", version, err.Error())
+			return nil, fmt.Errorf("Upgrading trousseau data store to version %s: failure\nReason: %s", versionRepr, err.Error())
 		} else {
-			fmt.Printf("Upgrading trousseau data store to version %s: success\n", version)
+			fmt.Printf("Upgrading trousseau data store to version %s: success\n", versionRepr)
 		}
 	}
 
