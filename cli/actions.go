@@ -28,7 +28,7 @@ func CreateAction(c *libcli.Context) {
 		Recipients:       recipients,
 		TrousseauVersion: trousseau.TROUSSEAU_VERSION,
 	}
-	store := trousseau.NewStore(&meta)
+	store := trousseau.NewStore(meta)
 
 	tr := trousseau.Trousseau{
 		CryptoType:      trousseau.ASYMMETRIC_ENCRYPTION,
@@ -597,7 +597,20 @@ func MetaAction(c *libcli.Context) {
 }
 
 func UpgradeAction(c *libcli.Context) {
-	fmt.Println("Upgrading")
+	data, err := ioutil.ReadFile(trousseau.InferStorePath())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	newStoreFile, err := trousseau.UpgradeTo("0.3.N", "0.4.N", data, trousseau.UpgradeClosures)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = ioutil.WriteFile(trousseau.InferStorePath(), newStoreFile, os.FileMode(0700))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // hasExpectedArgs checks whether the number of args are as expected.

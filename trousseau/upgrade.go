@@ -1,23 +1,50 @@
 package trousseau
 
 import (
-	"os"
 	"encoding/json"
 	"github.com/oleiade/trousseau/crypto/openpgp"
 	"sort"
+	"fmt"
 )
 
 type VersionMatcher func([]byte)bool
-type UpgradeClosure func(*os.File, *os.File)error
+type UpgradeClosure func([]byte)([]byte, error)
 
-var upgradeClosures map[string]UpgradeClosure = map[string]UpgradeClosure {
-	"0.3.0": nil,
-	"0.4.0": nil,
+
+var UpgradeClosures map[string]UpgradeClosure = map[string]UpgradeClosure {
+	"0.3.N": upgradeZeroDotThreeToZeroDotFour,
 }
 
 var versionDiscoverClosures map[string]VersionMatcher = map[string]VersionMatcher {
-	"0.3.0": isVersionZeroDotThree,
-	"0.4.0": isVersionZeroDotFour,
+	"0.3.N": isVersionZeroDotThree,
+	"0.4.N": isVersionZeroDotFour,
+}
+
+func UpgradeTo(startVersion, endVersion string, d []byte, mapping map[string]UpgradeClosure) ([]byte, error) {
+	var versions []string
+	var out []byte = d
+	var err error
+
+	fmt.Printf("Upgrading trousseau data store from version %s to %s\n", startVersion, endVersion)
+
+	for version, _ := range mapping {
+		if version >= startVersion && version <= endVersion {
+			versions = append(versions, version)
+		}
+	}
+	sort.Strings(versions)
+
+	for _, version := range versions {
+		upgradeClosure := mapping[version]
+		out, err = upgradeClosure(out)
+		if err != nil {
+			return nil, fmt.Errorf("  ---> Upgrade to version %s: failure\n  Reason: %s", version, err.Error())
+		} else {
+			fmt.Printf("  ---> Upgrade to version %s: success\n", version)
+		}
+	}
+
+	return out, nil
 }
 
 func DiscoverVersion(d []byte, mapping map[string]VersionMatcher) string {
@@ -63,4 +90,99 @@ func isVersionZeroDotFour(d []byte) bool {
 	}
 
 	return true
+}
+
+func upgradeZeroDotThreeToZeroDotFour(d []byte) ([]byte, error) {
+	var err error
+
+	// Assert input data are in the expected version format
+	validVersion := isVersionZeroDotThree(d)
+	if !validVersion {
+		return nil, fmt.Errorf("Provided input data not matching version 0.3 format")
+	}
+
+	// Declaring and instanciating a type matching
+	// the 0.3 version store format
+	legacyStore := struct {
+		Meta 	map[string]interface{} `json:"_meta"`
+		Data 	map[string]interface{} `json:"data"`
+	}{
+		Meta: make(map[string]interface{}),
+		Data: make(map[string]interface{}),
+	}
+
+	// Retrieve secret ring keys from openpgp
+	decryptionKeys, err := openpgp.ReadSecRing(openpgp.SecringFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Decrypt store version 0.3 (aka legacy)
+	plainData, err := openpgp.Decrypt(decryptionKeys, string(d), GetPassphrase())
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal it's content into the legacyStore
+	err = json.Unmarshal(plainData, &legacyStore)
+	if err != nil {
+		return nil, err
+	}
+
+	// Declaring and instanciating a type matching
+	// the 0.4 version store format so we can inject the
+	// legacy data  into it
+	newStore := struct {
+		Meta 	map[string]interface{} 	`json:"meta"`
+		Data 	map[string]interface{} 	`json:"store"`
+	}{
+	 	Meta: legacyStore.Meta,
+		Data: legacyStore.Data,
+	}
+
+	// Encode it in json
+	newStoreData, err := json.Marshal(newStore)
+	if err != nil {
+		return nil, err
+	}
+
+
+	// Retrieve legacyStore recipients
+	var recipients []string
+	for _, r := range legacyStore.Meta["recipients"].([]interface{}) {
+		recipients = append(recipients, r.(string))
+	}
+
+	// Read the public openpgp ring to retrieve the recipients public keys
+	encryptionKeys, err := openpgp.ReadPubRing(openpgp.PubringFile, recipients)
+	if err != nil {
+		return nil, err
+	}
+
+	// Encrypt the encoded newStore content
+	encryptedData := openpgp.Encrypt(encryptionKeys, string(newStoreData))
+	if err != nil {
+		return nil, err
+	}
+
+	// Declaring and instanciating a type matching
+	// the 0.4 version trousseau data store format
+	// so we can inject the encrypted store into it
+	newTrousseau := struct {
+		CryptoAlgorithm CryptoAlgorithm 	`json:"crypto_algorithm"`
+		CryptoType CryptoType  				`json:"crypto_type"`
+		Data 	[]byte 						`json:"_data"`
+	}{
+		CryptoAlgorithm: GPG_ENCRYPTION,
+		CryptoType: ASYMMETRIC_ENCRYPTION,
+		Data: encryptedData,
+	}
+
+	// Encode the new trousseau data store
+	trousseau, err := json.Marshal(newTrousseau)
+	if err != nil {
+		return nil, err
+	}
+
+	return trousseau, nil
 }

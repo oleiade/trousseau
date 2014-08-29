@@ -4,6 +4,7 @@ import (
 	"testing"
 	"github.com/oleiade/trousseau/crypto/openpgp"
 	"encoding/json"
+	"fmt"
 )
 
 func TestIsVersionZeroDotThree(t *testing.T) {
@@ -98,3 +99,4 @@ func TestDiscoverVersion_with_no_matching_version(t *testing.T) {
 
 	equals(t, DiscoverVersion(data, mapping), "")
 }
+
