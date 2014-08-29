@@ -597,6 +597,8 @@ func MetaAction(c *libcli.Context) {
 }
 
 func UpgradeAction(c *libcli.Context) {
+	var proceed string = "n"
+
 	data, err := ioutil.ReadFile(trousseau.InferStorePath())
 	if err != nil {
 		log.Fatal(err)
@@ -612,18 +614,32 @@ func UpgradeAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	// Write a backup of the old store file inplace
-	if c.Bool("no-backup") == false {
-		err = ioutil.WriteFile(trousseau.InferStorePath() + ".bkp", data, os.FileMode(0700))
+	if c.Bool("yes") == false {
+		fmt.Printf("You are about to upgrade trousseau data " +
+					"store %s (version %s) up to version %s. Proceed? [Y/n] ",
+			trousseau.InferStorePath(), version, trousseau.TROUSSEAU_VERSION)
+		_, err = fmt.Scanf("%s", &proceed)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	// Overwrite source legacy store with the new version content
-	err = ioutil.WriteFile(trousseau.InferStorePath(), newStoreFile, os.FileMode(0700))
-	if err != nil {
-		log.Fatal(err)
+	if strings.ToLower(proceed) == "y" || c.Bool("yes") {
+		// Write a backup of the old store file inplace
+		if c.Bool("no-backup") == false {
+			err = ioutil.WriteFile(trousseau.InferStorePath()+".bkp", data, os.FileMode(0700))
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		// Overwrite source legacy store with the new version content
+		err = ioutil.WriteFile(trousseau.InferStorePath(), newStoreFile, os.FileMode(0700))
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		fmt.Println("upgrade cancelled")
 	}
 }
 

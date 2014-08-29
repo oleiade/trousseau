@@ -180,6 +180,7 @@ func UpgradeCommand() libcli.Command {
 		Usage: "Upgrade your data store to a newer version",
 		Action: UpgradeAction,
 		Flags: []libcli.Flag{
+			YesFlag(),
 			NoBackupFlag(),
 		},
 	}

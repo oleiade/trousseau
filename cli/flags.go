@@ -20,10 +20,9 @@ func AskPassword() libcli.BoolFlag {
 	}
 }
 
-func YesFlag() libcli.StringFlag {
-	return libcli.StringFlag{
+func YesFlag() libcli.BoolFlag {
+	return libcli.BoolFlag{
 		Name:  "yes",
-		Value: "",
 		Usage: "Whatever the question is, answers yes",
 	}
 }
