@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	libcli "github.com/codegangsta/cli"
 	"github.com/oleiade/trousseau/dsn"
-	"github.com/oleiade/trousseau/trousseau"
+	"github.com/oleiade/trousseau"
 )
 
 func CreateAction(c *libcli.Context) {

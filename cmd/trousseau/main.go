@@ -5,7 +5,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	trousseau_cli "github.com/oleiade/trousseau/cli"
-	"github.com/oleiade/trousseau/trousseau"
+	"github.com/oleiade/trousseau"
 )
 
 func main() {

@@ -2,7 +2,7 @@ package cli
 
 import (
 	libcli "github.com/codegangsta/cli"
-	"github.com/oleiade/trousseau/trousseau"
+	"github.com/oleiade/trousseau"
 )
 
 func Before(c *libcli.Context) error {
