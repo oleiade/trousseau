@@ -77,3 +77,10 @@ func PlainFlag() libcli.BoolFlag {
 		Usage: "Import or export plain",
 	}
 }
+
+func NoBackupFlag() libcli.BoolFlag {
+	return libcli.BoolFlag{
+		Name: "no-backup",
+		Usage: "Don't backup store in the process of upgrading it",
+	}
+}
