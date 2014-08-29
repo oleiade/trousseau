@@ -12,23 +12,23 @@ type UpgradeClosure func([]byte)([]byte, error)
 
 
 var UpgradeClosures map[string]UpgradeClosure = map[string]UpgradeClosure {
-	"0.3.N": upgradeZeroDotThreeToZeroDotFour,
+	"0.3.0": upgradeZeroDotThreeToNext,
 }
 
 var versionDiscoverClosures map[string]VersionMatcher = map[string]VersionMatcher {
-	"0.3.N": isVersionZeroDotThree,
-	"0.4.N": isVersionZeroDotFour,
+	"0.3.0": isVersionZeroDotThreeDotZero,
+	"0.3.1": isVersionZeroDotThreeDotOne,
 }
 
-func UpgradeTo(startVersion, endVersion string, d []byte, mapping map[string]UpgradeClosure) ([]byte, error) {
+func UpgradeFrom(startVersion string, d []byte, mapping map[string]UpgradeClosure) ([]byte, error) {
 	var versions []string
 	var out []byte = d
 	var err error
 
-	fmt.Printf("Upgrading trousseau data store from version %s to %s\n", startVersion, endVersion)
+	fmt.Printf("Upgrading trousseau data store from version %s\n", startVersion)
 
 	for version, _ := range mapping {
-		if version >= startVersion && version <= endVersion {
+		if version >= startVersion {
 			versions = append(versions, version)
 		}
 	}
@@ -38,9 +38,9 @@ func UpgradeTo(startVersion, endVersion string, d []byte, mapping map[string]Upg
 		upgradeClosure := mapping[version]
 		out, err = upgradeClosure(out)
 		if err != nil {
-			return nil, fmt.Errorf("  ---> Upgrade to version %s: failure\n  Reason: %s", version, err.Error())
+			return nil, fmt.Errorf("Upgrading trousseau data store to version %s: failure\nReason: %s", version, err.Error())
 		} else {
-			fmt.Printf("  ---> Upgrade to version %s: success\n", version)
+			fmt.Printf("Upgrading trousseau data store to version %s: success\n", version)
 		}
 	}
 
@@ -64,7 +64,7 @@ func DiscoverVersion(d []byte, mapping map[string]VersionMatcher) string {
 	return ""
 }
 
-func isVersionZeroDotThree(d []byte) bool {
+func isVersionZeroDotThreeDotZero(d []byte) bool {
 	if len(d)>= len(openpgp.PGP_MESSAGE_HEADER) &&
 	   string(d[0:len(openpgp.PGP_MESSAGE_HEADER)]) == openpgp.PGP_MESSAGE_HEADER {
 		return true
@@ -73,7 +73,7 @@ func isVersionZeroDotThree(d []byte) bool {
 	return false
 }
 
-func isVersionZeroDotFour(d []byte) bool {
+func isVersionZeroDotThreeDotOne(d []byte) bool {
 	var zeroDotFourStore map[string]interface{} = make(map[string]interface{})
 	var zeroDotFourKeys []string = []string{"crypto_algorithm", "crypto_type", "_data"}
 
@@ -92,11 +92,11 @@ func isVersionZeroDotFour(d []byte) bool {
 	return true
 }
 
-func upgradeZeroDotThreeToZeroDotFour(d []byte) ([]byte, error) {
+func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	var err error
 
 	// Assert input data are in the expected version format
-	validVersion := isVersionZeroDotThree(d)
+	validVersion := isVersionZeroDotThreeDotZero(d)
 	if !validVersion {
 		return nil, fmt.Errorf("Provided input data not matching version 0.3 format")
 	}

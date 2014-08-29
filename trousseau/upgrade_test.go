@@ -4,7 +4,6 @@ import (
 	"testing"
 	"github.com/oleiade/trousseau/crypto/openpgp"
 	"encoding/json"
-	"fmt"
 )
 
 func TestIsVersionZeroDotThree(t *testing.T) {
@@ -13,14 +12,14 @@ func TestIsVersionZeroDotThree(t *testing.T) {
 				   openpgp.PGP_MESSAGE_FOOTER)
 
 	assert(t,
-		   isVersionZeroDotThree(data) == true,
+		   isVersionZeroDotThreeDotZero(data) == true,
 		   "Input test data were suppose to match version 0.3.N")
 }
 
 func TestIsVersionZeroDotThree_fails_with_data_shorter_than_pgp_header(t *testing.T) {
 	data := []byte("abc123")
 	assert(t,
-		   isVersionZeroDotThree(data) == false,
+		   isVersionZeroDotThreeDotZero(data) == false,
 		   "Input test data weren't suppose to match version 0.3.N")
 }
 
@@ -37,7 +36,7 @@ func TestIsVersionZeroDotFour(t *testing.T) {
 	}
 
 	assert(t,
-		   isVersionZeroDotFour(data) == true,
+		   isVersionZeroDotThreeDotOne(data) == true,
 		   "Input test data were suppose to match version 0.4.N")
 }
 
@@ -46,7 +45,7 @@ func TestDiscoverVersion_with_only_one_valid_version_in_mapping(t *testing.T) {
 			"12kjd091jd192jd0192jd" +
 			openpgp.PGP_MESSAGE_FOOTER)
 	var mapping map[string]VersionMatcher = map[string]VersionMatcher {
-		"0.3.0": isVersionZeroDotThree,
+		"0.3.0": isVersionZeroDotThreeDotZero,
 	}
 
 	assert(t,
@@ -61,8 +60,8 @@ func TestDiscoverVersion_with_two_valid_versions_in_mapping(t *testing.T) {
 		"_data": "oqwimdoqiwmd0qwd0iq0wdijqw9d0",
 	}
 	var mapping map[string]VersionMatcher = map[string]VersionMatcher {
-		"0.3.0": isVersionZeroDotThree,
-		"0.4.0": isVersionZeroDotFour,
+		"0.3.0": isVersionZeroDotThreeDotZero,
+		"0.4.0": isVersionZeroDotThreeDotOne,
 	}
 
 	data, err := json.Marshal(store)
@@ -80,8 +79,8 @@ func TestDiscoverVersion_with_two_matching_version_returns_the_lowest(t *testing
 			"12kjd091jd192jd0192jd" +
 			openpgp.PGP_MESSAGE_FOOTER)
 	var mapping map[string]VersionMatcher = map[string]VersionMatcher {
-		"0.3.0": isVersionZeroDotThree,
-		"0.3.1": isVersionZeroDotThree,
+		"0.3.0": isVersionZeroDotThreeDotZero,
+		"0.3.1": isVersionZeroDotThreeDotZero,
 	}
 
 	assert(t,
@@ -93,8 +92,8 @@ func TestDiscoverVersion_with_two_matching_version_returns_the_lowest(t *testing
 func TestDiscoverVersion_with_no_matching_version(t *testing.T) {
 	var data []byte = []byte("abc")
 	var mapping map[string]VersionMatcher = map[string]VersionMatcher {
-		"0.3.0": isVersionZeroDotThree,
-		"0.4.0": isVersionZeroDotFour,
+		"0.3.0": isVersionZeroDotThreeDotZero,
+		"0.4.0": isVersionZeroDotThreeDotOne,
 	}
 
 	equals(t, DiscoverVersion(data, mapping), "")

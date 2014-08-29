@@ -602,7 +602,7 @@ func UpgradeAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	newStoreFile, err := trousseau.UpgradeTo("0.3.N", "0.4.N", data, trousseau.UpgradeClosures)
+	newStoreFile, err := trousseau.UpgradeFrom("0.3.0", data, trousseau.UpgradeClosures)
 	if err != nil {
 		log.Fatal(err)
 	}
