@@ -602,7 +602,12 @@ func UpgradeAction(c *libcli.Context) {
 		log.Fatal(err)
 	}
 
-	newStoreFile, err := trousseau.UpgradeFrom("0.3.0", data, trousseau.UpgradeClosures)
+	version := trousseau.DiscoverVersion(data, trousseau.VersionDiscoverClosures)
+	if version == "" {
+		fmt.Errorf("Initial store version could not be detected")
+	}
+
+	newStoreFile, err := trousseau.UpgradeFrom(version, data, trousseau.UpgradeClosures)
 	if err != nil {
 		log.Fatal(err)
 	}

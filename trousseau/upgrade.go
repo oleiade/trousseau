@@ -15,7 +15,7 @@ var UpgradeClosures map[string]UpgradeClosure = map[string]UpgradeClosure {
 	"0.3.0": upgradeZeroDotThreeToNext,
 }
 
-var versionDiscoverClosures map[string]VersionMatcher = map[string]VersionMatcher {
+var VersionDiscoverClosures map[string]VersionMatcher = map[string]VersionMatcher {
 	"0.3.0": isVersionZeroDotThreeDotZero,
 	"0.3.1": isVersionZeroDotThreeDotOne,
 }
