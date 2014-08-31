@@ -28,6 +28,7 @@ func ImportStore(src, dest *Store, strategy ImportStrategy) error {
 	return nil
 }
 
+// TODO : remove
 func (s *ImportStrategy) FromCliContext(c *cli.Context) error {
 	var yours bool = c.Bool("yours")
 	var theirs bool = c.Bool("theirs")

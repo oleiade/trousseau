@@ -8,7 +8,7 @@ import (
 
 func VerboseFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
-		Name:  "verbose, v",
+		Name:  "verbose",
 		Usage: "Set trousseau in verbose mode",
 	}
 }
