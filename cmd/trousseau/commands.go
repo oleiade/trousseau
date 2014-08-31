@@ -140,7 +140,7 @@ func ListRecipientsCommand() cli.Command {
 		Usage:  "lists trousseau data store recipients",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 0) {
-				log.Fatal("Incorrect number of arguments provided to 'list-recipients' command")
+				log.Fatal("Invalid number of arguments provided to list-recipients command")
 			}
 
 			trousseau.ListRecipientsAction()
@@ -157,7 +157,7 @@ func AddRecipientCommand() cli.Command {
 		Usage:  "add a recipient to the encrypted trousseau",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
-				log.Fatal("Incorrect number of arguments to 'add-recipient' command")
+				log.Fatal("Invalid number of arguments provided to add-recipient command")
 			}
 
 			trousseau.AddRecipientAction(c.Args().First())
@@ -178,7 +178,7 @@ func RemoveRecipientCommand() cli.Command {
 		Usage:  "remove a recipient of the encrypted trousseau",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
-				log.Fatal("Incorrect number of arguments to 'remove-recipient' command")
+				log.Fatal("Invalid number of arguments provided to remove-recipient command")
 			}
 
 			trousseau.RemoveRecipientAction(c.Args().First())
