@@ -11,6 +11,8 @@ func main() {
 	app := cli.NewApp()
 
 	app.Name = "trousseau"
+	app.Author = "oleiade"
+	app.Email = "tcrevon@gmail.com"
 	app.Usage = "Create, manage and share an encrypted data store"
 	app.Version = trousseau.TROUSSEAU_VERSION
 	app.Commands = []cli.Command{
