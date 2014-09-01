@@ -365,7 +365,10 @@ func UpgradeCommand() cli.Command {
 			trousseau.UpgradeAction(c.Bool("yes"), c.Bool("no-backup"))
 		},
 		Flags: []cli.Flag{
-			YesFlag(),
+			cli.BoolFlag{
+				Name:  "yes, y",
+				Usage: "Answer yes when prompted to trigger the upgrade action",
+			},
 			NoBackupFlag(),
 		},
 	}

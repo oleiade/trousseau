@@ -13,13 +13,6 @@ func VerboseFlag() libcli.BoolFlag {
 	}
 }
 
-func YesFlag() libcli.BoolFlag {
-	return libcli.BoolFlag{
-		Name:  "yes, y",
-		Usage: "Whatever the question is, answers yes",
-	}
-}
-
 func SshPrivateKeyPathFlag() libcli.StringFlag {
 	return libcli.StringFlag{
 		Name:  "ssh-private-key",
