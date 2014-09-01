@@ -40,7 +40,10 @@ func PushCommand() cli.Command {
 				Name:  "overwrite",
 				Usage: "Overwrite any existing remote resource with pushed data",
 			},
-			AskPassword(),
+			cli.BoolFlag{
+				Name:  "ask-password",
+				Usage: "Prompt for remote host ssh password",
+			},
 			VerboseFlag(),
 			SshPrivateKeyPathFlag(),
 		},
@@ -64,7 +67,10 @@ func PullCommand() cli.Command {
 				Name:  "overwrite",
 				Usage: "Overwrite local data store with pulled remote resource",
 			},
-			AskPassword(),
+			cli.BoolFlag{
+				Name:  "ask-password",
+				Usage: "Prompt for remote host ssh password",
+			},
 			VerboseFlag(),
 			SshPrivateKeyPathFlag(),
 		},

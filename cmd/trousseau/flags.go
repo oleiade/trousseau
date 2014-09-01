@@ -13,13 +13,6 @@ func VerboseFlag() libcli.BoolFlag {
 	}
 }
 
-func AskPassword() libcli.BoolFlag {
-	return libcli.BoolFlag{
-		Name:  "ask-password, p",
-		Usage: "Prompt for password",
-	}
-}
-
 func YesFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
 		Name:  "yes, y",
