@@ -63,13 +63,6 @@ func StoreFlag() libcli.StringFlag {
 	}
 }
 
-func OverwriteFlag() libcli.BoolFlag {
-	return libcli.BoolFlag{
-		Name:  "overwrite",
-		Usage: "Override existing resources",
-	}
-}
-
 func PlainFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
 		Name:  "plain",

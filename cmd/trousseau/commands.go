@@ -36,7 +36,10 @@ func PushCommand() cli.Command {
 			trousseau.PushAction(destination, c.String("ssh-private-key"), c.Bool("ask-password"))
 		},
 		Flags: []cli.Flag{
-			OverwriteFlag(),
+			cli.BoolFlag{
+				Name:  "overwrite",
+				Usage: "Overwrite any existing remote resource with pushed data",
+			},
 			AskPassword(),
 			VerboseFlag(),
 			SshPrivateKeyPathFlag(),
@@ -57,7 +60,10 @@ func PullCommand() cli.Command {
 			trousseau.PullAction(source, c.String("ssh-private-key"), c.Bool("ask-password"))
 		},
 		Flags: []cli.Flag{
-			OverwriteFlag(),
+			cli.BoolFlag{
+				Name:  "overwrite",
+				Usage: "Overwrite local data store with pulled remote resource",
+			},
 			AskPassword(),
 			VerboseFlag(),
 			SshPrivateKeyPathFlag(),
@@ -78,7 +84,10 @@ func ExportCommand() cli.Command {
 			trousseau.ExportAction(to, c.Bool("plain"))
 		},
 		Flags: []cli.Flag{
-			OverwriteFlag(),
+			cli.BoolFlag{
+				Name:  "overwrite",
+				Usage: "Overwrite any existing destination resource",
+			},
 			PlainFlag(),
 			VerboseFlag(),
 		},
@@ -125,9 +134,12 @@ func ImportCommand() cli.Command {
 			trousseau.ImportAction(from, strategy, c.Bool("plain"))
 		},
 		Flags: []cli.Flag{
+			cli.BoolFlag{
+				Name:  "overwrite",
+				Usage: "Overwrite local data store with imported resource",
+			},
 			VerboseFlag(),
 			PlainFlag(),
-			OverwriteFlag(),
 			TheirsFlag(),
 			YoursFlag(),
 		},
@@ -258,7 +270,10 @@ func RenameCommand() cli.Command {
 			}
 		},
 		Flags: []cli.Flag{
-			OverwriteFlag(),
+			cli.BoolFlag{
+				Name:  "overwrite",
+				Usage: "Override any existing destination key",
+			},
 			VerboseFlag(),
 		},
 	}
