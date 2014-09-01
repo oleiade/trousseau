@@ -41,7 +41,7 @@ func PushCommand() cli.Command {
 				Usage: "Overwrite any existing remote resource with pushed data",
 			},
 			cli.BoolFlag{
-				Name:  "ask-password",
+				Name:  "password",
 				Usage: "Prompt for remote host ssh password",
 			},
 			VerboseFlag(),
@@ -68,7 +68,7 @@ func PullCommand() cli.Command {
 				Usage: "Overwrite local data store with pulled remote resource",
 			},
 			cli.BoolFlag{
-				Name:  "ask-password",
+				Name:  "password",
 				Usage: "Prompt for remote host ssh password",
 			},
 			VerboseFlag(),
