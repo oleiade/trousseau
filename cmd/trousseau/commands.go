@@ -248,7 +248,10 @@ func SetCommand() cli.Command {
 			}
 		},
 		Flags: []cli.Flag{
-			FileFlag(),
+			cli.StringFlag{
+				Name:  "file, f",
+				Usage: "Write key's value to provided file",
+			},
 			VerboseFlag(),
 		},
 	}
@@ -268,7 +271,10 @@ func GetCommand() cli.Command {
 			trousseau.GetAction(key, file)
 		},
 		Flags: []cli.Flag{
-			FileFlag(),
+			cli.StringFlag{
+				Name:  "file, f",
+				Usage: "Read key's value from provided file",
+			},
 		},
 	}
 }

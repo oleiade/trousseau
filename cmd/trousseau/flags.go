@@ -11,13 +11,6 @@ func VerboseFlag() libcli.BoolFlag {
 	}
 }
 
-func FileFlag() libcli.StringFlag {
-	return libcli.StringFlag{
-		Name:  "file, f",
-		Usage: "Path to the file to be extracted",
-	}
-}
-
 func StoreFlag() libcli.StringFlag {
 	return libcli.StringFlag{
 		Name:  "store, s",
