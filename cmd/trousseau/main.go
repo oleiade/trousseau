@@ -35,7 +35,7 @@ func main() {
 	}
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
-			Name:  "verbose, v",
+			Name:  "verbose",
 			Usage: "Set trousseau in verbose mode",
 		},
 		cli.StringFlag{
