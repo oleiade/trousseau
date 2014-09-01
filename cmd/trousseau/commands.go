@@ -5,7 +5,9 @@ import (
 	"github.com/oleiade/trousseau"
 	"log"
 	"fmt"
+	"os"
 	"strings"
+	"path/filepath"
 )
 
 func CreateCommand() cli.Command {
@@ -45,7 +47,11 @@ func PushCommand() cli.Command {
 				Usage: "Prompt for remote host ssh password",
 			},
 			VerboseFlag(),
-			SshPrivateKeyPathFlag(),
+			cli.StringFlag{
+				Name:  "ssh-private-key",
+				Value: filepath.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
+				Usage: "Path to the ssh private key to be used when pushing to remote storage via ssh",
+			},
 		},
 	}
 }
@@ -72,7 +78,11 @@ func PullCommand() cli.Command {
 				Usage: "Prompt for remote host ssh password",
 			},
 			VerboseFlag(),
-			SshPrivateKeyPathFlag(),
+			cli.StringFlag{
+				Name:  "ssh-private-key",
+				Value: filepath.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
+				Usage: "Path to the ssh private key to be used when pulling from remote storage via ssh",
+			},
 		},
 	}
 }
