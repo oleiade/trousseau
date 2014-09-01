@@ -11,9 +11,3 @@ func VerboseFlag() libcli.BoolFlag {
 	}
 }
 
-func NoBackupFlag() libcli.BoolFlag {
-	return libcli.BoolFlag{
-		Name:  "no-backup",
-		Usage: "Don't backup store in the process of upgrading it",
-	}
-}

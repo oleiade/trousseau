@@ -397,7 +397,10 @@ func UpgradeCommand() cli.Command {
 				Name:  "yes, y",
 				Usage: "Answer yes when prompted to trigger the upgrade action",
 			},
-			NoBackupFlag(),
+			cli.BoolFlag{
+				Name:  "no-backup",
+				Usage: "Don't backup store in the process of upgrading it",
+			},
 		},
 	}
 }
