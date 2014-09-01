@@ -11,7 +11,7 @@ import (
 func CreateCommand() cli.Command {
 	return cli.Command{
 		Name:   "create",
-		Usage:  "create the trousseau data store",
+		Usage:  "Create an encrypted data store",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to create command")
@@ -26,7 +26,7 @@ func CreateCommand() cli.Command {
 func PushCommand() cli.Command {
 	return cli.Command{
 		Name:   "push",
-		Usage:  "pushes the trousseau to remote storage",
+		Usage:  "Push the encrypted data store to a remote storage",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to push command")
@@ -47,7 +47,7 @@ func PushCommand() cli.Command {
 func PullCommand() cli.Command {
 	return cli.Command{
 		Name:   "pull",
-		Usage:  "pull the trousseau from remote storage",
+		Usage:  "Pull the encrypted data store from a remote storage",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to pull command")
@@ -68,7 +68,7 @@ func PullCommand() cli.Command {
 func ExportCommand() cli.Command {
 	return cli.Command{
 		Name:   "export",
-		Usage:  "export the encrypted trousseau to local fs",
+		Usage:  "Export the encrypted data store to a file system location",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to export command")
@@ -88,7 +88,7 @@ func ExportCommand() cli.Command {
 func ImportCommand() cli.Command {
 	return cli.Command{
 		Name:   "import",
-		Usage:  "import an encrypted trousseau from local fs",
+		Usage:  "Import an encrypted data store from a file system location",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to import command")
@@ -137,7 +137,7 @@ func ImportCommand() cli.Command {
 func ListRecipientsCommand() cli.Command {
 	return cli.Command{
 		Name:   "list-recipients",
-		Usage:  "lists trousseau data store recipients",
+		Usage:  "List the data store encryption recipients",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 0) {
 				log.Fatal("Invalid number of arguments provided to list-recipients command")
@@ -154,7 +154,7 @@ func ListRecipientsCommand() cli.Command {
 func AddRecipientCommand() cli.Command {
 	return cli.Command{
 		Name:   "add-recipient",
-		Usage:  "add a recipient to the encrypted trousseau",
+		Usage:  "Add a recipient to the encrypted data store",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to add-recipient command")
@@ -175,7 +175,7 @@ func AddRecipientCommand() cli.Command {
 func RemoveRecipientCommand() cli.Command {
 	return cli.Command{
 		Name:   "remove-recipient",
-		Usage:  "remove a recipient of the encrypted trousseau",
+		Usage:  "Remove a recipient from the encrypted data store",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to remove-recipient command")
@@ -197,7 +197,7 @@ func RemoveRecipientCommand() cli.Command {
 func SetCommand() cli.Command {
 	return cli.Command{
 		Name:   "set",
-		Usage:  "sets a key value pair in the store",
+		Usage:  "Set a key value pair in the encrypted data store",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 2) {
 				log.Fatal("Invalid number of arguments provided to set command")
@@ -223,7 +223,7 @@ func SetCommand() cli.Command {
 func GetCommand() cli.Command {
 	return cli.Command{
 		Name:   "get",
-		Usage:  "get a value from the trousseau",
+		Usage:  "Get a key's value from the encrypted data store",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to get command")
@@ -242,7 +242,7 @@ func GetCommand() cli.Command {
 func RenameCommand() cli.Command {
 	return cli.Command{
 		Name:   "rename",
-		Usage:  "rename an existing key",
+		Usage:  "Rename an encrypted data store's key",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 2) {
 				log.Fatal("Invalid number of arguments provided to rename command")
@@ -267,7 +267,7 @@ func RenameCommand() cli.Command {
 func DelCommand() cli.Command {
 	return cli.Command{
 		Name:   "del",
-		Usage:  "delete the point key pair from the store",
+		Usage:  "Delete a key value pair from the store",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 1) {
 				log.Fatal("Invalid number of arguments provided to del command")
@@ -290,7 +290,7 @@ func DelCommand() cli.Command {
 func KeysCommand() cli.Command {
 	return cli.Command{
 		Name:   "keys",
-		Usage:  "Lists the store keys",
+		Usage:  "List the encrypted data store keys",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 0) {
 				log.Fatal("Invalid number of arguments provided to keys command")
@@ -307,7 +307,7 @@ func KeysCommand() cli.Command {
 func ShowCommand() cli.Command {
 	return cli.Command{
 		Name:   "show",
-		Usage:  "shows trousseau content",
+		Usage:  "Show the encrypted data store key value pairs",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 0) {
 				log.Fatal("Invalid number of arguments provided to show command")
@@ -321,7 +321,7 @@ func ShowCommand() cli.Command {
 func MetaCommand() cli.Command {
 	return cli.Command{
 		Name:   "meta",
-		Usage:  "shows trousseau metadata",
+		Usage:  "Show the encrypted data store metadata",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 0) {
 				log.Fatal("Invalid number of arguments provided to meta command")
@@ -335,7 +335,7 @@ func MetaCommand() cli.Command {
 func UpgradeCommand() cli.Command {
 	return cli.Command{
 		Name:   "upgrade",
-		Usage:  "Upgrade your data store to a newer version",
+		Usage:  "Upgrade the encrypted data store to a newer version's file format",
 		Action: func(c *cli.Context) {
 			if !hasExpectedArgs(c.Args(), 0) {
 				log.Fatal("Invalid number of arguments provided to upgrade command")

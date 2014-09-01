@@ -11,23 +11,23 @@ func main() {
 	app := cli.NewApp()
 
 	app.Name = "trousseau"
-	app.Usage = "handles an encrypted keys store"
+	app.Usage = "Create, manage and share an encrypted data store"
 	app.Version = trousseau.TROUSSEAU_VERSION
 	app.Commands = []cli.Command{
 		CreateCommand(),
-		PushCommand(),
-		PullCommand(),
-		ExportCommand(),
-		ImportCommand(),
-		ListRecipientsCommand(),
-		AddRecipientCommand(),
-		RemoveRecipientCommand(),
 		SetCommand(),
 		GetCommand(),
 		RenameCommand(),
 		DelCommand(),
 		KeysCommand(),
 		ShowCommand(),
+		ExportCommand(),
+		ImportCommand(),
+		PushCommand(),
+		PullCommand(),
+		ListRecipientsCommand(),
+		AddRecipientCommand(),
+		RemoveRecipientCommand(),
 		MetaCommand(),
 		UpgradeCommand(),
 	}
