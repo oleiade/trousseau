@@ -11,13 +11,6 @@ func VerboseFlag() libcli.BoolFlag {
 	}
 }
 
-func StoreFlag() libcli.StringFlag {
-	return libcli.StringFlag{
-		Name:  "store, s",
-		Usage: "Path to the trousseau data store to use",
-	}
-}
-
 func PlainFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
 		Name:  "plain",
