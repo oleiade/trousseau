@@ -46,7 +46,6 @@ func PushCommand() cli.Command {
 				Name:  "password",
 				Usage: "Prompt for remote host ssh password",
 			},
-			VerboseFlag(),
 			cli.StringFlag{
 				Name:  "ssh-private-key",
 				Value: filepath.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
@@ -77,7 +76,6 @@ func PullCommand() cli.Command {
 				Name:  "password",
 				Usage: "Prompt for remote host ssh password",
 			},
-			VerboseFlag(),
 			cli.StringFlag{
 				Name:  "ssh-private-key",
 				Value: filepath.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
@@ -108,7 +106,6 @@ func ExportCommand() cli.Command {
 				Name:  "plain",
 				Usage: "Export the plain content of the encrypted data store",
 			},
-			VerboseFlag(),
 		},
 	}
 }
@@ -157,7 +154,6 @@ func ImportCommand() cli.Command {
 				Name:  "overwrite",
 				Usage: "Overwrite local data store with imported resource",
 			},
-			VerboseFlag(),
 			cli.BoolFlag{
 				Name:  "plain",
 				Usage: "Import the content of the encrypted data store from a plain file",
@@ -185,9 +181,6 @@ func ListRecipientsCommand() cli.Command {
 
 			trousseau.ListRecipientsAction()
 		},
-		Flags: []cli.Flag{
-			VerboseFlag(),
-		},
 	}
 }
 
@@ -205,9 +198,6 @@ func AddRecipientCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.Logger.Info(fmt.Sprintf("Recipient added to trousseau data store: %s", c.Args().First()))
 			}
-		},
-		Flags: []cli.Flag{
-			VerboseFlag(),
 		},
 	}
 }
@@ -227,9 +217,6 @@ func RemoveRecipientCommand() cli.Command {
 				fmt.Printf("Recipient removed from trousseau data store: %s", c.Args().First())
 			}
 
-		},
-		Flags: []cli.Flag{
-			VerboseFlag(),
 		},
 	}
 }
@@ -258,7 +245,6 @@ func SetCommand() cli.Command {
 				Name:  "file, f",
 				Usage: "Write key's value to provided file",
 			},
-			VerboseFlag(),
 		},
 	}
 }
@@ -308,7 +294,6 @@ func RenameCommand() cli.Command {
 				Name:  "overwrite",
 				Usage: "Override any existing destination key",
 			},
-			VerboseFlag(),
 		},
 	}
 }
@@ -330,9 +315,6 @@ func DelCommand() cli.Command {
 				trousseau.Logger.Info(fmt.Sprintf("deleted: %s", c.Args()[0]))
 			}
 		},
-		Flags: []cli.Flag{
-			VerboseFlag(),
-		},
 	}
 }
 
@@ -346,9 +328,6 @@ func KeysCommand() cli.Command {
 			}
 
 			trousseau.KeysAction()
-		},
-		Flags: []cli.Flag{
-			VerboseFlag(),
 		},
 	}
 }

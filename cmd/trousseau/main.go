@@ -32,8 +32,14 @@ func main() {
 		UpgradeCommand(),
 	}
 	app.Flags = []cli.Flag{
-		VerboseFlag(),
-		StoreFlag(),
+		cli.BoolFlag{
+			Name:  "verbose, v",
+			Usage: "Set trousseau in verbose mode",
+		},
+		cli.StringFlag{
+			Name:  "store, s",
+			Usage: "Path to the trousseau data store to use",
+		},
 	}
 	app.Before = Before
 
