@@ -156,7 +156,10 @@ func ImportCommand() cli.Command {
 			},
 			VerboseFlag(),
 			PlainFlag(),
-			TheirsFlag(),
+			cli.BoolFlag{
+				Name:  "theirs",
+				Usage: "Keep the imported file value",
+			},
 			YoursFlag(),
 		},
 	}

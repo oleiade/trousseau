@@ -2,29 +2,12 @@ package main
 
 import (
 	libcli "github.com/codegangsta/cli"
-	"os"
-	"path/filepath"
 )
 
 func VerboseFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
 		Name:  "verbose",
 		Usage: "Set trousseau in verbose mode",
-	}
-}
-
-func SshPrivateKeyPathFlag() libcli.StringFlag {
-	return libcli.StringFlag{
-		Name:  "ssh-private-key",
-		Value: filepath.Join(os.Getenv("HOME"), ".ssh/id_rsa"),
-		Usage: "Path to the ssh private key to be used",
-	}
-}
-
-func TheirsFlag() libcli.BoolFlag {
-	return libcli.BoolFlag{
-		Name:  "theirs",
-		Usage: "Keep the imported file value",
 	}
 }
 
