@@ -104,7 +104,10 @@ func ExportCommand() cli.Command {
 				Name:  "overwrite",
 				Usage: "Overwrite any existing destination resource",
 			},
-			PlainFlag(),
+			cli.BoolFlag{
+				Name:  "plain",
+				Usage: "Export the plain content of the encrypted data store",
+			},
 			VerboseFlag(),
 		},
 	}
@@ -155,7 +158,10 @@ func ImportCommand() cli.Command {
 				Usage: "Overwrite local data store with imported resource",
 			},
 			VerboseFlag(),
-			PlainFlag(),
+			cli.BoolFlag{
+				Name:  "plain",
+				Usage: "Import the content of the encrypted data store from a plain file",
+			},
 			cli.BoolFlag{
 				Name:  "theirs",
 				Usage: "Keep the imported file value",

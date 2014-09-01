@@ -11,13 +11,6 @@ func VerboseFlag() libcli.BoolFlag {
 	}
 }
 
-func PlainFlag() libcli.BoolFlag {
-	return libcli.BoolFlag{
-		Name:  "plain",
-		Usage: "Import or export plain",
-	}
-}
-
 func NoBackupFlag() libcli.BoolFlag {
 	return libcli.BoolFlag{
 		Name:  "no-backup",
