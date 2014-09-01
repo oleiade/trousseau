@@ -11,13 +11,6 @@ func VerboseFlag() libcli.BoolFlag {
 	}
 }
 
-func YoursFlag() libcli.BoolFlag {
-	return libcli.BoolFlag{
-		Name:  "yours",
-		Usage: "Keep your current data store values",
-	}
-}
-
 func FileFlag() libcli.StringFlag {
 	return libcli.StringFlag{
 		Name:  "file, f",

@@ -160,7 +160,10 @@ func ImportCommand() cli.Command {
 				Name:  "theirs",
 				Usage: "Keep the imported file value",
 			},
-			YoursFlag(),
+			cli.BoolFlag{
+				Name:  "yours",
+				Usage: "Keep your current data store values",
+			},
 		},
 	}
 }
