@@ -43,8 +43,7 @@ func main() {
 			Usage: "Path to the trousseau data store to use",
 		},
 	}
-	app.Before = Before
 
-	trousseau.Logger.Formatter = new(trousseau.RawFormatter)
+	app.Before = Before
 	app.Run(os.Args)
 }

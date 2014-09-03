@@ -2,7 +2,6 @@ package trousseau
 
 import (
 	"github.com/tmc/keyring"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -60,7 +59,7 @@ func GetPassphrase() (passphrase string) {
 	}
 
 	if err != nil {
-		log.Fatal("No passphrase provided. Unable to open data store")
+		ErrorLogger.Fatal("No passphrase provided. Unable to open data store")
 	}
 
 	return passphrase
