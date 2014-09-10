@@ -26,7 +26,7 @@ func UploadUsingS3(dsn *dsn.Dsn) error {
 		return fmt.Errorf("Unable to connect to S3")
 	}
 
-	err = s3Storage.Push(gStorePath, dsn.Path)
+	err = s3Storage.Push(GetStorePath(), dsn.Path)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func UploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
 		return err
 	}
 
-	err = scpStorage.Push(gStorePath, dsn.Path)
+	err = scpStorage.Push(GetStorePath(), dsn.Path)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func UploadUsingGist(dsn *dsn.Dsn) (err error) {
 	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
 	gistStorage.Connect()
 
-	err = gistStorage.Push(gStorePath, dsn.Path)
+	err = gistStorage.Push(GetStorePath(), dsn.Path)
 	if err != nil {
 		return err
 	}

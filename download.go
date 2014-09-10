@@ -26,7 +26,7 @@ func DownloadUsingS3(dsn *dsn.Dsn) error {
 		fmt.Errorf("Unable to connect to S3")
 	}
 
-	err = s3Storage.Pull(dsn.Path, gStorePath)
+	err = s3Storage.Pull(dsn.Path, GetStorePath())
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
 		return err
 	}
 
-	err = scpStorage.Pull(dsn.Path, gStorePath)
+	err = scpStorage.Pull(dsn.Path, GetStorePath())
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func DownloadUsingGist(dsn *dsn.Dsn) (err error) {
 	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
 	gistStorage.Connect()
 
-	err = gistStorage.Pull(dsn.Path, gStorePath)
+	err = gistStorage.Pull(dsn.Path, GetStorePath())
 	if err != nil {
 		return err
 	}

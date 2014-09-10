@@ -21,11 +21,12 @@ var (
 
 func InferStorePath() string {
 	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
+	contextPath := GetStorePath()
 
 	if envPath != "" {
 		return envPath
-	} else if gStorePath != "" {
-		return gStorePath
+	} else if contextPath != "" {
+		return contextPath
 	}
 
 	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
