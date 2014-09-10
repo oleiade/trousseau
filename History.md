@@ -1,3 +1,45 @@
+0.3.1 / 2014-09-10
+==================
+
+!! Backward Incompatibility !!
+
+Trousseau data store file format changed, and trousseau >= 0.3.1 are 
+now incompatible with older version created files.
+
+Fortunately, trousseau now exposes a 'upgrade' command which will take
+care to upgrade your existing data stores.
+
+So if you are upgrading from former versions, please, upgrade.
+
+*Features and user experience* 
+ * New data store file format: support for different encryption type and algorithms. Plain and Encrypted sections splitted.
+ * New upgrade command to automatically upgrade old versions data store to new format.
+ * Added a rename command to modify a key name
+ * Added a list-recipients command  to easily show data store recipients
+ * Added a --store global option to select directly from command line data store to be used
+ * Added bash, zsh, and fish autocompletion rules in scripts/
+ * Updated import and export commands to support plain data import/export through a --plain option
+ * Updated trousseau keys and show commands output so they are now alphabetically sorted
+ * Fixed trousseau command piped output 
+ * Fixed trousseau dependency management reliability through godep
+ * Improved command-line accessibility: more obvious behaviors, commands and flags descriptions
+ * Improved Makefile
+
+
+*Code and design*
+ * Reduce inter-dependency between trousseau package and cli interactions
+ * Moved command actions in trousseau package, got rid of cli.Context dependency.
+ * Replaced (trousseau)cli package with idiomatic cmd/trousseau/*
+ * Got rid of a ton of useless abstractions. More to go.
+ * Removed logrus dependency and use stdlib log package instead
+ * Rename GetStorePath to InferStorePath and add getters/setters on the gStorePath global
+ * Rename upload* helpers to Helper*
+ * Move S3 and Scp defaults globals to context.go
+ * Add a store file path retrieval helper
+ * Move passphrase handling in context.go
+ * Remove global passphrase + use getter in cli instead
+ * Copy the cli interface trousseau package members to a new cli package
+
 
 0.3.0 / 2013-04-21
 ==================
