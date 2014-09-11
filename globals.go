@@ -15,5 +15,5 @@ var gMasterGpgId string = os.Getenv(ENV_MASTER_GPG_ID_KEY)
 // Keyring manager service and username to use in order to
 // retrieve trousseau main gpg key passphrase from system
 // keyring
-//var gKeyringService string = os.Getenv(ENV_KEYRING_SERVICE_KEY)
+var gKeyringService string = os.Getenv(ENV_KEYRING_SERVICE_KEY)
 var gKeyringUser string = os.Getenv(ENV_KEYRING_USER_KEY)
