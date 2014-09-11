@@ -37,3 +37,7 @@ _testmain.go
 
 # Documentation files
 docs/build/
+
+
+# Intellij
+.idea

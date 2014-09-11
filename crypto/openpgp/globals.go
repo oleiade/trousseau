@@ -6,7 +6,7 @@ import (
 )
 
 // Gnupg keyrings files
-var gPubringFile string = func() string {
+var PubringFile string = func() string {
 	envPubring := os.Getenv("GNUPG_PUBRING_PATH")
 
 	if envPubring != "" {
@@ -16,7 +16,7 @@ var gPubringFile string = func() string {
 	return filepath.Join(os.Getenv("HOME"), ".gnupg", "pubring.gpg")
 }()
 
-var gSecringFile string = func() string {
+var SecringFile string = func() string {
 	envSecring := os.Getenv("GNUPG_SECRING_PATH")
 
 	if envSecring != "" {

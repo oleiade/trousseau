@@ -27,7 +27,7 @@ func NewGpgFile(filepath, passphrase string, recipients []string) *GpgFile {
 // the associated file descriptor has mode O_RDONLY.
 // If there is an error, it will be of type *PathError.
 func OpenFile(name string, mode int, passphrase string, recipients []string) (*GpgFile, error) {
-	f, err := os.OpenFile(name, mode, 0600)
+	f, err := os.OpenFile(name, mode, os.FileMode(0600))
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (gf *GpgFile) ReadAll() ([]byte, error) {
 	}
 
 	// Decrypt store data
-	decryptionKeys, err := ReadSecRing(gSecringFile)
+	decryptionKeys, err := ReadSecRing(SecringFile)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (gf *GpgFile) Read(b []byte) (n int, err error) {
 // It returns the number of bytes written and an error, if any.
 // Write returns a non-nil error when n != len(b).
 func (gf *GpgFile) Write(p []byte) (n int, err error) {
-	encryptionKeys, err := ReadPubRing(gPubringFile, gf.Recipients)
+	encryptionKeys, err := ReadPubRing(PubringFile, gf.Recipients)
 	if err != nil {
 		return 0, err
 	}
