@@ -23,10 +23,6 @@ func CreateCommand() cli.Command {
 					 "     trousseau create tcrevon@gmail.com\n" +
 					 "     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
 		Action: func(c *cli.Context) {
-			if !hasExpectedArgs(c.Args(), 1) {
-				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to create command")
-			}
-
 			var recipients []string = strings.Split(c.Args()[0], ",")
 			trousseau.CreateAction(recipients)
 		},
