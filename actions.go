@@ -189,49 +189,49 @@ func ImportAction(from string, strategy ImportStrategy, plain bool) {
 
 	localTr, err := OpenTrousseau(localFilePath)
 	if err != nil {
-	ErrorLogger.Fatal(err)
+		ErrorLogger.Fatal(err)
 	}
 
 	localStore, err := localTr.Decrypt()
 	if err != nil {
-	ErrorLogger.Fatal(err)
+		ErrorLogger.Fatal(err)
 	}
 
 	if plain == true {
-	importedData, err := ioutil.ReadFile(from)
-	if err != nil {
-	ErrorLogger.Fatal(err)
-	}
+		importedData, err := ioutil.ReadFile(from)
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
 
-	err = json.Unmarshal(importedData, importedStore)
-	if err != nil {
-	ErrorLogger.Fatal(err)
-	}
+		err = json.Unmarshal(importedData, importedStore)
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
 	} else {
-	importedTr, err := OpenTrousseau(from)
-	if err != nil {
-	ErrorLogger.Fatal(err)
-	}
+		importedTr, err := OpenTrousseau(from)
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
 
-	importedStore, err = importedTr.Decrypt()
-	if err != nil {
-	ErrorLogger.Fatal(err)
-	}
+		importedStore, err = importedTr.Decrypt()
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
 	}
 
 	err = ImportStore(importedStore, localStore, strategy)
 	if err != nil {
-	ErrorLogger.Fatal(err)
+		ErrorLogger.Fatal(err)
 	}
 
 	err = localTr.Encrypt(localStore)
 	if err != nil {
-	ErrorLogger.Fatal(err)
+		ErrorLogger.Fatal(err)
 	}
 
 	err = localTr.Write(localFilePath)
 	if err != nil {
-	ErrorLogger.Fatal(err)
+		ErrorLogger.Fatal(err)
 	}
 
 	InfoLogger.Println(fmt.Sprintf("Trousseau data store imported: %s", from))
