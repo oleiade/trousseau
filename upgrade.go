@@ -44,8 +44,6 @@ func UpgradeFrom(startVersion string, d []byte, mapping map[string]UpgradeClosur
 		out, err = upgradeClosure(out)
 		if err != nil {
 			return nil, fmt.Errorf("Upgrading trousseau data store to version %s: failure\nReason: %s", versionRepr, err.Error())
-		} else {
-			fmt.Printf("Upgrading trousseau data store to version %s: success\n", versionRepr)
 		}
 	}
 
