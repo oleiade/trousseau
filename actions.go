@@ -25,9 +25,13 @@ func CreateAction(recipients []string) {
 		CryptoType:      ASYMMETRIC_ENCRYPTION,
 		CryptoAlgorithm: GPG_ENCRYPTION,
 	}
-	tr.Encrypt(store)
 
-	err := tr.Write(InferStorePath())
+	err := tr.Encrypt(store)
+	if err != nil {
+		ErrorLogger.Fatal(err)
+	}
+
+	err = tr.Write(InferStorePath())
 	if err != nil {
 		ErrorLogger.Fatal(err)
 	}
