@@ -64,9 +64,9 @@ func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, 
 				"Invalid passphrase supplied.")
 		},
 		nil)
-
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to decrypt trousseau data store. " +
+							   "No private key able to decrypt it found in your keyring.")
 	}
 
 	bytes, err := ioutil.ReadAll(d.UnverifiedBody)
