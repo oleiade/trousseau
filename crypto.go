@@ -25,13 +25,13 @@ const (
 
 // Gnupg variables
 var GnupgHome = path.Join(os.Getenv("HOME"), ".gnupg")
-var GnupgPubring string = func() string { return path.Join(GnupgHome, "pubring.gpg") }()
-var GnupgSecring string = func() string { return path.Join(GnupgHome, "secring.gpg") }()
+var GnupgPubring func()string = func()string { return path.Join(GnupgHome, "pubring.gpg") }
+var GnupgSecring func()string = func()string { return path.Join(GnupgHome, "secring.gpg") }
 
 // DecryptAsymmetricPGP decrypts an OpenPGP message using GnuPG.
 func DecryptAsymmetricPGP(encryptedData []byte, passphrase string) ([]byte, error) {
 	// Decrypt store data
-	decryptionKeys, err := openpgp.ReadSecRing(GnupgSecring)
+	decryptionKeys, err := openpgp.ReadSecRing(GnupgSecring())
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func DecryptAsymmetricPGP(encryptedData []byte, passphrase string) ([]byte, erro
 }
 
 func EncryptAsymmetricPGP(plainData []byte, recipients []string) ([]byte, error) {
-	encryptionKeys, err := openpgp.ReadPubRing(GnupgPubring, recipients)
+	encryptionKeys, err := openpgp.ReadPubRing(GnupgPubring(), recipients)
 	if err != nil {
 		return nil, err
 	}
