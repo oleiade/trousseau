@@ -27,7 +27,7 @@ func DecryptAsymmetricPGP(encryptedData []byte, passphrase string) ([]byte, erro
 		return nil, err
 	}
 
-	plainData, err := openpgp.Decrypt(decryptionKeys, string(encryptedData), passphrase)
+	plainData, err := openpgp.Decrypt(encryptedData, decryptionKeys, passphrase)
 	if err != nil {
 		return nil, err
 	}

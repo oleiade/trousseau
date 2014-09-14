@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"strings"
 )
 
 func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
@@ -41,17 +40,22 @@ func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, error) {
-	if s == "" {
+func Decrypt(d []byte, decryptionKeys *openpgp.EntityList, passphrase string) ([]byte, error) {
+	var armoredBlock *armor.Block
+	var message *openpgp.MessageDetails
+	var plain []byte
+	var err error
+
+	if d == nil {
 		return nil, nil
 	}
 
-	armorBlock, err := armor.Decode(strings.NewReader(s))
+	armoredBlock, err = armor.Decode(bytes.NewReader(d))
 	if err != nil {
 		return nil, err
 	}
 
-	d, err := openpgp.ReadMessage(armorBlock.Body, decryptionKeys,
+	message, err = openpgp.ReadMessage(armoredBlock.Body, decryptionKeys,
 		func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 			kp := []byte(passphrase)
 
@@ -75,6 +79,7 @@ func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, 
 							   "No private key able to decrypt it found in your keyring.")
 	}
 
-	bytes, err := ioutil.ReadAll(d.UnverifiedBody)
-	return bytes, err
+	plain, err = ioutil.ReadAll(message.UnverifiedBody)
+
+	return plain, err
 }

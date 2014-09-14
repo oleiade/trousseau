@@ -121,7 +121,7 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	}
 
 	// Decrypt store version 0.3 (aka legacy)
-	plainData, err := openpgp.Decrypt(decryptionKeys, string(d), GetPassphrase())
+	plainData, err := openpgp.Decrypt(d, decryptionKeys, GetPassphrase())
 	if err != nil {
 		return nil, err
 	}
