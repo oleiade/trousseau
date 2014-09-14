@@ -41,7 +41,10 @@ func EncryptAsymmetricPGP(plainData []byte, recipients []string) ([]byte, error)
 		return nil, err
 	}
 
-	encData := openpgp.Encrypt(encryptionKeys, string(plainData))
+	encData, err := openpgp.Encrypt(plainData, encryptionKeys)
+	if err != nil {
+		return nil, err
+	}
 
 	return encData, nil
 }

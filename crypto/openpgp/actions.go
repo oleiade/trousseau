@@ -11,28 +11,34 @@ import (
 	"strings"
 )
 
-func Encrypt(encryptionKeys *openpgp.EntityList, s string) []byte {
-	buf := &bytes.Buffer{}
+func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
+	var buffer *bytes.Buffer = &bytes.Buffer{}
+	var armoredWriter io.WriteCloser
+	var cipheredWriter io.WriteCloser
+	var err error
 
-	wa, err := armor.Encode(buf, "PGP MESSAGE", nil)
+	// Create an openpgp armored cipher writer pointing on our
+	// buffer
+	armoredWriter , err = armor.Encode(buffer, "PGP MESSAGE", nil)
 	if err != nil {
 		NewPgpError(ERR_ENCRYPTION_ENCODING, fmt.Sprintf("Can't make armor: %v", err))
 	}
 
-	w, err := openpgp.Encrypt(wa, *encryptionKeys, nil, nil, nil)
+	// Create an encrypted writer using
+	cipheredWriter, err = openpgp.Encrypt(armoredWriter, *encryptionKeys, nil, nil, nil)
 	if err != nil {
 		NewPgpError(ERR_ENCRYPTION_ENCRYPT, fmt.Sprintf("Error encrypting: %v", err))
 	}
 
-	_, err = io.Copy(w, strings.NewReader(s))
+	_, err = cipheredWriter.Write(d)
 	if err != nil {
 		log.Fatalf("Error copying encrypted content: %v", err)
 	}
 
-	w.Close()
-	wa.Close()
+	cipheredWriter.Close()
+	armoredWriter.Close()
 
-	return buf.Bytes()
+	return buffer.Bytes(), nil
 }
 
 func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, error) {

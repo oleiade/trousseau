@@ -83,13 +83,16 @@ func (gf *GpgFile) Read(b []byte) (n int, err error) {
 // Write writes len(b) bytes to the GpgFile.
 // It returns the number of bytes written and an error, if any.
 // Write returns a non-nil error when n != len(b).
-func (gf *GpgFile) Write(p []byte) (n int, err error) {
+func (gf *GpgFile) Write(d []byte) (n int, err error) {
 	encryptionKeys, err := ReadPubRing(PubringFile, gf.Recipients)
 	if err != nil {
 		return 0, err
 	}
 
-	encData := Encrypt(encryptionKeys, string(p))
+	encData, err := Encrypt(d, encryptionKeys)
+	if err != nil {
+		return 0, err
+	}
 
 	// As we were able to encrypt data, truncate source
 	// file and write to it

@@ -162,7 +162,7 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	}
 
 	// Encrypt the encoded newStore content
-	encryptedData := openpgp.Encrypt(encryptionKeys, string(newStoreData))
+	encryptedData, err := openpgp.Encrypt(newStoreData, encryptionKeys)
 	if err != nil {
 		return nil, err
 	}
