@@ -42,6 +42,10 @@ func main() {
 			Name:  "store, s",
 			Usage: "Path to the trousseau data store to use",
 		},
+		cli.StringFlag{
+			Name: "gnupg-home",
+			Usage: "Provide an alternate gnupg home",
+		},
 	}
 
 	app.Before = Before

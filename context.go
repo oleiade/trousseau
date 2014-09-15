@@ -1,9 +1,9 @@
 package trousseau
 
 import (
-	"github.com/tmc/keyring"
 	"os"
 	"path/filepath"
+	"github.com/tmc/keyring"
 )
 
 // Global variables defining default values for S3 and scp
@@ -19,14 +19,19 @@ var (
 	}
 )
 
+// Global data store file path
+var gStorePath string
+func SetStorePath(storePath string) { gStorePath = storePath }
+func GetStorePath() string          { return gStorePath }
+
 func InferStorePath() string {
 	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
 	contextPath := GetStorePath()
 
-	if envPath != "" {
-		return envPath
-	} else if contextPath != "" {
+	if contextPath != "" {
 		return contextPath
+	} else if envPath != "" {
+		return envPath
 	}
 
 	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
@@ -40,27 +45,27 @@ func InferStorePath() string {
 func GetPassphrase() (passphrase string) {
 	var err error
 
-	// Try to retrieve passphrase from env
+	// try to retrieve passphrase from env
 	passphrase = os.Getenv(ENV_PASSPHRASE_KEY)
 	if len(passphrase) > 0 {
 		return passphrase
 	}
 
-	// If passphrase wasn't found in env, try to fetch it from
+	// if passphrase wasn't found in env, try to fetch it from
 	// system keyring manager.
-	passphrase, err = keyring.Get(gKeyringService, gKeyringUser)
+	passphrase, err = keyring.Get(os.Getenv(ENV_KEYRING_SERVICE_KEY), os.Getenv(ENV_KEYRING_USER_KEY))
 	if len(passphrase) > 0 {
 		return passphrase
 	}
 
-	// If passphrase was enither found in the environment nor
+	// if passphrase was enither found in the environment nor
 	// system keyring manager try to fetch it from gpg-agent
-	if os.Getenv("GPG_AGENT_INFO") != "" {
-		passphrase, err = getGpgPassphrase(gMasterGpgId)
+	if os.Getenv("gpg_agent_info") != "" {
+		passphrase, err = getGpgPassphrase(os.Getenv(ENV_MASTER_GPG_ID_KEY))
 	}
 
 	if err != nil {
-		ErrorLogger.Fatal("No passphrase provided. Unable to open data store")
+		ErrorLogger.Fatal("no passphrase provided. unable to open data store")
 	}
 
 	return passphrase

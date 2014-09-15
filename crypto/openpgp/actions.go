@@ -8,44 +8,62 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"strings"
 )
 
-func Encrypt(encryptionKeys *openpgp.EntityList, s string) []byte {
-	buf := &bytes.Buffer{}
+// Encrypt the provided bytes for the provided encryption
+// keys recipients. Returns the encrypted content bytes.
+func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
+	var buffer *bytes.Buffer = &bytes.Buffer{}
+	var armoredWriter io.WriteCloser
+	var cipheredWriter io.WriteCloser
+	var err error
 
-	wa, err := armor.Encode(buf, "PGP MESSAGE", nil)
+	// Create an openpgp armored cipher writer pointing on our
+	// buffer
+	armoredWriter , err = armor.Encode(buffer, "PGP MESSAGE", nil)
 	if err != nil {
 		NewPgpError(ERR_ENCRYPTION_ENCODING, fmt.Sprintf("Can't make armor: %v", err))
 	}
 
-	w, err := openpgp.Encrypt(wa, *encryptionKeys, nil, nil, nil)
+	// Create an encrypted writer using the provided encryption keys
+	cipheredWriter, err = openpgp.Encrypt(armoredWriter, *encryptionKeys, nil, nil, nil)
 	if err != nil {
 		NewPgpError(ERR_ENCRYPTION_ENCRYPT, fmt.Sprintf("Error encrypting: %v", err))
 	}
 
-	_, err = io.Copy(w, strings.NewReader(s))
+	// Write (encrypts on the fly) the provided bytes to
+	// cipheredWriter
+	_, err = cipheredWriter.Write(d)
 	if err != nil {
 		log.Fatalf("Error copying encrypted content: %v", err)
 	}
 
-	w.Close()
-	wa.Close()
+	cipheredWriter.Close()
+	armoredWriter.Close()
 
-	return buf.Bytes()
+	return buffer.Bytes(), nil
 }
 
-func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, error) {
-	if s == "" {
+// Decrypt tries to decrypt an OpenPGP armored block using the provided decryption keys
+// and passphrase. If succesfull the plain content of the block is returned as []byte.
+func Decrypt(d []byte, decryptionKeys *openpgp.EntityList, passphrase string) ([]byte, error) {
+	var armoredBlock *armor.Block
+	var message *openpgp.MessageDetails
+	var plain []byte
+	var err error
+
+	if d == nil {
 		return nil, nil
 	}
 
-	armorBlock, err := armor.Decode(strings.NewReader(s))
+	// Decode the OpenPGP armored block
+	armoredBlock, err = armor.Decode(bytes.NewReader(d))
 	if err != nil {
 		return nil, err
 	}
 
-	d, err := openpgp.ReadMessage(armorBlock.Body, decryptionKeys,
+	// Extract the message from the OpenPGP armored block
+	message, err = openpgp.ReadMessage(armoredBlock.Body, decryptionKeys,
 		func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 			kp := []byte(passphrase)
 
@@ -56,6 +74,8 @@ func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, 
 			for _, k := range keys {
 				err := k.PrivateKey.Decrypt(kp)
 				if err == nil {
+					// If no error were returned, we could succesfully
+					// decrypt the message using the provided private key
 					return nil, nil
 				}
 			}
@@ -64,11 +84,16 @@ func Decrypt(decryptionKeys *openpgp.EntityList, s, passphrase string) ([]byte, 
 				"Invalid passphrase supplied.")
 		},
 		nil)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decrypt trousseau data store. " +
+							   "No private key able to decrypt it found in your keyring.")
+	}
 
+	// Read the plain message bytes
+	plain, err = ioutil.ReadAll(message.UnverifiedBody)
 	if err != nil {
 		return nil, err
 	}
 
-	bytes, err := ioutil.ReadAll(d.UnverifiedBody)
-	return bytes, err
+	return plain, err
 }

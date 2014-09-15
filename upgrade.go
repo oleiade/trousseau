@@ -44,8 +44,6 @@ func UpgradeFrom(startVersion string, d []byte, mapping map[string]UpgradeClosur
 		out, err = upgradeClosure(out)
 		if err != nil {
 			return nil, fmt.Errorf("Upgrading trousseau data store to version %s: failure\nReason: %s", versionRepr, err.Error())
-		} else {
-			fmt.Printf("Upgrading trousseau data store to version %s: success\n", versionRepr)
 		}
 	}
 
@@ -123,7 +121,7 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	}
 
 	// Decrypt store version 0.3 (aka legacy)
-	plainData, err := openpgp.Decrypt(decryptionKeys, string(d), GetPassphrase())
+	plainData, err := openpgp.Decrypt(d, decryptionKeys, GetPassphrase())
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +162,7 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	}
 
 	// Encrypt the encoded newStore content
-	encryptedData := openpgp.Encrypt(encryptionKeys, string(newStoreData))
+	encryptedData, err := openpgp.Encrypt(newStoreData, encryptionKeys)
 	if err != nil {
 		return nil, err
 	}

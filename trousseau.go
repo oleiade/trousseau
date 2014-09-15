@@ -31,6 +31,15 @@ func OpenTrousseau(fp string) (*Trousseau, error) {
 
 	err = json.Unmarshal(content, &trousseau)
 	if err != nil {
+		// Check if the content of the file matches with a legacy
+		// data store file format. Raise a proper error accordingly.
+		contentVersion := DiscoverVersion(content, VersionDiscoverClosures)
+		if contentVersion != "" {
+			return nil, fmt.Errorf("outdated data store file format detected: %s. " +
+								   "You are currently using incompatible version: %s. " +
+								   "Please upgrade the data store by using the upgrade command.",
+								   contentVersion, TROUSSEAU_VERSION)
+		}
 		return nil, err
 	}
 
