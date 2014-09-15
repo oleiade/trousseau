@@ -28,10 +28,10 @@ func InferStorePath() string {
 	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
 	contextPath := GetStorePath()
 
-	if envPath != "" {
-		return envPath
-	} else if contextPath != "" {
+	if contextPath != "" {
 		return contextPath
+	} else if envPath != "" {
+		return envPath
 	}
 
 	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
