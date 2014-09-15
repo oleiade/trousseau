@@ -5,6 +5,6 @@
 	"Arch": "386 amd64 arm",
 	"Os": "linux darwin",
 	"BuildConstraints": "linux darwin",
-	"PackageVersion": "0.3.1",
+	"PackageVersion": "0.3.2",
 	"ConfigVersion": "0.9"
 }

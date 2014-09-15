@@ -1,3 +1,18 @@
+0.3.2 / 2014-09-15
+==================
+
+ * Fix store path evaluation order option > env > default [fix #112]
+ * Add support for alternative gnupg home [fix #103]
+ * Generate gnupg pubring and secring at execution time [ref #103]
+ * trousseau/crypto/openpgp cleanup and enhancements
+ * Remove globals.go file [ref #101]
+ * Enhance logging when no private key able to decrypt data store found [fix #111]
+ * Raise a proper error message when outdated data store format is detected [fix #109]
+ * Remove useless logging from upgrade command [fix #104]
+ * Fix import raises an error when data store does not exist [fix #58]
+ * Support for multiple recipients on data store creation [fix #95]
+ * Throw error when recipient does not exist on create command [fix #89]
+
 0.3.1 / 2014-09-10
 ==================
 

@@ -1,6 +1,6 @@
 package trousseau
 
-const TROUSSEAU_VERSION = "0.3.1"
+const TROUSSEAU_VERSION = "0.3.2"
 
 const (
 	DEFAULT_STORE_FILENAME = ".trousseau"
