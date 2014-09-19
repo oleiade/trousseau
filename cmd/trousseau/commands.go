@@ -271,13 +271,21 @@ func SetCommand() cli.Command {
 		Name:   "set",
 		Usage:  "Set a key value pair in the encrypted data store",
 		Action: func(c *cli.Context) {
-			if !hasExpectedArgs(c.Args(), 2) {
-				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to set command")
-			}
-
-			var key string = c.Args().First()
-			var value string = c.Args()[1]
 			var file string = c.String("file")
+			var key string = c.Args().First()
+			var value string
+
+			if file != "" {
+				if !hasExpectedArgs(c.Args(), 1) {
+					trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to set command")
+				}
+			} else {
+				if !hasExpectedArgs(c.Args(), 2) {
+					trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to set command")
+				}
+
+				value = c.Args()[1]
+			}
 
 			trousseau.SetAction(key, value, file)
 
