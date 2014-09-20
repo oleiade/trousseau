@@ -18,6 +18,11 @@ load test_helpers
     [ ! -f $TROUSSEAU_TEST_STORE_CREATE ]
 }
 
+@test "create store without a recipient fails" {
+    run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE_CREATE create 
+    [ "$status" -eq 1 ]
+}
+
 @test "create store with one valid recipient and one invalid recipient" {
     run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE_CREATE create $TROUSSEAU_TEST_KEY_ID ABC123EAS 
 
