@@ -23,8 +23,16 @@ func CreateCommand() cli.Command {
 					 "     trousseau create tcrevon@gmail.com\n" +
 					 "     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
 		Action: func(c *cli.Context) {
-			var recipients []string = strings.Split(c.Args()[0], ",")
-			trousseau.CreateAction(recipients)
+			var recipients []string
+
+			if len(c.Args()) > 0 {
+				recipients = strings.Split(c.Args()[0], ",")
+				trousseau.CreateAction(recipients)
+			} else {
+				trousseau.ErrorLogger.Fatal("invalid number of arguments provided to " +
+											"the create command. At least one recipient to encrypt the " +
+											"data store for is needed.")
+			}
 		},
 	}
 }
@@ -271,13 +279,21 @@ func SetCommand() cli.Command {
 		Name:   "set",
 		Usage:  "Set a key value pair in the encrypted data store",
 		Action: func(c *cli.Context) {
-			if !hasExpectedArgs(c.Args(), 2) {
-				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to set command")
-			}
-
-			var key string = c.Args().First()
-			var value string = c.Args()[1]
 			var file string = c.String("file")
+			var key string = c.Args().First()
+			var value string
+
+			if file != "" {
+				if !hasExpectedArgs(c.Args(), 1) {
+					trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to set command")
+				}
+			} else {
+				if !hasExpectedArgs(c.Args(), 2) {
+					trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to set command")
+				}
+
+				value = c.Args()[1]
+			}
 
 			trousseau.SetAction(key, value, file)
 

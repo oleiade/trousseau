@@ -5,6 +5,15 @@
 	"Arch": "386 amd64 arm",
 	"Os": "linux darwin",
 	"BuildConstraints": "linux darwin",
-	"PackageVersion": "0.3.2",
+	"PackageVersion": "0.3.3",
 	"ConfigVersion": "0.9"
+	"ConfigVersion": "0.9",
+	"TaskSettings": {
+    "deb": {
+        "metadata": {
+            "description": "Networked and encrypted key-value database",
+            "maintainer": "Theo Crevon (https://github.com/oleiade) <theocrevon@fastmail.fm>"
+        }
+     }
+  }
 }
