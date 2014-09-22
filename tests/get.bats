@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+load system_helpers
+load keyring_helpers
 load test_helpers
 
 # This file will be automatically collected at teardown
