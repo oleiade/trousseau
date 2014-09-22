@@ -1,3 +1,11 @@
+0.3.3 / 2014-09-22
+==================
+
+ * Fix #117: fill the debian packages metadata Description field
+ * Fix #116: raise and error when no recipients were provided to the create function
+ * Fix #115 expected args count whether --file option is passed or not and add tests
+ * Add integration tests with bats
+
 0.3.2 / 2014-09-15
 ==================
 

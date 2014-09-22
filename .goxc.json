@@ -6,7 +6,6 @@
 	"Os": "linux darwin",
 	"BuildConstraints": "linux darwin",
 	"PackageVersion": "0.3.3",
-	"ConfigVersion": "0.9"
 	"ConfigVersion": "0.9",
 	"TaskSettings": {
     "deb": {
