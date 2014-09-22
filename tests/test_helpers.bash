@@ -21,7 +21,6 @@ TROUSSEAU_KEYRING_SERVICE_NAME=trousseau_test
 TROUSSEAU_TEST_KEY_PASSPHRASE=trousseau
 
 
-
 # Setup and teardown
 setup() {
     # Make sure to fail fast if trousseau was not built
@@ -41,13 +40,14 @@ setup() {
     # Otherwise, create the base test store
     $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE create $TROUSSEAU_TEST_KEY_ID > /dev/null
 
-    create_keyring_service
+    # Export the test key passphrase in environment so
+    # data store interraction and authentication tests are properly
+    # splitted.
+    export TROUSSEAU_PASSPHRASE=$TROUSSEAU_TEST_KEY_PASSPHRASE
 }
 
 teardown() {
     # Remove every trousseau test prefixed files from 
     # tmp dir
     rm -rf $TROUSSEAU_TEST_FILES
-
-    drop_keyring_service
 }
