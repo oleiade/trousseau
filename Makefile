@@ -12,6 +12,14 @@ TROUSSEAU_CMD_DIR = $(CMD_DIR)/trousseau
 BIN_DIR = $(ROOT_DIR)/bin
 TROUSSEAU_BIN = $(BIN_DIR)/trousseau
 
+# Third party binaries paths
+BATS_BIN ?= $(shell which bats)
+
+# Integration tests resources
+INTEGRATION_TEST_DIR := $(ROOT_DIR)/tests
+INTEGRATION_TEST_FILES := $(wildcard $(INTEGRATION_TEST_DIR)/*.bats)
+INTEGRATION_TEST_FILES := $(filter-out $(INTEGRATION_TEST_DIR)/auth.bats, $(INTEGRATION_TEST_FILES))
+
 # Actions
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 
@@ -29,8 +37,17 @@ trousseau: deps
 	@(cd $(TROUSSEAU_CMD_DIR) && go build -o $(TROUSSEAU_BIN)) 
 	@(echo "-> trousseau binary created: $(TROUSSEAU_BIN)")
 
-test: deps
+test: unit integration
+
+unit: deps
 	@(go list ./... | xargs -n1 go test)
+
+# Running integration depends on bats test framework
+# https://github.com/sstephenson/bats
+# Make sure to set $BATS_BIN variable to point
+# to bats eecutable via 'env BATS_BIN=myexec make integration'
+integration: deps
+	@(${BATS_BIN} $(INTEGRATION_TEST_FILES))
 
 format:
 	@(go fmt ./...)
