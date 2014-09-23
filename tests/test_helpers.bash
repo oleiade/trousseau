@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Testing context
 TMP_DIR=/tmp
 TROUSSEAU_TEST_FILES_PREFIX=trousseau_test_
@@ -7,8 +9,8 @@ TROUSSEAU_TEST_FILES_WILDCARD="${TROUSSEAU_TEST_FILES_PREFIX}*"
 TROUSSEAU_TEST_FILES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_WILDCARD}"
 
 # Build context
-TROUSSEAU_BINARY_DIR=../bin
-TROUSSEAU_BINARY=../bin/trousseau
+TROUSSEAU_BINARY_DIR="$DIR/../bin"
+TROUSSEAU_BINARY="$TROUSSEAU_BINARY_DIR/trousseau"
 
 # Trousseau context
 TROUSSEAU_TEST_KEY_ID=6F7FEB2D
