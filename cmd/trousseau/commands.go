@@ -5,7 +5,6 @@ import (
 	"github.com/oleiade/trousseau"
 	"fmt"
 	"os"
-	"strings"
 	"path/filepath"
 )
 
@@ -26,7 +25,7 @@ func CreateCommand() cli.Command {
 			var recipients []string
 
 			if len(c.Args()) > 0 {
-				recipients = strings.Split(c.Args()[0], ",")
+				recipients = c.Args()
 				trousseau.CreateAction(recipients)
 			} else {
 				trousseau.ErrorLogger.Fatal("invalid number of arguments provided to " +
