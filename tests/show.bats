@@ -9,7 +9,7 @@ load test_helpers
     [ "$status" -eq 0 ]
 }
 
-@test "show values of a fulfilled store" {
+@test "show values of a fulfilled store succeeds" {
     # Prepare the data store and environement
     run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE set abc 123
     run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE show 
