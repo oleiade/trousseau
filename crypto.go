@@ -1,9 +1,10 @@
 package trousseau
 
 import (
-	"github.com/oleiade/trousseau/crypto/openpgp"
 	"os"
 	"path"
+
+	"github.com/oleiade/trousseau/crypto/openpgp"
 )
 
 // Declare encryption types

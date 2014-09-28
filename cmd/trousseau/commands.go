@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
-	"github.com/oleiade/trousseau"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/codegangsta/cli"
+	"github.com/oleiade/trousseau"
 )
 
 func CreateCommand() cli.Command {

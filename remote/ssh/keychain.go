@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"bytes"
-	"code.google.com/p/gosshold/ssh"
 	"crypto"
 	"crypto/dsa"
 	"crypto/rsa"
@@ -12,6 +11,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+
+	"code.google.com/p/gosshold/ssh"
 )
 
 type Keychain struct {

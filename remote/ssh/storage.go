@@ -1,8 +1,9 @@
 package ssh
 
 import (
-	"code.google.com/p/gosshold/ssh"
 	"strings"
+
+	"code.google.com/p/gosshold/ssh"
 )
 
 type ScpStorage struct {
