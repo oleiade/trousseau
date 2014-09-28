@@ -3,8 +3,9 @@ package trousseau
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/oleiade/trousseau/crypto/openpgp"
 	"sort"
+
+	"github.com/oleiade/trousseau/crypto/openpgp"
 )
 
 type VersionMatcher func([]byte) bool

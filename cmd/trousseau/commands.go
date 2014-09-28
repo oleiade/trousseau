@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
-	"github.com/oleiade/trousseau"
 	"os"
 	"path/filepath"
-	"strings"
+
+	"github.com/codegangsta/cli"
+	"github.com/oleiade/trousseau"
 )
 
 func CreateCommand() cli.Command {
@@ -30,8 +30,8 @@ func CreateCommand() cli.Command {
 				trousseau.CreateAction(recipients)
 			} else {
 				trousseau.ErrorLogger.Fatal("invalid number of arguments provided to " +
-											"the create command. At least one recipient to encrypt the " +
-											"data store for is needed.")
+					"the create command. At least one recipient to encrypt the " +
+					"data store for is needed.")
 			}
 		},
 	}

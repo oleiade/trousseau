@@ -22,7 +22,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-
 	"io"
 	"net"
 	"net/url"

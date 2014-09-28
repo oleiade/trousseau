@@ -1,9 +1,10 @@
 package openpgp
 
 import (
-	_ "github.com/oleiade/trousseau/crypto"
 	"io/ioutil"
 	"os"
+
+	_ "github.com/oleiade/trousseau/crypto"
 )
 
 type GpgFile struct {

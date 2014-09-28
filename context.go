@@ -1,9 +1,10 @@
 package trousseau
 
 import (
-	"github.com/tmc/keyring"
 	"os"
 	"path/filepath"
+
+	"github.com/tmc/keyring"
 )
 
 // Global variables defining default values for S3 and scp

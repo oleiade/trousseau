@@ -2,6 +2,7 @@ package trousseau
 
 import (
 	"fmt"
+
 	"github.com/howeyc/gopass"
 )
 

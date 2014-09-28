@@ -2,6 +2,7 @@ package trousseau
 
 import (
 	"fmt"
+
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/remote/gist"

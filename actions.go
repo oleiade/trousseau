@@ -1,15 +1,15 @@
 package trousseau
 
 import (
-	"time"
-
 	"encoding/json"
 	"fmt"
-	"github.com/oleiade/trousseau/dsn"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/oleiade/trousseau/dsn"
 )
 
 func CreateAction(recipients []string) {
