@@ -3,12 +3,12 @@ package trousseau
 import (
 	"time"
 
-	"github.com/oleiade/trousseau/dsn"
-	"os"
-	"io"
-	"io/ioutil"
 	"encoding/json"
 	"fmt"
+	"github.com/oleiade/trousseau/dsn"
+	"io"
+	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -506,7 +506,7 @@ func UpgradeAction(yes, noBackup bool) {
 
 	if yes == false {
 		fmt.Printf("You are about to upgrade trousseau data "+
-					"store %s (version %s) up to version %s. Proceed? [Y/n] ",
+			"store %s (version %s) up to version %s. Proceed? [Y/n] ",
 			InferStorePath(), version, TROUSSEAU_VERSION)
 		_, err = fmt.Scanf("%s", &proceed)
 		if err != nil {
@@ -543,4 +543,3 @@ func isPipe(f *os.File) bool {
 
 	return s.Mode()&os.ModeNamedPipe != 0
 }
-
