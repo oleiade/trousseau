@@ -30,6 +30,22 @@ TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
     [ "${lines[0]}" = "do re mi" ]
 }
 
+@test "get valid key value's export to file with mode 0600" {
+    run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE set 'easy as' 'do re mi'
+    run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE get 'easy as' -f $TEST_FILE
+    [ "$status" -eq 0 ]
+    [ -f $TEST_FILE ]
+
+    # Now let's make sure the created file has proper mode (in a generic way)
+    if [[ $(uname) == 'Linux' ]]; then
+        run stat -c "%a" $TEST_FILE
+        [ "$output" == "600" ]
+    elif [[ $(uname) == 'Darwin' ]]; then
+        run stat -f "%Mp%Lp" $TEST_FILE
+        [ "$output" == "0600" ]
+    fi
+}
+
 @test "get valid key value's export to non openable file fails" {
     run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE set 'easy as' 'do re mi'
     run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE get 'easy as' -f /root

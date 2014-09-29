@@ -46,7 +46,7 @@ unit: deps
 # https://github.com/sstephenson/bats
 # Make sure to set $BATS_BIN variable to point
 # to bats eecutable via 'env BATS_BIN=myexec make integration'
-integration: deps
+integration: all
 	@(${BATS_BIN} $(INTEGRATION_TEST_FILES))
 
 format:
