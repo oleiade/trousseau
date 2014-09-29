@@ -35,10 +35,10 @@ func OpenTrousseau(fp string) (*Trousseau, error) {
 		// data store file format. Raise a proper error accordingly.
 		contentVersion := DiscoverVersion(content, VersionDiscoverClosures)
 		if contentVersion != "" {
-			return nil, fmt.Errorf("outdated data store file format detected: %s. " +
-								   "You are currently using incompatible version: %s. " +
-								   "Please upgrade the data store by using the upgrade command.",
-								   contentVersion, TROUSSEAU_VERSION)
+			return nil, fmt.Errorf("outdated data store file format detected: %s. "+
+				"You are currently using incompatible version: %s. "+
+				"Please upgrade the data store by using the upgrade command.",
+				contentVersion, TROUSSEAU_VERSION)
 		}
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (t *Trousseau) Write(fp string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(fp, jsonData, os.FileMode(0700))
+	err = ioutil.WriteFile(fp, jsonData, os.FileMode(0600))
 	if err != nil {
 		return err
 	}
