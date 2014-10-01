@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 )
 
 // Encrypt the provided bytes for the provided encryption
@@ -22,20 +21,20 @@ func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
 	// buffer
 	armoredWriter , err = armor.Encode(buffer, "PGP MESSAGE", nil)
 	if err != nil {
-		NewPgpError(ERR_ENCRYPTION_ENCODING, fmt.Sprintf("Can't make armor: %v", err))
+		return nil, NewPgpError(ERR_ENCRYPTION_ENCODING, fmt.Sprintf("Can't make armor: %v", err))
 	}
 
 	// Create an encrypted writer using the provided encryption keys
 	cipheredWriter, err = openpgp.Encrypt(armoredWriter, *encryptionKeys, nil, nil, nil)
 	if err != nil {
-		NewPgpError(ERR_ENCRYPTION_ENCRYPT, fmt.Sprintf("Error encrypting: %v", err))
+		return nil, NewPgpError(ERR_ENCRYPTION_ENCRYPT, fmt.Sprintf("Error encrypting: %v", err))
 	}
 
 	// Write (encrypts on the fly) the provided bytes to
 	// cipheredWriter
 	_, err = cipheredWriter.Write(d)
 	if err != nil {
-		log.Fatalf("Error copying encrypted content: %v", err)
+		return nil, NewPgpError(ERR_ENCRYPTION_ENCRYPT, fmt.Sprintf("Error copying encrypted content: %v", err))
 	}
 
 	cipheredWriter.Close()
