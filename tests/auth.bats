@@ -14,7 +14,7 @@ load test_helpers
     create_keyring_service
     export TROUSSEAU_KEYRING_SERVICE=$TROUSSEAU_KEYRING_SERVICE_NAME
 
-    run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE keys
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE keys
     [ "$status" -eq 0 ]
 
     # Drop the keyring entry
@@ -26,7 +26,7 @@ load test_helpers
     # for the test key passphrase
     unset TROUSSEAU_PASSPHRASE
     
-    run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE keys
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE keys
     [ "$status" -eq 1 ]
 }
 
@@ -37,7 +37,7 @@ load test_helpers
 
     export TROUSSEAU_KEYRING_SERVICE=nonexisting
 
-    run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE keys
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE keys
     [ "$status" -eq 1 ]
 }
 

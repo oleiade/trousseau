@@ -7,7 +7,7 @@ load test_helpers
     unset TROUSSEAU_PASSPHRASE
 
     export TROUSSEAU_PASSPHRASE=$TROUSSEAU_TEST_KEY_PASSPHRASE
-    run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE keys
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE keys
     [ "$status" -eq 0 ]
 
     unset TROUSSEAU_PASSPHRASE
@@ -17,6 +17,6 @@ load test_helpers
     # Remove it if it exists
     unset TROUSSEAU_PASSPHRASE
 
-    run $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE keys
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE keys
     [ "$status" -eq 1 ]
 }

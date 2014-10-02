@@ -8,20 +8,51 @@ TROUSSEAU_TEST_FILES_PREFIX=trousseau_test_
 TROUSSEAU_TEST_FILES_WILDCARD="${TROUSSEAU_TEST_FILES_PREFIX}*"
 TROUSSEAU_TEST_FILES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_WILDCARD}"
 
-# Build context
-TROUSSEAU_BINARY_DIR="$DIR/../bin"
-TROUSSEAU_BINARY="$TROUSSEAU_BINARY_DIR/trousseau"
+# Test gnupg context
+TROUSSEAU_TEST_GNUPG_HOME="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}gnupg"
+TROUSSEAU_TEST_KEYS_DIR="${DIR}/keys"
 
-# Trousseau context
-TROUSSEAU_TEST_KEY_ID=6F7FEB2D
-TROUSSEAU_TEST_KEY_EMAIL=theo@trousseau.io
-TROUSSEAU_TEST_STORE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}store"
-TROUSSEAU_TEST_STORE_CREATE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}create_store"
+TROUSSEAU_TEST_FIRST_PUBLIC_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_public_first_test.key"
+TROUSSEAU_TEST_FIRST_PRIVATE_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_private_first_test.key"
+TROUSSEAU_TEST_FIRST_KEY_ID=6F7FEB2D
+TROUSSEAU_TEST_FIRST_KEY_EMAIL=theo@trousseau.io
+
+TROUSSEAU_TEST_SECOND_PUBLIC_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_public_second_test.key"
+TROUSSEAU_TEST_SECOND_PRIVATE_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_private_second_test.key"
+TROUSSEAU_TEST_SECOND_KEY_ID=EA7F9C59
+TROUSSEAU_TEST_SECOND_KEY_EMAIL=theo@trousseau.io
+#
 
 # Keyring context
 TROUSSEAU_KEYRING_SERVICE_NAME=trousseau_test
 TROUSSEAU_TEST_KEY_PASSPHRASE=trousseau
 
+# Build context
+TROUSSEAU_BINARY_DIR="$DIR/../bin"
+TROUSSEAU_TEST_OPTIONS="--gnupg-home=$TROUSSEAU_TEST_GNUPG_HOME"
+TROUSSEAU_COMMAND="$TROUSSEAU_BINARY_DIR/trousseau"
+
+# Trousseau global context
+TROUSSEAU_TEST_STORE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}store"
+TROUSSEAU_TEST_STORE_CREATE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}create_store"
+
+
+install_gpg_test_keys() {
+    mkdir $TROUSSEAU_TEST_GNUPG_HOME
+    chmod -R 0777 $TROUSSEAU_TEST_GNUPG_HOME
+    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --import $TROUSSEAU_TEST_FIRST_PUBLIC_KEY_FILE &> /dev/null
+    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --allow-secret-key-import --import $TROUSSEAU_TEST_FIRST_PRIVATE_KEY_FILE &> /dev/null
+    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --import $TROUSSEAU_TEST_SECOND_PUBLIC_KEY_FILE &> /dev/null
+    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --allow-secret-key-import --import $TROUSSEAU_TEST_SECOND_PRIVATE_KEY_FILE &> /dev/null
+}
+
+setup_env() {
+    export TROUSSEAU_PASSPHRASE=$TROUSSEAU_TEST_KEY_PASSPHRASE
+}
+
+teardown_env() {
+    unset TROUSSEAU_PASSPHRASE
+}
 
 # Setup and teardown
 setup() {
@@ -39,16 +70,18 @@ setup() {
         exit 1
     fi
 
-    # Otherwise, create the base test store
-    $TROUSSEAU_BINARY --store $TROUSSEAU_TEST_STORE create $TROUSSEAU_TEST_KEY_ID > /dev/null
+    install_gpg_test_keys
+    setup_env
 
-    # Export the test key passphrase in environment so
-    # data store interraction and authentication tests are properly
-    # splitted.
-    export TROUSSEAU_PASSPHRASE=$TROUSSEAU_TEST_KEY_PASSPHRASE
+    # Otherwise, create the base test store
+    $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME \
+                       --store $TROUSSEAU_TEST_STORE \
+                       create $TROUSSEAU_TEST_FIRST_KEY_ID > /dev/null
 }
 
 teardown() {
+    teardown_env
+
     # Remove every trousseau test prefixed files from 
     # tmp dir
     rm -rf $TROUSSEAU_TEST_FILES
