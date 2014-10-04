@@ -9,6 +9,7 @@ func Before(c *cli.Context) error {
 	checkHelp(c)
 	updateStorePath(c)
 	updateGnupgHome(c)
+	updateCheckPassphrase(c)
 
 	return nil
 }
@@ -38,5 +39,11 @@ func updateStorePath(c *cli.Context) {
 func updateGnupgHome(c *cli.Context) {
 	if c.String("gnupg-home") != "" {
 		trousseau.GnupgHome = c.String("gnupg-home")
+	}
+}
+
+func updateCheckPassphrase(c *cli.Context) {
+	if c.GlobalBool("ask-passphrase") {
+		trousseau.AskPassphrase()
 	}
 }
