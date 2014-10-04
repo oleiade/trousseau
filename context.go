@@ -3,6 +3,7 @@ package trousseau
 import (
 	"os"
 	"path/filepath"
+
 	"github.com/tmc/keyring"
 )
 
@@ -19,10 +20,15 @@ var (
 	}
 )
 
+// Check passphrase bool
+var gAskPassphrase bool = false
+
 // Global data store file path
 var gStorePath string
+
 func SetStorePath(storePath string) { gStorePath = storePath }
 func GetStorePath() string          { return gStorePath }
+func AskPassphrase()                { gAskPassphrase = true }
 
 func InferStorePath() string {
 	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
@@ -62,6 +68,10 @@ func GetPassphrase() (passphrase string) {
 	// system keyring manager try to fetch it from gpg-agent
 	if os.Getenv("gpg_agent_info") != "" {
 		passphrase, err = getGpgPassphrase(os.Getenv(ENV_MASTER_GPG_ID_KEY))
+	}
+	// if user set ask-passphrase flag, use it
+	if gAskPassphrase {
+		return PromptForPassword()
 	}
 
 	if err != nil {
