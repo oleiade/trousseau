@@ -83,6 +83,10 @@
 		{
 			"ImportPath": "github.com/tmc/keyring",
 			"Rev": "c97358d3b0f2df246afedabacbad24fad4e3246e"
+		},
+		{
+			"ImportPath":"code.google.com/p/go.crypto/scrypt",
+			"Rev":" 7eef55bbd51c"
 		}
 	]
 }
