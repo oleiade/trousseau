@@ -5,14 +5,15 @@ import (
 
 	"encoding/json"
 	"fmt"
-	"github.com/oleiade/trousseau/dsn"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/oleiade/trousseau/dsn"
 )
 
-func CreateAction(recipients []string) {
+func CreateAction(recipients []string, symmetric bool) {
 	meta := Meta{
 		CreatedAt:        time.Now().String(),
 		LastModifiedAt:   time.Now().String(),
@@ -20,10 +21,19 @@ func CreateAction(recipients []string) {
 		TrousseauVersion: TROUSSEAU_VERSION,
 	}
 	store := NewStore(meta)
+	var ct CryptoType
+	var ca CryptoAlgorithm
 
+	if symmetric {
+		ct = SYMMETRIC_ENCRYPTION
+		ca = AES_256_ENCRYPTION
+	} else {
+		ct = ASYMMETRIC_ENCRYPTION
+		ca = GPG_ENCRYPTION
+	}
 	tr := Trousseau{
-		CryptoType:      ASYMMETRIC_ENCRYPTION,
-		CryptoAlgorithm: GPG_ENCRYPTION,
+		CryptoType:      ct,
+		CryptoAlgorithm: ca,
 	}
 
 	err := tr.Encrypt(store)

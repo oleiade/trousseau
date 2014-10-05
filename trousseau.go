@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/oleiade/trousseau/crypto/aesencryption"
 )
 
 type Trousseau struct {
@@ -60,6 +62,17 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 		if err != nil {
 			return nil, err
 		}
+	case AES_256_ENCRYPTION:
+		msg, key, err := aesencryption.ParseMsg(GetPassphrase(), t.Data)
+		if err != nil {
+			return nil, err
+		}
+		plainData, err := aesencryption.DecryptAES256(*key, msg)
+		err = json.Unmarshal(plainData, &store)
+		if err != nil {
+			return nil, err
+		}
+
 	default:
 		return nil, fmt.Errorf("Invalid encryption method provided")
 	}
@@ -76,6 +89,20 @@ func (t *Trousseau) Encrypt(store *Store) error {
 		}
 
 		t.Data, err = EncryptAsymmetricPGP(plainData, store.Meta.Recipients)
+		if err != nil {
+			return err
+		}
+	case AES_256_ENCRYPTION:
+		// Implement crypto.aesencryption package here
+		key, err := aesencryption.MakeAES256Key(GetPassphrase(), nil)
+		if err != nil {
+			return err
+		}
+		plainData, err := json.Marshal(*store)
+		if err != nil {
+			return err
+		}
+		t.Data, err = aesencryption.EncryptAES256(*key, plainData)
 		if err != nil {
 			return err
 		}
