@@ -23,11 +23,16 @@ func NewGpgFile(filepath, passphrase string, recipients []string) *GpgFile {
 	}
 }
 
-// Open opens the named file for reading.
-// If successful, methods on the returned file can be used for reading;
+// Open opens the named file for reading/writing, depending on the given mode.
+// If successful, methods on the returned file can be used for reading or writing;
 // the associated file descriptor has mode O_RDONLY.
 // If there is an error, it will be of type *PathError.
+//
+// The passphrase is used only for decryption.
 func OpenFile(name string, mode int, passphrase string, recipients []string) (*GpgFile, error) {
+	if mode == 0 {
+		mode = os.O_RDONLY
+	}
 	f, err := os.OpenFile(name, mode, os.FileMode(0600))
 	if err != nil {
 		return nil, err
