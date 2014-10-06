@@ -1,9 +1,10 @@
 package gist
 
 import (
+	"io/ioutil"
+
 	"code.google.com/p/goauth2/oauth"
 	"github.com/google/go-github/github"
-	"io/ioutil"
 )
 
 type GistStorage struct {

@@ -2,8 +2,9 @@ package trousseau
 
 import (
 	"encoding/json"
-	"github.com/oleiade/trousseau/crypto/openpgp"
 	"testing"
+
+	"github.com/oleiade/trousseau/crypto/openpgp"
 )
 
 func TestIsVersionZeroDotThree(t *testing.T) {

@@ -2,12 +2,13 @@ package openpgp
 
 import (
 	"bytes"
-	"code.google.com/p/go.crypto/openpgp"
-	"code.google.com/p/go.crypto/openpgp/armor"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+
+	"code.google.com/p/go.crypto/openpgp"
+	"code.google.com/p/go.crypto/openpgp/armor"
 )
 
 // Encrypt the provided bytes for the provided encryption
@@ -20,15 +21,15 @@ func Encrypt(d []byte, encryptionKeys *openpgp.EntityList) ([]byte, error) {
 
 	// Create an openpgp armored cipher writer pointing on our
 	// buffer
-	armoredWriter , err = armor.Encode(buffer, "PGP MESSAGE", nil)
+	armoredWriter, err = armor.Encode(buffer, "PGP MESSAGE", nil)
 	if err != nil {
-		NewPgpError(ERR_ENCRYPTION_ENCODING, fmt.Sprintf("Can't make armor: %v", err))
+		return nil, NewPgpError(ERR_ENCRYPTION_ENCODING, fmt.Sprintf("Can't make armor: %v", err))
 	}
 
 	// Create an encrypted writer using the provided encryption keys
 	cipheredWriter, err = openpgp.Encrypt(armoredWriter, *encryptionKeys, nil, nil, nil)
 	if err != nil {
-		NewPgpError(ERR_ENCRYPTION_ENCRYPT, fmt.Sprintf("Error encrypting: %v", err))
+		return nil, NewPgpError(ERR_ENCRYPTION_ENCRYPT, fmt.Sprintf("Error encrypting: %v", err))
 	}
 
 	// Write (encrypts on the fly) the provided bytes to
@@ -86,7 +87,7 @@ func Decrypt(d []byte, decryptionKeys *openpgp.EntityList, passphrase string) ([
 		nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decrypt trousseau data store. " +
-							   "No private key able to decrypt it found in your keyring.")
+			"No private key able to decrypt it found in your keyring.")
 	}
 
 	// Read the plain message bytes

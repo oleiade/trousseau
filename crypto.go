@@ -1,11 +1,11 @@
 package trousseau
 
 import (
-	"github.com/oleiade/trousseau/crypto/openpgp"
-	"path"
 	"os"
-)
+	"path"
 
+	"github.com/oleiade/trousseau/crypto/openpgp"
+)
 
 // Declare encryption types
 type CryptoType int
@@ -25,8 +25,8 @@ const (
 
 // Gnupg variables
 var GnupgHome = path.Join(os.Getenv("HOME"), ".gnupg")
-var GnupgPubring func()string = func()string { return path.Join(GnupgHome, "pubring.gpg") }
-var GnupgSecring func()string = func()string { return path.Join(GnupgHome, "secring.gpg") }
+var GnupgPubring func() string = func() string { return path.Join(GnupgHome, "pubring.gpg") }
+var GnupgSecring func() string = func() string { return path.Join(GnupgHome, "secring.gpg") }
 
 // DecryptAsymmetricPGP decrypts an OpenPGP message using GnuPG.
 func DecryptAsymmetricPGP(encryptedData []byte, passphrase string) ([]byte, error) {

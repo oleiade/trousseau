@@ -3,6 +3,7 @@ package trousseau
 import (
 	"os"
 	"path/filepath"
+
 	"github.com/tmc/keyring"
 )
 
@@ -21,6 +22,7 @@ var (
 
 // Global data store file path
 var gStorePath string
+
 func SetStorePath(storePath string) { gStorePath = storePath }
 func GetStorePath() string          { return gStorePath }
 

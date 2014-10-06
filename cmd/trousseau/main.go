@@ -43,7 +43,7 @@ func main() {
 			Usage: "Path to the trousseau data store to use",
 		},
 		cli.StringFlag{
-			Name: "gnupg-home",
+			Name:  "gnupg-home",
 			Usage: "Provide an alternate gnupg home",
 		},
 	}

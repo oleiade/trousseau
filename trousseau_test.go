@@ -2,10 +2,10 @@ package trousseau
 
 import (
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/oleiade/tempura"
-	"os"
 )
 
 func TestOpenTrousseau(t *testing.T) {
