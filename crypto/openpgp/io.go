@@ -1,6 +1,7 @@
 package openpgp
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -8,18 +9,39 @@ import (
 )
 
 type GpgFile struct {
-	file       *os.File
+	file       fileLike
 	passphrase string
 
 	Path       string
 	Recipients []string
 }
 
+type fileLike interface {
+	io.Reader
+	io.Writer
+	io.Closer
+	Name() string
+	Stat() (os.FileInfo, error)
+	Truncate(int64) error
+}
+
+// NewGpgFile creates a new GPG file.
 func NewGpgFile(filepath, passphrase string, recipients []string) *GpgFile {
-	return &GpgFile{
+	gf := &GpgFile{
 		Path:       filepath,
 		Recipients: recipients,
 		passphrase: passphrase,
+	}
+	return gf
+}
+
+// WrapFile wraps a *os.File-like object into a *GpgFile.
+func WrapFile(f fileLike, passphrase string, recipients []string) *GpgFile {
+	return &GpgFile{
+		Path:       f.Name(),
+		passphrase: passphrase,
+		Recipients: recipients,
+		file:       f,
 	}
 }
 
@@ -38,10 +60,7 @@ func OpenFile(name string, mode int, passphrase string, recipients []string) (*G
 		return nil, err
 	}
 
-	gpg := NewGpgFile(name, passphrase, recipients)
-	gpg.file = f
-
-	return gpg, nil
+	return WrapFile(f, passphrase, recipients), nil
 }
 
 // Close closes the GpgFile, rendering it unusable for I/O.
@@ -100,16 +119,17 @@ func (gf *GpgFile) Write(d []byte) (n int, err error) {
 		return 0, err
 	}
 
-	// As we were able to encrypt data, truncate source
-	// file and write to it
-	err = gf.file.Truncate(int64(len(encData)))
-	n, err = gf.file.Write(encData)
-
-	return n, err
+	return gf.file.Write(encData)
 }
 
 // Stat returns the FileInfo structure describing file.
 // If there is an error, it will be of type *PathError.
 func (gf *GpgFile) Stat() (fi os.FileInfo, err error) {
 	return gf.file.Stat()
+}
+
+func (gf *GpgFile) Truncate(p int64) error {
+	// As we were able to encrypt data, truncate source
+	// file and write to it
+	return gf.file.Truncate(p)
 }
