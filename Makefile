@@ -28,8 +28,8 @@ all: deps trousseau
 
 deps:
 	@(echo "-> Processing dependencies")
-	@(go get github.com/kr/godep)
-	@(godep restore)
+	# @(go get github.com/kr/godep)
+	# @(godep restore)
 
 trousseau: deps
 	@(echo "-> Compiling trousseau binary")

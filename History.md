@@ -1,3 +1,13 @@
+
+0.3.4 / 2014-10-06
+==================
+
+ * Fix #119: add missing errors return in trousseau's openpgp package
+ * Fix #121: Ensure files are created in 0600 mode
+ * Enhance integration testing
+ * Add dummy gpg keys for testing purposes
+ * Fix create store for multiple recipients
+
 0.3.3 / 2014-09-22
 ==================
 
