@@ -64,7 +64,7 @@ func PushAction(destination string, sshPrivateKey string, askPassword bool) {
 		}
 
 		if askPassword == true {
-			password := PromptForPassword()
+			password := PromptForHiddenInput("Ssh endpoint password: ")
 			endpointDsn.Secret = password
 		}
 
@@ -107,7 +107,7 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) {
 		}
 
 		if askPassword == true {
-			password := PromptForPassword()
+			password := PromptForHiddenInput("Ssh endpoint password: ")
 			endpointDsn.Secret = password
 		}
 
