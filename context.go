@@ -42,7 +42,7 @@ func InferStorePath() string {
 }
 
 func AskPassphrase() {
-	SetPassphrase(PromptForPassword())
+	SetPassphrase(PromptForHiddenInput("Passphrase: "))
 }
 
 // GetPassphrase attemps to retrieve the user's gpg master
