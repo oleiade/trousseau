@@ -13,6 +13,12 @@ TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
     [ -f $TEST_FILE ]
 }
 
+@test "export without arguments prints to stdout" {
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE export 
+    [ "$status" -eq 0 ] 
+    [ "$output" != "" ]
+}
+
 @test "export store creates a valid data store file" {
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE export $TEST_FILE
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TEST_FILE keys
