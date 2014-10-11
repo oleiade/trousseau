@@ -143,20 +143,7 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) {
 	InfoLogger.Println("Trousseau data store succesfully pulled from remote storage")
 }
 
-func ExportAction(to string, plain bool) {
-	outputFile, err := os.Create(to)
-	if err != nil {
-		ErrorLogger.Fatal(err)
-	}
-	defer outputFile.Close()
-
-	// Make sure the file is readble/writable only
-	// by its owner
-	err = os.Chmod(outputFile.Name(), os.FileMode(0600))
-	if err != nil {
-		ErrorLogger.Fatal(err)
-	}
-
+func ExportAction(destination io.Writer, plain bool) {
 	if plain == true {
 		tr, err := OpenTrousseau(InferStorePath())
 		if err != nil {
@@ -173,7 +160,7 @@ func ExportAction(to string, plain bool) {
 			ErrorLogger.Fatal(err)
 		}
 
-		err = ioutil.WriteFile(to, storeBytes, os.FileMode(0600))
+		_, err = destination.Write(storeBytes)
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
@@ -184,13 +171,11 @@ func ExportAction(to string, plain bool) {
 			ErrorLogger.Fatal(err)
 		}
 
-		_, err = io.Copy(outputFile, inputFile)
+		_, err = io.Copy(destination, inputFile)
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
 	}
-
-	InfoLogger.Println(fmt.Sprintf("Trousseau data store exported to: %s", to))
 }
 
 func ImportAction(from string, strategy ImportStrategy, plain bool) {
@@ -243,8 +228,6 @@ func ImportAction(from string, strategy ImportStrategy, plain bool) {
 	if err != nil {
 		ErrorLogger.Fatal(err)
 	}
-
-	InfoLogger.Println(fmt.Sprintf("Trousseau data store imported: %s", from))
 }
 
 func ListRecipientsAction() {
