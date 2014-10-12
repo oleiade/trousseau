@@ -192,9 +192,9 @@ func ImportCommand() cli.Command {
 			"will be imported to the default trousseau location ($HOME/.trousseau.tr) or " +
 			"the one pointed by the $TROUSSEAU_STORE environment variable",
 		Action: func(c *cli.Context) {
-			if !hasExpectedArgs(c.Args(), 1) {
-				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to import command")
-			}
+//			if !hasExpectedArgs(c.Args(), 1) {
+//				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to import command")
+//			}
 
 			var strategy trousseau.ImportStrategy
 			var yours bool = c.Bool("yours")
@@ -223,8 +223,20 @@ func ImportCommand() cli.Command {
 				strategy = trousseau.IMPORT_YOURS
 			}
 
-			var from string = c.Args().First()
-			trousseau.ImportAction(from, strategy, c.Bool("plain"))
+			if len(c.Args()) == 0 {
+				source := os.Stdin
+				trousseau.ImportAction(source, strategy, c.Bool("plain"))
+			} else if len(c.Args()) == 1 {
+				source, err := os.Open(c.Args().First())
+				if err != nil {
+					trousseau.ErrorLogger.Fatal(err)
+				}
+				defer source.Close()
+
+				trousseau.ImportAction(source, strategy, c.Bool("plain"))
+
+				trousseau.InfoLogger.Println(fmt.Sprintf("Trousseau data store imported: %s", c.Args().First()))
+			}
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
