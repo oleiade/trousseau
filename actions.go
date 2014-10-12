@@ -168,7 +168,9 @@ func ExportAction(destination io.Writer, plain bool) {
 	}
 }
 
-func ImportAction(from string, strategy ImportStrategy, plain bool) {
+func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) {
+	var data []byte
+	var err error
 	var importedStore *Store = &Store{}
 	var localFilePath string = InferStorePath()
 
@@ -183,17 +185,22 @@ func ImportAction(from string, strategy ImportStrategy, plain bool) {
 	}
 
 	if plain == true {
-		importedData, err := ioutil.ReadFile(from)
+		data, err = ioutil.ReadAll(source)
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
 
-		err = json.Unmarshal(importedData, importedStore)
+		err = json.Unmarshal(data, importedStore)
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
 	} else {
-		importedTr, err := OpenTrousseau(from)
+		data, err = ioutil.ReadAll(source)
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+
+		importedTr, err := FromBytes(data)
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
