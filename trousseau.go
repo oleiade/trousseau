@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/oleiade/trousseau/crypto/aesencryption"
+	"github.com/oleiade/trousseau/crypto/aes"
 )
 
 type Trousseau struct {
@@ -84,11 +84,10 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 			return nil, err
 		}
 	case AES_256_ENCRYPTION:
-		msg, key, err := aesencryption.ParseMsg(GetPassphrase(), t.Data)
+		plainData, err := aes.Decrypt(GetPassphrase(), t.Data)
 		if err != nil {
 			return nil, err
 		}
-		plainData, err := aesencryption.DecryptAES256(*key, msg)
 		err = json.Unmarshal(plainData, &store)
 		if err != nil {
 			return nil, err
@@ -114,16 +113,11 @@ func (t *Trousseau) Encrypt(store *Store) error {
 			return err
 		}
 	case AES_256_ENCRYPTION:
-		// Implement crypto.aesencryption package here
-		key, err := aesencryption.MakeAES256Key(GetPassphrase(), nil)
-		if err != nil {
-			return err
-		}
 		plainData, err := json.Marshal(*store)
 		if err != nil {
 			return err
 		}
-		t.Data, err = aesencryption.EncryptAES256(*key, plainData)
+		t.Data, err = aes.Encrypt(GetPassphrase(), plainData)
 		if err != nil {
 			return err
 		}

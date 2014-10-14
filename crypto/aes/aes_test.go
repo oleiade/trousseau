@@ -1,6 +1,9 @@
-package aesencryption
+package aes
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestGenerateSalt(t *testing.T) {
 	salt, err := GenerateSalt()
@@ -23,10 +26,6 @@ func TestGenerateSalt(t *testing.T) {
 	if e {
 		t.Errorf("salt should not be the same as salt2")
 	}
-}
-
-func TestExtractFunctions(t *testing.T) {
-	// write these later
 }
 
 func TestMakeAES256Key(t *testing.T) {
@@ -112,4 +111,59 @@ func TestEncryption(t *testing.T) {
 		t.Errorf("Decryption should return plainData, it does not")
 	}
 
+}
+
+func TestEncryptDecrypt(t *testing.T) {
+	plainData := []byte("This is my super secret secret. Keep safe pls. Ty.")
+	passphrase := "test passphrase"
+	ciphertext, err := Encrypt(passphrase, plainData)
+	if err != nil {
+		t.Errorf("Encrypt() raised error: ", err)
+	}
+	plaintext, err := Decrypt(passphrase, ciphertext)
+	if err != nil {
+		t.Errorf("Decrypt() raised error: ", err)
+	}
+	if len(plaintext) != len(plainData) {
+		t.Errorf("plainData and plaintext should have the same length")
+	}
+	same := true
+	for i := 0; i < len(plainData); i++ {
+		if plaintext[i] != plainData[i] {
+			same = false
+		}
+	}
+	if !same {
+		t.Errorf("plainData and plaintext should be the same")
+	}
+}
+
+// FIXME: write these tests
+func TestFileFunctions(t *testing.T) {
+	plainData := []byte("This is my super secret secret. Keep safe pls. Ty.")
+	passphrase := "test passphrase"
+	key, err := MakeAES256Key(passphrase, nil)
+	if err != nil {
+		t.Errorf("MakeAES256Key() returned error: ", err)
+	}
+	f, err := OpenFile("test/myfile.aes", os.O_CREATE|os.O_RDWR, *key)
+	if err != nil {
+		t.Errorf("OpenFile() returned error: ", err)
+	}
+	_, err = f.Write(plainData)
+	if err != nil {
+		t.Errorf("AESFile.Write() returned error: ", err.Error())
+	}
+	/* this is a bad test
+	if n != len(plainData) {
+		t.Errorf("return of AESFile.Write() should be equal to input length")
+	}*/
+	err = f.Close()
+	if err != nil {
+		t.Errorf("AESFile.Close() returned error: ", err.Error())
+	}
+}
+
+func TestExtractFunctions(t *testing.T) {
+	t.Fail()
 }
