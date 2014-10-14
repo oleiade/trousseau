@@ -138,7 +138,6 @@ func TestEncryptDecrypt(t *testing.T) {
 	}
 }
 
-// FIXME: write these tests
 func TestFileFunctions(t *testing.T) {
 	plainData := []byte("This is my super secret secret. Keep safe pls. Ty.")
 	passphrase := "test passphrase"
@@ -165,5 +164,46 @@ func TestFileFunctions(t *testing.T) {
 }
 
 func TestExtractFunctions(t *testing.T) {
-	t.Fail()
+	salt, err := GenerateSalt()
+	if err != nil {
+		t.Errorf("GenerateSalt() returned error: ", err)
+	}
+	plainData := []byte("My secret message")
+	passphrase := "test passphrase"
+	key, err := MakeAES256Key(passphrase, salt)
+	if err != nil {
+		t.Errorf("MakeAES256Key() returned error: ", err)
+	}
+	msg, err := EncryptAES256(*key, plainData)
+	if err != nil {
+		t.Errorf("EncryptAES256() returned error: ", err)
+	}
+	new_salt, err := ExtractSalt(msg)
+	if err != nil {
+		t.Errorf("ExtractSalt() returned error: ", err)
+	}
+	salt_good := true
+	for i := 0; i < len(salt); i++ {
+		if salt[i] != new_salt[i] {
+			salt_good = false
+		}
+	}
+	if !salt_good {
+		t.Errorf("ExtractSalt() return value should be equal to salt, it is not")
+	}
+	new_msg, err := ExtractMsg(msg)
+	if err != nil {
+		t.Errorf("ExtractMsg() returned error: ", err)
+	}
+	new_plainData, err := DecryptAES256(*key, new_msg)
+	plainData_good := true
+	for i := 0; i < len(plainData); i++ {
+		if plainData[i] != new_plainData[i] {
+			plainData_good = false
+		}
+	}
+	if !plainData_good {
+		t.Errorf("Decrypted return from ExtractMsg() should be equal to plainData, it is not")
+	}
+
 }
