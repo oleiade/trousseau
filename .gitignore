@@ -42,6 +42,7 @@ docs/build/
 # Intellij
 .idea
 
+<<<<<<< HEAD
 # Vim files
 *.swp
 *.swo

@@ -21,6 +21,17 @@ TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
     [ "$output" == "123" ]
 }
 
+@test "import store from valid data on stdin succeeds" {
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE set abc 123
+    cp $TROUSSEAU_TEST_STORE $TEST_FILE
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE del abc
+
+    cat $TEST_FILE | $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE import 
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE show
+    [ "$status" -eq 0 ]
+    [ "$output" == "abc : 123" ]
+}
+
 @test "import store from invalid file fails" {
     echo "invalid" "/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_import_test"
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE import $TEST_FILE

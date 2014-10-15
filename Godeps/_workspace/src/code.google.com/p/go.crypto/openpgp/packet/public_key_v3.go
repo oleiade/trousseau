@@ -215,8 +215,8 @@ func (pk *PublicKeyV3) VerifySignatureV3(signed hash.Hash, sig *SignatureV3) (er
 }
 
 // VerifyUserIdSignatureV3 returns nil iff sig is a valid signature, made by this
-// public key, of id.
-func (pk *PublicKeyV3) VerifyUserIdSignatureV3(id string, sig *SignatureV3) (err error) {
+// public key, that id is the identity of pub.
+func (pk *PublicKeyV3) VerifyUserIdSignatureV3(id string, pub *PublicKeyV3, sig *SignatureV3) (err error) {
 	h, err := userIdSignatureV3Hash(id, pk, sig.Hash)
 	if err != nil {
 		return err
@@ -237,9 +237,10 @@ func (pk *PublicKeyV3) VerifyKeySignatureV3(signed *PublicKeyV3, sig *SignatureV
 // userIdSignatureV3Hash returns a Hash of the message that needs to be signed
 // to assert that pk is a valid key for id.
 func userIdSignatureV3Hash(id string, pk signingKey, hfn crypto.Hash) (h hash.Hash, err error) {
-	if h = hfn.New(); h == nil {
+	if !hfn.Available() {
 		return nil, errors.UnsupportedError("hash function")
 	}
+	h = hfn.New()
 
 	// RFC 4880, section 5.2.4
 	pk.SerializeSignaturePrefix(h)

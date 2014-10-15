@@ -5,7 +5,7 @@
 	"Arch": "386 amd64 arm",
 	"Os": "linux darwin",
 	"BuildConstraints": "linux darwin",
-	"PackageVersion": "0.3.3",
+	"PackageVersion": "0.3.4",
 	"ConfigVersion": "0.9",
 	"TaskSettings": {
     "deb": {
