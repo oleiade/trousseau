@@ -8,14 +8,14 @@ import (
 func TestGenerateSalt(t *testing.T) {
 	salt, err := GenerateSalt()
 	if err != nil {
-		t.Errorf("GenerateSalt() returns error: ", err.Error())
+		t.Errorf("GenerateSalt() returns error: ", err)
 	}
 	if len(salt) != saltSize {
 		t.Errorf("Salt should be of length 8, it is ", len(salt))
 	}
 	salt2, err := GenerateSalt()
 	if err != nil {
-		t.Errorf("GenerateSalt() returns error: ", err.Error())
+		t.Errorf("GenerateSalt() returns error: ", err)
 	}
 	e := true
 	for i := 0; i < len(salt); i++ {
@@ -35,7 +35,7 @@ func TestMakeAES256Key(t *testing.T) {
 	}
 	aeskey, err := MakeAES256Key("test passphrase", salt)
 	if err != nil {
-		t.Errorf("MakeAES256Key() returned error: ", err.Error())
+		t.Errorf("MakeAES256Key() returned error: ", err)
 	}
 	if len(aeskey.key) != 32 {
 		t.Errorf("AES key should be of length 32 (256-bit) it is not")
@@ -45,7 +45,7 @@ func TestMakeAES256Key(t *testing.T) {
 	}
 	aeskey2, err := MakeAES256Key("test passphrase", salt)
 	if err != nil {
-		t.Errorf("MakeAES256Key() returned error: ", err.Error())
+		t.Errorf("MakeAES256Key() returned error: ", err)
 	}
 	e := false
 	for i := 0; i < len(aeskey.key); i++ {
@@ -58,7 +58,7 @@ func TestMakeAES256Key(t *testing.T) {
 	}
 	aeskey3, err := MakeAES256Key("test passphrase", nil)
 	if err != nil {
-		t.Errorf("MakeAES256Key() returned error: ", err.Error())
+		t.Errorf("MakeAES256Key() returned error: ", err)
 	}
 	e = true
 	for i := 0; i < len(aeskey.key); i++ {
@@ -151,7 +151,7 @@ func TestFileFunctions(t *testing.T) {
 	}
 	_, err = f.Write(plainData)
 	if err != nil {
-		t.Errorf("AESFile.Write() returned error: ", err.Error())
+		t.Errorf("AESFile.Write() returned error: ", err)
 	}
 	/* this is a bad test
 	if n != len(plainData) {
@@ -159,7 +159,7 @@ func TestFileFunctions(t *testing.T) {
 	}*/
 	err = f.Close()
 	if err != nil {
-		t.Errorf("AESFile.Close() returned error: ", err.Error())
+		t.Errorf("AESFile.Close() returned error: ", err)
 	}
 }
 
@@ -205,5 +205,4 @@ func TestExtractFunctions(t *testing.T) {
 	if !plainData_good {
 		t.Errorf("Decrypted return from ExtractMsg() should be equal to plainData, it is not")
 	}
-
 }
