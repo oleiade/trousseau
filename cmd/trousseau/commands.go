@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -147,9 +148,9 @@ func ExportCommand() cli.Command {
 			"to the filesystem location provided as first argument.",
 		Action: func(c *cli.Context) {
 			// TODO: restore with further version of hasExpectedArgs
-//			if !hasExpectedArgs(c.Args(), 1) {
-//				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to export command")
-//			}
+			//			if !hasExpectedArgs(c.Args(), 1) {
+			//				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to export command")
+			//			}
 			if len(c.Args()) == 0 {
 				destination := os.Stdout
 				trousseau.ExportAction(destination, c.Bool("plain"))
@@ -192,9 +193,9 @@ func ImportCommand() cli.Command {
 			"will be imported to the default trousseau location ($HOME/.trousseau.tr) or " +
 			"the one pointed by the $TROUSSEAU_STORE environment variable",
 		Action: func(c *cli.Context) {
-//			if !hasExpectedArgs(c.Args(), 1) {
-//				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to import command")
-//			}
+			//			if !hasExpectedArgs(c.Args(), 1) {
+			//				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to import command")
+			//			}
 
 			var strategy trousseau.ImportStrategy
 			var yours bool = c.Bool("yours")
@@ -329,11 +330,20 @@ func SetCommand() cli.Command {
 					trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to set command")
 				}
 			} else {
-				if !hasExpectedArgs(c.Args(), 2) {
+				if !hasExpectedArgs(c.Args(), 1) && !hasExpectedArgs(c.Args(), 2) {
 					trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to set command")
 				}
 
-				value = c.Args()[1]
+				if hasExpectedArgs(c.Args(), 2) {
+					value = c.Args()[1]
+				} else if hasExpectedArgs(c.Args(), 1) {
+					var err error
+					reader := bufio.NewReader(os.Stdin)
+					value, err = reader.ReadString('\n')
+					if err != nil {
+						trousseau.ErrorLogger.Fatal(err)
+					}
+				}
 			}
 
 			trousseau.SetAction(key, value, file)
