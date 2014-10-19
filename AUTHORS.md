@@ -4,6 +4,7 @@
 
 ## Contributors
 
+* [Johnnydiabetic](https://github.com/jd1123)
 * [Mthamed](https://github.com/mtahmed)
 * [Fernando Alvarez](https://github.com/fern4lvarez) <fa@cloudcontrol.de>
 * [Chris Aumann](https://github.com/chr4)
