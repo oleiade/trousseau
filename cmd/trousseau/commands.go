@@ -17,7 +17,7 @@ func CreateCommand() cli.Command {
 		Description: "The create command will generate an encrypted data store " +
 			"placed at $HOME/.trousseau.tr or at the location described by " +
 			"the $TROUSSEAU_HOME environment variable if you provided it.\n\n" +
-			"   Encryption is made using your GPG main identity, and targets the " +
+			"   Encryption is made using is made using your GPG main identity, and targets the " +
 			"GPG recipients you provide as the command arguments.\n\n" +
 			"   Examples:\n\n" +
 			"     trousseau create 16DB4F3\n" +
@@ -25,15 +25,34 @@ func CreateCommand() cli.Command {
 			"     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
 		Action: func(c *cli.Context) {
 			var recipients []string
+			var encryptionType string = c.String("encryption-type")
 
-			if len(c.Args()) > 0 {
-				recipients = c.Args()
-				trousseau.CreateAction(recipients)
+			if encryptionType == trousseau.SYMMETRIC_ENCRYPTION_REPR {
+				trousseau.CreateAction(nil, true)
 			} else {
-				trousseau.ErrorLogger.Fatal("invalid number of arguments provided to " +
-					"the create command. At least one recipient to encrypt the " +
-					"data store for is needed.")
+				if len(c.Args()) > 0 {
+					recipients = c.Args()
+					trousseau.CreateAction(recipients, false)
+				} else {
+					trousseau.ErrorLogger.Fatal("invalid number of arguments provided to " +
+						"the create command. At least one recipient to encrypt the " +
+						"data store for is needed.")
+				}
 			}
+		},
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name: "encryption-type",
+				Usage: "Define the encryption type to be used for store encryption. " +
+						"Whether symmetric or asymmetric.",
+				Value: trousseau.ASYMMETRIC_ENCRYPTION_REPR,
+			},
+			cli.StringFlag{
+				Name: "encryption-algorithm",
+				Usage: "Define the algorithm to be used for store encryption. " +
+					   "Whether gpg or aes.",
+				Value: trousseau.GPG_ENCRYPTION_REPR,
+			},
 		},
 	}
 }
