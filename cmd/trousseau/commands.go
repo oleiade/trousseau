@@ -24,15 +24,13 @@ func CreateCommand() cli.Command {
 			"     trousseau create tcrevon@gmail.com\n" +
 			"     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
 		Action: func(c *cli.Context) {
-			var recipients []string
 			var encryptionType string = c.String("encryption-type")
 
 			if encryptionType == trousseau.SYMMETRIC_ENCRYPTION_REPR {
-				trousseau.CreateAction(nil, true)
+				trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, trousseau.AES_256_ENCRYPTION, nil)
 			} else {
 				if len(c.Args()) > 0 {
-					recipients = c.Args()
-					trousseau.CreateAction(recipients, false)
+					trousseau.CreateAction(trousseau.ASYMMETRIC_ENCRYPTION, trousseau.GPG_ENCRYPTION, c.Args())
 				} else {
 					trousseau.ErrorLogger.Fatal("invalid number of arguments provided to " +
 						"the create command. At least one recipient to encrypt the " +
