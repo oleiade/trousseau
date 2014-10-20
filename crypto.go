@@ -8,21 +8,23 @@ import (
 
 // Declare encryption types
 type CryptoType int
+
 const (
 	SYMMETRIC_ENCRYPTION  CryptoType = 0
 	ASYMMETRIC_ENCRYPTION CryptoType = 1
 
-	SYMMETRIC_ENCRYPTION_REPR string = "symmetric"
+	SYMMETRIC_ENCRYPTION_REPR  string = "symmetric"
 	ASYMMETRIC_ENCRYPTION_REPR string = "asymmetric"
 )
 
 // Declare available encryption algorithms
 type CryptoAlgorithm int
+
 const (
 	GPG_ENCRYPTION     CryptoAlgorithm = 0
 	AES_256_ENCRYPTION CryptoAlgorithm = 1
 
-	GPG_ENCRYPTION_REPR string = "gpg"
+	GPG_ENCRYPTION_REPR     string = "gpg"
 	AES_256_ENCRYPTION_REPR string = "aes256"
 )
 

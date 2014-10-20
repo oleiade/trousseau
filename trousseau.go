@@ -59,8 +59,8 @@ func FromBytes(d []byte) (*Trousseau, error) {
 		contentVersion := DiscoverVersion(d, VersionDiscoverClosures)
 		if contentVersion != "" {
 			return nil, fmt.Errorf("outdated data store file format detected: %s. "+
-						"You are currently using incompatible version: %s. "+
-						"Please upgrade the data store by using the upgrade command.",
+				"You are currently using incompatible version: %s. "+
+				"Please upgrade the data store by using the upgrade command.",
 				contentVersion, TROUSSEAU_VERSION)
 		}
 		return nil, err

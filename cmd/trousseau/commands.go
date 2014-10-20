@@ -43,13 +43,13 @@ func CreateCommand() cli.Command {
 			cli.StringFlag{
 				Name: "encryption-type",
 				Usage: "Define the encryption type to be used for store encryption. " +
-						"Whether symmetric or asymmetric.",
+					"Whether symmetric or asymmetric.",
 				Value: trousseau.ASYMMETRIC_ENCRYPTION_REPR,
 			},
 			cli.StringFlag{
 				Name: "encryption-algorithm",
 				Usage: "Define the algorithm to be used for store encryption. " +
-					   "Whether gpg or aes.",
+					"Whether gpg or aes.",
 				Value: trousseau.GPG_ENCRYPTION_REPR,
 			},
 		},
@@ -176,7 +176,7 @@ func ExportCommand() cli.Command {
 				}
 
 				trousseau.ExportAction(destination, c.Bool("plain"))
-				trousseau.InfoLogger.Print("Trousseau data store exported to: %s", c.Args().First())
+				trousseau.InfoLogger.Printf("Trousseau data store exported to: %s", c.Args().First())
 			}
 		},
 		Flags: []cli.Flag{
