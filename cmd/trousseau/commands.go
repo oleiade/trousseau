@@ -343,6 +343,7 @@ func SetCommand() cli.Command {
 					if err != nil {
 						trousseau.ErrorLogger.Fatal(err)
 					}
+					value = value[:len(value)-1]
 				}
 			}
 
