@@ -28,16 +28,24 @@ func CreateCommand() cli.Command {
 			var encryptionType string = c.String("encryption-type")
 
 			if encryptionType == trousseau.SYMMETRIC_ENCRYPTION_REPR {
-				trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, trousseau.AES_256_ENCRYPTION, nil)
+				err := trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, trousseau.AES_256_ENCRYPTION, nil)
+				if err != nil {
+					trousseau.ErrorLogger.Fatal(err)
+				}
 			} else {
 				if len(c.Args()) > 0 {
-					trousseau.CreateAction(trousseau.ASYMMETRIC_ENCRYPTION, trousseau.GPG_ENCRYPTION, c.Args())
+					err := trousseau.CreateAction(trousseau.ASYMMETRIC_ENCRYPTION, trousseau.GPG_ENCRYPTION, c.Args())
+					if err != nil {
+						trousseau.ErrorLogger.Fatal(err)
+					}
 				} else {
 					trousseau.ErrorLogger.Fatal("invalid number of arguments provided to " +
 						"the create command. At least one recipient to encrypt the " +
 						"data store for is needed.")
 				}
 			}
+
+			trousseau.InfoLogger.Println("Trousseau data store succesfully created")
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -81,7 +89,12 @@ func PushCommand() cli.Command {
 			}
 
 			var destination string = c.Args().First()
-			trousseau.PushAction(destination, c.String("ssh-private-key"), c.Bool("ask-password"))
+			err := trousseau.PushAction(destination, c.String("ssh-private-key"), c.Bool("ask-password"))
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
+
+			trousseau.InfoLogger.Printf("Encrypted data store succesfully pushed to %s remote storage\n", destination)
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -126,7 +139,12 @@ func PullCommand() cli.Command {
 			}
 
 			var source string = c.Args().First()
-			trousseau.PullAction(source, c.String("ssh-private-key"), c.Bool("ask-password"))
+			err := trousseau.PullAction(source, c.String("ssh-private-key"), c.Bool("ask-password"))
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
+
+			trousseau.InfoLogger.Println("Encrypted data store succesfully pulled from %s remote storage\n", source)
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -160,7 +178,10 @@ func ExportCommand() cli.Command {
 			//			}
 			if len(c.Args()) == 0 {
 				destination := os.Stdout
-				trousseau.ExportAction(destination, c.Bool("plain"))
+				err := trousseau.ExportAction(destination, c.Bool("plain"))
+				if err != nil {
+					trousseau.ErrorLogger.Fatal(err)
+				}
 			} else if len(c.Args()) == 1 {
 				destination, err := os.Create(c.Args().First())
 				if err != nil {
@@ -175,8 +196,12 @@ func ExportCommand() cli.Command {
 					trousseau.ErrorLogger.Fatal(err)
 				}
 
-				trousseau.ExportAction(destination, c.Bool("plain"))
-				trousseau.InfoLogger.Printf("Trousseau data store exported to: %s", c.Args().First())
+				err = trousseau.ExportAction(destination, c.Bool("plain"))
+				if err != nil {
+					trousseau.ErrorLogger.Fatal(err)
+				}
+
+				trousseau.InfoLogger.Printf("Data store exported to: %s", c.Args().First())
 			}
 		},
 		Flags: []cli.Flag{
@@ -233,7 +258,10 @@ func ImportCommand() cli.Command {
 
 			if len(c.Args()) == 0 {
 				source := os.Stdin
-				trousseau.ImportAction(source, strategy, c.Bool("plain"))
+				err := trousseau.ImportAction(source, strategy, c.Bool("plain"))
+				if err != nil {
+					trousseau.ErrorLogger.Fatal(err)
+				}
 			} else if len(c.Args()) == 1 {
 				source, err := os.Open(c.Args().First())
 				if err != nil {
@@ -241,10 +269,14 @@ func ImportCommand() cli.Command {
 				}
 				defer source.Close()
 
-				trousseau.ImportAction(source, strategy, c.Bool("plain"))
+				err = trousseau.ImportAction(source, strategy, c.Bool("plain"))
+				if err != nil {
+					trousseau.ErrorLogger.Fatal(err)
+				}
 
-				trousseau.InfoLogger.Println(fmt.Sprintf("Trousseau data store imported: %s", c.Args().First()))
 			}
+
+			trousseau.InfoLogger.Println(fmt.Sprintf("Trousseau data store imported: %s", c.Args().First()))
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -276,7 +308,12 @@ func ListRecipientsCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to list-recipients command")
 			}
 
-			trousseau.ListRecipientsAction()
+			err := trousseau.ListRecipientsAction()
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
+
+
 		},
 	}
 }
@@ -295,7 +332,10 @@ func AddRecipientCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to add-recipient command")
 			}
 
-			trousseau.AddRecipientAction(c.Args().First())
+			err := trousseau.AddRecipientAction(c.Args().First())
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("Recipient added to trousseau data store: %s", c.Args().First()))
@@ -313,7 +353,10 @@ func RemoveRecipientCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to remove-recipient command")
 			}
 
-			trousseau.RemoveRecipientAction(c.Args().First())
+			err := trousseau.RemoveRecipientAction(c.Args().First())
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 
 			if c.Bool("verbose") == true {
 				fmt.Printf("Recipient removed from trousseau data store: %s", c.Args().First())
@@ -354,7 +397,10 @@ func SetCommand() cli.Command {
 				}
 			}
 
-			trousseau.SetAction(key, value, file)
+			err := trousseau.SetAction(key, value, file)
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("%s:%s", key, value))
@@ -380,7 +426,10 @@ func GetCommand() cli.Command {
 
 			var key string = c.Args().First()
 			var file string = c.String("file")
-			trousseau.GetAction(key, file)
+			err := trousseau.GetAction(key, file)
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -403,7 +452,10 @@ func RenameCommand() cli.Command {
 			var src string = c.Args().First()
 			var dest string = c.Args()[1]
 
-			trousseau.RenameAction(src, dest, c.Bool("overwrite"))
+			err := trousseau.RenameAction(src, dest, c.Bool("overwrite"))
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("renamed: %s to %s", src, dest))
@@ -429,7 +481,10 @@ func DelCommand() cli.Command {
 
 			var key string = c.Args().First()
 
-			trousseau.DelAction(key)
+			err := trousseau.DelAction(key)
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("deleted: %s", c.Args()[0]))
@@ -447,7 +502,10 @@ func KeysCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to keys command")
 			}
 
-			trousseau.KeysAction()
+			err := trousseau.KeysAction()
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 		},
 	}
 }
@@ -461,7 +519,10 @@ func ShowCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to show command")
 			}
 
-			trousseau.ShowAction()
+			err := trousseau.ShowAction()
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 		},
 	}
 }
@@ -475,7 +536,10 @@ func MetaCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to meta command")
 			}
 
-			trousseau.MetaAction()
+			err := trousseau.MetaAction()
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
 		},
 	}
 }
@@ -489,7 +553,12 @@ func UpgradeCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to upgrade command")
 			}
 
-			trousseau.UpgradeAction(c.Bool("yes"), c.Bool("no-backup"))
+			err := trousseau.UpgradeAction(c.Bool("yes"), c.Bool("no-backup"))
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
+
+			trousseau.InfoLogger.Print("Data store succesfully upgraded")
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
