@@ -13,7 +13,7 @@ import (
 	"github.com/oleiade/trousseau/dsn"
 )
 
-func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) {
+func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error {
 	meta := Meta{
 		CreatedAt:        time.Now().String(),
 		LastModifiedAt:   time.Now().String(),
@@ -29,39 +29,38 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) {
 
 	err := tr.Encrypt(store)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Write(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
-	InfoLogger.Println("Trousseau data store succesfully created")
+	return nil
 }
 
-func PushAction(destination string, sshPrivateKey string, askPassword bool) {
+func PushAction(destination string, sshPrivateKey string, askPassword bool) error {
 	endpointDsn, err := dsn.Parse(destination)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	switch endpointDsn.Scheme {
 	case "s3":
 		err := endpointDsn.SetDefaults(S3Defaults)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		err = UploadUsingS3(endpointDsn)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
-		InfoLogger.Println("Trousseau data store succesfully pushed to s3")
 	case "scp":
 		err := endpointDsn.SetDefaults(ScpDefaults)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		if askPassword == true {
@@ -71,40 +70,39 @@ func PushAction(destination string, sshPrivateKey string, askPassword bool) {
 
 		err = UploadUsingScp(endpointDsn, sshPrivateKey)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
-		InfoLogger.Println("Trousseau data store succesfully pushed to ssh remote storage")
 	case "gist":
 		err = UploadUsingGist(endpointDsn)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
-		InfoLogger.Println("Trousseau data store succesfully pushed to gist")
 	}
+
+	return nil
 }
 
-func PullAction(source string, sshPrivateKey string, askPassword bool) {
+func PullAction(source string, sshPrivateKey string, askPassword bool) error {
 	endpointDsn, err := dsn.Parse(source)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	switch endpointDsn.Scheme {
 	case "s3":
 		err := endpointDsn.SetDefaults(S3Defaults)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		err = DownloadUsingS3(endpointDsn)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
-		InfoLogger.Println("Trousseau data store succesfully pulled from S3")
 	case "scp":
 		err := endpointDsn.SetDefaults(ScpDefaults)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		if askPassword == true {
@@ -114,15 +112,13 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) {
 
 		err = DownloadUsingScp(endpointDsn, sshPrivateKey)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
-		InfoLogger.Println("Trousseau data store succesfully pulled from ssh remote storage")
 	case "gist":
 		err = DownloadUsingGist(endpointDsn)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
-		InfoLogger.Println("Trousseau data store succesfully pulled from gist")
 	default:
 		if endpointDsn.Scheme == "" {
 			ErrorLogger.Fatalf("No dsn scheme supplied")
@@ -131,45 +127,47 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) {
 		}
 	}
 
-	InfoLogger.Println("Trousseau data store succesfully pulled from remote storage")
+	return nil
 }
 
-func ExportAction(destination io.Writer, plain bool) {
+func ExportAction(destination io.Writer, plain bool) error {
 	if plain == true {
 		tr, err := OpenTrousseau(InferStorePath())
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		store, err := tr.Decrypt()
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		storeBytes, err := json.Marshal(store)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		_, err = destination.Write(storeBytes)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 	} else {
 		inputFile, err := os.Open(InferStorePath())
 		defer inputFile.Close()
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		_, err = io.Copy(destination, inputFile)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 	}
+
+	return nil 
 }
 
-func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) {
+func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 	var data []byte
 	var err error
 	var importedStore *Store = &Store{}
@@ -177,142 +175,150 @@ func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) {
 
 	localTr, err := OpenTrousseau(localFilePath)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	localStore, err := localTr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	if plain == true {
 		data, err = ioutil.ReadAll(source)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		err = json.Unmarshal(data, importedStore)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 	} else {
 		data, err = ioutil.ReadAll(source)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		importedTr, err := FromBytes(data)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 
 		importedStore, err = importedTr.Decrypt()
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 	}
 
 	err = ImportStore(importedStore, localStore, strategy)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = localTr.Encrypt(localStore)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = localTr.Write(localFilePath)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func ListRecipientsAction() {
+func ListRecipientsAction() error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	recipients := store.Meta.ListRecipients()
 	for _, r := range recipients {
 		InfoLogger.Println(r)
 	}
+
+	return nil
 }
 
-func AddRecipientAction(recipient string) {
+func AddRecipientAction(recipient string) error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = store.Meta.AddRecipient(recipient)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Encrypt(store)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Write(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func RemoveRecipientAction(recipient string) {
+func RemoveRecipientAction(recipient string) error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = store.Meta.RemoveRecipient(recipient)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Encrypt(store)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Write(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func GetAction(key string, filepath string) {
+func GetAction(key string, filepath string) error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	value, err := store.Data.Get(key)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	// If the --file flag is provided
@@ -324,7 +330,7 @@ func GetAction(key string, filepath string) {
 
 		err := ioutil.WriteFile(filepath, []byte(valueBytes), os.FileMode(0600))
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 	} else {
 		// Use fmt.Print to support patch processes,
@@ -335,9 +341,11 @@ func GetAction(key string, filepath string) {
 			InfoLogger.Println(value)
 		}
 	}
+
+	return nil
 }
 
-func SetAction(key, value, file string) {
+func SetAction(key, value, file string) error {
 	// If the --file flag is provided
 	if file != "" {
 		// And the file actually exists on file system
@@ -345,7 +353,7 @@ func SetAction(key, value, file string) {
 			// Then load it's content
 			fileContent, err := ioutil.ReadFile(file)
 			if err != nil {
-				ErrorLogger.Fatal(err)
+				return err
 			}
 
 			value = string(fileContent)
@@ -356,133 +364,143 @@ func SetAction(key, value, file string) {
 
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store.Data.Set(key, value)
 
 	err = tr.Encrypt(store)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Write(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func RenameAction(src, dest string, overwrite bool) {
+func RenameAction(src, dest string, overwrite bool) error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = store.Data.Rename(src, dest, overwrite)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Encrypt(store)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Write(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
+	return nil
 }
 
-func DelAction(key string) {
+func DelAction(key string) error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store.Data.Del(key)
 
 	tr.Encrypt(store)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	err = tr.Write(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
-func KeysAction() {
+func KeysAction() error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	keys := store.Data.Keys()
 	for _, k := range keys {
 		InfoLogger.Println(k)
 	}
+
+	return nil
 }
 
-func ShowAction() {
+func ShowAction() error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	items := store.Data.Items()
 	for k, v := range items {
 		InfoLogger.Println(fmt.Sprintf("%s : %s", k, v.(string)))
 	}
+
+	return nil
 }
 
-func MetaAction() {
+func MetaAction() error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	store, err := tr.Decrypt()
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	InfoLogger.Println(store.Meta)
+	return nil
 }
 
-func UpgradeAction(yes, noBackup bool) {
+func UpgradeAction(yes, noBackup bool) error {
 	var proceed string = "n"
 
 	data, err := ioutil.ReadFile(InferStorePath())
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	version := DiscoverVersion(data, VersionDiscoverClosures)
@@ -492,7 +510,7 @@ func UpgradeAction(yes, noBackup bool) {
 
 	newStoreFile, err := UpgradeFrom(version, data, UpgradeClosures)
 	if err != nil {
-		ErrorLogger.Fatal(err)
+		return err
 	}
 
 	if yes == false {
@@ -501,7 +519,7 @@ func UpgradeAction(yes, noBackup bool) {
 			InferStorePath(), version, TROUSSEAU_VERSION)
 		_, err = fmt.Scanf("%s", &proceed)
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 	}
 
@@ -510,18 +528,20 @@ func UpgradeAction(yes, noBackup bool) {
 		if noBackup == false {
 			err = ioutil.WriteFile(InferStorePath()+".bkp", data, os.FileMode(0700))
 			if err != nil {
-				ErrorLogger.Fatal(err)
+				return err
 			}
 		}
 
 		// Overwrite source legacy store with the new version content
 		err = ioutil.WriteFile(InferStorePath(), newStoreFile, os.FileMode(0700))
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			return err
 		}
 	} else {
 		fmt.Println("upgrade cancelled")
 	}
+
+	return nil
 }
 
 // Thanks, mrnugget!
