@@ -41,8 +41,12 @@ func InferStorePath() string {
 	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
 }
 
-func AskPassphrase() {
-	SetPassphrase(PromptForHiddenInput("Passphrase: "))
+func AskPassphrase(confirm bool) {
+	if confirm {
+		SetPassphrase(PromptForHiddenInputConfirm())
+	} else {
+		SetPassphrase(PromptForHiddenInput("Passphrase: "))
+	}
 }
 
 // GetPassphrase attemps to retrieve the user's gpg master

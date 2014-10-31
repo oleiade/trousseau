@@ -164,7 +164,7 @@ func ExportAction(destination io.Writer, plain bool) error {
 		}
 	}
 
-	return nil 
+	return nil
 }
 
 func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
