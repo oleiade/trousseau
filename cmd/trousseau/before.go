@@ -44,6 +44,10 @@ func updateGnupgHome(c *cli.Context) {
 
 func updateCheckPassphrase(c *cli.Context) {
 	if c.GlobalBool("ask-passphrase") {
-		trousseau.AskPassphrase()
+		if c.Args().Get(0) == "passphrase" {
+			trousseau.AskPassphrase(true)
+		} else {
+			trousseau.AskPassphrase(false)
+		}
 	}
 }

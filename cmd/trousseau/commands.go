@@ -313,7 +313,6 @@ func ListRecipientsCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal(err)
 			}
 
-
 		},
 	}
 }
