@@ -13,7 +13,8 @@ BIN_DIR = $(ROOT_DIR)/bin
 TROUSSEAU_BIN = $(BIN_DIR)/trousseau
 
 # Third party binaries paths
-BATS_BIN ?= $(shell which bats)
+BATS_BIN := $(shell which bats 2>/dev/null)
+GOXC_BIN := $(shell which goxc 2>/dev/null)
 
 # Integration tests resources
 INTEGRATION_TEST_DIR := $(ROOT_DIR)/tests
@@ -43,7 +44,21 @@ unit:
 # Make sure to set $BATS_BIN variable to point
 # to bats eecutable via 'env BATS_BIN=myexec make integration'
 integration: all
+ifdef BATS_BIN
 	@(${BATS_BIN} $(INTEGRATION_TEST_FILES))
+else
+	@(echo "bats was not found on your PATH. Unable to run integration tests.")
+endif
+
+# package rule will build debian and osx packages using the goxc (https://github.com/laher/goxc)
+# tool. Before running this command, make sure to call "goxc -t" before moving on with the package
+# command.
+package:
+ifdef GOXC_BIN
+	@(goxc -c $(ROOT_DIR)/.goxc.json)
+else
+	@(echo "goxc was not found on your PATH. Unable to run integration tests.")
+endif
 
 format:
 	@(go fmt ./...)
