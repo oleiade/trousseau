@@ -64,5 +64,5 @@ format:
 	@(go fmt ./...)
 	@(go vet ./...)
 
-.PNONY: all trousseau test format
+.PHONY: all trousseau test unit integration package format
 
