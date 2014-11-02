@@ -442,9 +442,13 @@ TrousseauVersion: 0.1.0c
 
 ## Contribute
 
+For detailled contribution instructions, see the the [CONTRBITUING](https://github.com/oleiade/trousseau/blob/master/CONTRIBUTING.md) document
+
+However here is a quick summary for all of you in a hurry:
 * Check for open issues or open a fresh issue to start a discussion around a feature idea or a bug.
-* Fork the repository on GitHub to start making your changes to the **master** branch (or branch off of it).
-* Write tests which show that the bug was fixed or that the feature works as expected.
+* Fork the repository on GitHub.
+* Start a branch from **develop** dedicated to your changes.
+* If relevant: write tests showing the bug was fixed or the feature implemented works as expected.
 * Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS.
 
 ## It's open-source
