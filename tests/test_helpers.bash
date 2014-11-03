@@ -34,8 +34,9 @@ TROUSSEAU_COMMAND="$TROUSSEAU_BINARY_DIR/trousseau"
 
 # Trousseau global context
 TROUSSEAU_TEST_STORE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}store"
+TROUSSEAU_TEST_STORE_AES="${TMP_DIR}/${TROUSSEU_TEXT_FILES_PREFIX}aes_store"
 TROUSSEAU_TEST_STORE_CREATE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}create_store"
-
+TROUSSEAU_TEST_STORE_CREATE_AES="${TMP_DIR}/${TROUSSEU_TEXT_FILES_PREFIX}aes_create_store"
 
 install_gpg_test_keys() {
     mkdir $TROUSSEAU_TEST_GNUPG_HOME
@@ -77,6 +78,9 @@ setup() {
     $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME \
                        --store $TROUSSEAU_TEST_STORE \
                        create $TROUSSEAU_TEST_FIRST_KEY_ID > /dev/null
+
+    $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_AES \
+                       create --encryption-type 'symmetric' > /dev/null
 }
 
 teardown() {

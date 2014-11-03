@@ -45,3 +45,8 @@ load test_helpers
     [ ! -f $TROUSSEAU_TEST_STORE_CREATE ]
 }
 
+@test "create symmetric store succeeds" {
+	run $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_CREATE_AES create --encryption-type 'symmetric'
+    [ "$status" -eq 0 ]
+    [ -f $TROUSSEAU_TEST_STORE_CREATE_AES ]
+}

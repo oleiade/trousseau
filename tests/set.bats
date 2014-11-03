@@ -15,11 +15,18 @@ TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
     [ "${lines[0]}" = "123" ]
 }
 
-@test "set value pair with no value fails" {
-    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE set 'foo' 
-
-    [ "$status" -eq 1 ]
+@test "set valid key pair succeeds with symmetric encryption" {
+    run $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_AES set abc 123
+    [ "$status" -eq 0 ]
+    
+    run $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_AES get abc
+    [ "${lines[0]}" = "123" ]
 }
+#@test "set value pair with no value fails" {
+#    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE set 'foo' 
+
+#    [ "$status" -eq 1 ]
+#}
 
 @test "set valid key's value import from file succeeds" {
     echo "do re mi" >> $TEST_FILE
