@@ -139,6 +139,11 @@ func TestEncryptDecrypt(t *testing.T) {
 }
 
 func TestFileFunctions(t *testing.T) {
+	err := os.Mkdir("test", 0777)
+	if err != nil {
+		t.Error("Mkdir test failed")
+	}
+
 	plainData := []byte("This is my super secret secret. Keep safe pls. Ty.")
 	passphrase := "test passphrase"
 	key, err := MakeAES256Key(passphrase, nil)
@@ -160,6 +165,15 @@ func TestFileFunctions(t *testing.T) {
 	err = f.Close()
 	if err != nil {
 		t.Error("AESFile.Close() returned error: ", err)
+	}
+
+	err = os.Remove("./test/myfile.aes")
+	if err != nil {
+		t.Error("Remove test directory fails", err)
+	}
+	err = os.Remove("test")
+	if err != nil {
+		t.Error("Remove test directory fails", err)
 	}
 }
 

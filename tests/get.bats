@@ -13,8 +13,21 @@ TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
     [ "${lines[0]}" = "123" ]
 }
 
+@test "get valid key pair succeeds with symmetric encryption" {
+    run $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_AES set abc 123
+    run $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_AES get abc
+    [ "$status" -eq 0 ]
+    [ "${lines[0]}" = "123" ]
+}
+
 @test "get value pair of non existing key fails" {
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE get 'foo' 
+
+    [ "$status" -eq 1 ]
+}
+
+@test "get value pair of non existing key fails with symmetric encryption" {
+    run $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_AES get 'foo' 
 
     [ "$status" -eq 1 ]
 }
