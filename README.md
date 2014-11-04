@@ -5,7 +5,7 @@
 
 *Trousseau* is an encrypted key-value store designed to be a *simple*, *safe* and *trustworthy* place for your data.
 
-It stores data in a single file, encrypted using the openpgp asymetric encryption algorithm.
+It stores data in a single file, encrypted using the openpgp asymmetric encryption algorithm.
 It can be easily exported and imported to/from multiple remote storages: like S3, an ssh endpoint, gist (ftp, dropbox, and more to come...). 
 It is able to restrict access to the data store to a set of openpgp recipients. 
 
