@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"code.google.com/p/go.crypto/openpgp"
-	"code.google.com/p/go.crypto/openpgp/armor"
+	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
 )
 
 // Encrypt the provided bytes for the provided encryption

@@ -6,9 +6,9 @@ package packet
 
 import (
 	"bytes"
-	"code.google.com/p/go.crypto/openpgp/elgamal"
-	"code.google.com/p/go.crypto/openpgp/errors"
-	"code.google.com/p/go.crypto/openpgp/s2k"
+	"golang.org/x/crypto/openpgp/elgamal"
+	"golang.org/x/crypto/openpgp/errors"
+	"golang.org/x/crypto/openpgp/s2k"
 	"crypto/cipher"
 	"crypto/dsa"
 	"crypto/rsa"

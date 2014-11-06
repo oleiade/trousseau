@@ -7,7 +7,7 @@
 package s2k
 
 import (
-	"code.google.com/p/go.crypto/openpgp/errors"
+	"golang.org/x/crypto/openpgp/errors"
 	"crypto"
 	"hash"
 	"io"

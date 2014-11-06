@@ -5,8 +5,8 @@
 package packet
 
 import (
-	"code.google.com/p/go.crypto/openpgp/errors"
-	"code.google.com/p/go.crypto/openpgp/s2k"
+	"golang.org/x/crypto/openpgp/errors"
+	"golang.org/x/crypto/openpgp/s2k"
 	"crypto"
 	"encoding/binary"
 	"io"

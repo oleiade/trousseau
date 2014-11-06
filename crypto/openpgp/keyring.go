@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"code.google.com/p/go.crypto/openpgp"
+	"golang.org/x/crypto/openpgp"
 )
 
 func ReadPubRing(path string, keyIds []string) (*openpgp.EntityList, error) {
