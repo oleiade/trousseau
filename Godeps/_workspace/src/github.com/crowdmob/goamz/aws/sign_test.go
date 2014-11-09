@@ -3,13 +3,13 @@ package aws_test
 import (
 	"fmt"
 	"github.com/crowdmob/goamz/aws"
-	"launchpad.net/gocheck"
+	"gopkg.in/check.v1"
 	"net/http"
 	"strings"
 	"time"
 )
 
-var _ = gocheck.Suite(&V4SignerSuite{})
+var _ = check.Suite(&V4SignerSuite{})
 
 type V4SignerSuite struct {
 	auth   aws.Auth
@@ -34,7 +34,7 @@ type V4SignerSuiteCaseRequest struct {
 	body    string
 }
 
-func (s *V4SignerSuite) SetUpSuite(c *gocheck.C) {
+func (s *V4SignerSuite) SetUpSuite(c *check.C) {
 	s.auth = aws.Auth{AccessKey: "AKIDEXAMPLE", SecretKey: "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"}
 	s.region = aws.USEast
 
@@ -465,13 +465,13 @@ func (s *V4SignerSuite) SetUpSuite(c *gocheck.C) {
 	)
 }
 
-func (s *V4SignerSuite) TestCases(c *gocheck.C) {
+func (s *V4SignerSuite) TestCases(c *check.C) {
 	signer := aws.NewV4Signer(s.auth, "host", s.region)
 
 	for _, testCase := range s.cases {
 
 		req, err := http.NewRequest(testCase.request.method, "http://"+testCase.request.host+testCase.request.url, strings.NewReader(testCase.request.body))
-		c.Assert(err, gocheck.IsNil, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Assert(err, check.IsNil, check.Commentf("Testcase: %s", testCase.label))
 		for _, v := range testCase.request.headers {
 			h := strings.SplitN(v, ":", 2)
 			req.Header.Add(h[0], h[1])
@@ -481,19 +481,19 @@ func (s *V4SignerSuite) TestCases(c *gocheck.C) {
 		t := signer.RequestTime(req)
 
 		canonicalRequest := signer.CanonicalRequest(req)
-		c.Check(canonicalRequest, gocheck.Equals, testCase.canonicalRequest, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(canonicalRequest, check.Equals, testCase.canonicalRequest, check.Commentf("Testcase: %s", testCase.label))
 
 		stringToSign := signer.StringToSign(t, canonicalRequest)
-		c.Check(stringToSign, gocheck.Equals, testCase.stringToSign, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(stringToSign, check.Equals, testCase.stringToSign, check.Commentf("Testcase: %s", testCase.label))
 
 		signature := signer.Signature(t, stringToSign)
-		c.Check(signature, gocheck.Equals, testCase.signature, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(signature, check.Equals, testCase.signature, check.Commentf("Testcase: %s", testCase.label))
 
 		authorization := signer.Authorization(req.Header, t, signature)
-		c.Check(authorization, gocheck.Equals, testCase.authorization, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(authorization, check.Equals, testCase.authorization, check.Commentf("Testcase: %s", testCase.label))
 
 		signer.Sign(req)
-		c.Check(req.Header.Get("Authorization"), gocheck.Equals, testCase.authorization, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(req.Header.Get("Authorization"), check.Equals, testCase.authorization, check.Commentf("Testcase: %s", testCase.label))
 	}
 }
 

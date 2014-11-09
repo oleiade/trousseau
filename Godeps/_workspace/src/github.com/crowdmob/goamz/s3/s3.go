@@ -13,11 +13,11 @@ package s3
 import (
 	"bytes"
 	"crypto/hmac"
+	"crypto/md5"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/xml"
 	"fmt"
-	"github.com/crowdmob/goamz/aws"
 	"io"
 	"io/ioutil"
 	"log"
@@ -28,6 +28,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/crowdmob/goamz/aws"
 )
 
 const debug = false
@@ -56,11 +58,15 @@ type Owner struct {
 // Fold options into an Options struct
 //
 type Options struct {
-	SSE              bool
-	Meta             map[string][]string
-	ContentEncoding  string
-	CacheControl     string
-	RedirectLocation string
+	SSE                  bool
+	SSECustomerAlgorithm string
+	SSECustomerKey       string
+	SSECustomerKeyMD5    string
+	Meta                 map[string][]string
+	ContentEncoding      string
+	CacheControl         string
+	RedirectLocation     string
+	ContentMD5           string
 	// What else?
 	// Content-Disposition string
 	//// The following become headers so they are []strings rather than strings... I think
@@ -96,6 +102,36 @@ func (s3 *S3) Bucket(name string) *Bucket {
 		name = strings.ToLower(name)
 	}
 	return &Bucket{s3, name}
+}
+
+type BucketInfo struct {
+	Name         string
+	CreationDate string
+}
+
+type GetServiceResp struct {
+	Owner   Owner
+	Buckets []BucketInfo `xml:">Bucket"`
+}
+
+// GetService gets a list of all buckets owned by an account.
+//
+// See http://goo.gl/wbHkGj for details.
+func (s3 *S3) GetService() (*GetServiceResp, error) {
+	bucket := s3.Bucket("")
+
+	r, err := bucket.Get("")
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse the XML response.
+	var resp GetServiceResp
+	if err = xml.Unmarshal(r, &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
 }
 
 var createBucketConfiguration = `<CreateBucketConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
@@ -242,15 +278,17 @@ func (b *Bucket) Exists(path string) (exists bool, err error) {
 
 		if err != nil {
 			// We can treat a 403 or 404 as non existance
-			if (*err.(*Error)).StatusCode == 403 || (*err.(*Error)).StatusCode == 404 {
+			if e, ok := err.(*Error); ok && (e.StatusCode == 403 || e.StatusCode == 404) {
 				return false, nil
-			} else {
-				return false, err
 			}
+			return false, err
 		}
 
 		if resp.StatusCode/100 == 2 {
 			exists = true
+		}
+		if resp.Body != nil {
+			resp.Body.Close()
 		}
 		return exists, err
 	}
@@ -296,7 +334,7 @@ func (b *Bucket) Put(path string, data []byte, contType string, perm ACL, option
 func (b *Bucket) PutCopy(path string, perm ACL, options CopyOptions, source string) (*CopyObjectResult, error) {
 	headers := map[string][]string{
 		"x-amz-acl":         {string(perm)},
-		"x-amz-copy-source": {source},
+		"x-amz-copy-source": {url.QueryEscape(source)},
 	}
 	options.addHeaders(headers)
 	req := &request{
@@ -336,12 +374,20 @@ func (b *Bucket) PutReader(path string, r io.Reader, length int64, contType stri
 func (o Options) addHeaders(headers map[string][]string) {
 	if o.SSE {
 		headers["x-amz-server-side-encryption"] = []string{"AES256"}
+	} else if len(o.SSECustomerAlgorithm) != 0 && len(o.SSECustomerKey) != 0 && len(o.SSECustomerKeyMD5) != 0 {
+		// Amazon-managed keys and customer-managed keys are mutually exclusive
+		headers["x-amz-server-side-encryption-customer-algorithm"] = []string{o.SSECustomerAlgorithm}
+		headers["x-amz-server-side-encryption-customer-key"] = []string{o.SSECustomerKey}
+		headers["x-amz-server-side-encryption-customer-key-MD5"] = []string{o.SSECustomerKeyMD5}
 	}
 	if len(o.ContentEncoding) != 0 {
 		headers["Content-Encoding"] = []string{o.ContentEncoding}
 	}
 	if len(o.CacheControl) != 0 {
 		headers["Cache-Control"] = []string{o.CacheControl}
+	}
+	if len(o.ContentMD5) != 0 {
+		headers["Content-MD5"] = []string{o.ContentMD5}
 	}
 	if len(o.RedirectLocation) != 0 {
 		headers["x-amz-website-redirect-location"] = []string{o.RedirectLocation}
@@ -360,6 +406,13 @@ func (o CopyOptions) addHeaders(headers map[string][]string) {
 	if len(o.ContentType) != 0 {
 		headers["Content-Type"] = []string{o.ContentType}
 	}
+}
+
+func makeXmlBuffer(doc []byte) *bytes.Buffer {
+	buf := new(bytes.Buffer)
+	buf.WriteString(xml.Header)
+	buf.Write(doc)
+	return buf
 }
 
 type RoutingRule struct {
@@ -382,9 +435,7 @@ func (b *Bucket) PutBucketWebsite(configuration WebsiteConfiguration) error {
 		return err
 	}
 
-	buf := new(bytes.Buffer)
-	buf.WriteString(xml.Header)
-	buf.Write(doc)
+	buf := makeXmlBuffer(doc)
 
 	return b.PutBucketSubresource("website", buf, int64(buf.Len()))
 }
@@ -417,6 +468,49 @@ func (b *Bucket) Del(path string) error {
 	return b.S3.query(req, nil)
 }
 
+type Delete struct {
+	Quiet   bool     `xml:"Quiet,omitempty"`
+	Objects []Object `xml:"Object"`
+}
+
+type Object struct {
+	Key       string `xml:"Key"`
+	VersionId string `xml:"VersionId,omitempty"`
+}
+
+// DelMulti removes up to 1000 objects from the S3 bucket.
+//
+// See http://goo.gl/jx6cWK for details.
+func (b *Bucket) DelMulti(objects Delete) error {
+	doc, err := xml.Marshal(objects)
+	if err != nil {
+		return err
+	}
+
+	buf := makeXmlBuffer(doc)
+	digest := md5.New()
+	size, err := digest.Write(buf.Bytes())
+	if err != nil {
+		return err
+	}
+
+	headers := map[string][]string{
+		"Content-Length": {strconv.FormatInt(int64(size), 10)},
+		"Content-MD5":    {base64.StdEncoding.EncodeToString(digest.Sum(nil))},
+		"Content-Type":   {"text/xml"},
+	}
+	req := &request{
+		path:    "/",
+		method:  "POST",
+		params:  url.Values{"delete": {""}},
+		bucket:  b.Name,
+		headers: headers,
+		payload: buf,
+	}
+
+	return b.S3.query(req, nil)
+}
+
 // The ListResp type holds the results of a List bucket operation.
 type ListResp struct {
 	Name      string
@@ -431,6 +525,9 @@ type ListResp struct {
 	IsTruncated    bool
 	Contents       []Key
 	CommonPrefixes []string `xml:">Prefix"`
+	// if IsTruncated is true, pass NextMarker as marker argument to List()
+	// to get the next set of keys
+	NextMarker string
 }
 
 // The Key type represents an item stored in an S3 bucket.
@@ -524,6 +621,14 @@ func (b *Bucket) List(prefix, delim, marker string, max int) (result *ListResp, 
 	if err != nil {
 		return nil, err
 	}
+	// if NextMarker is not returned, it should be set to the name of last key,
+	// so let's do it so that each caller doesn't have to
+	if result.IsTruncated && result.NextMarker == "" {
+		n := len(result.Contents)
+		if n > 0 {
+			result.NextMarker = result.Contents[n-1].Key
+		}
+	}
 	return result, nil
 }
 
@@ -588,6 +693,29 @@ func (b *Bucket) Versions(prefix, delim, keyMarker string, versionIdMarker strin
 	return result, nil
 }
 
+type GetLocationResp struct {
+	Location string `xml:",innerxml"`
+}
+
+func (b *Bucket) Location() (string, error) {
+	r, err := b.Get("/?location")
+	if err != nil {
+		return "", err
+	}
+
+	// Parse the XML response.
+	var resp GetLocationResp
+	if err = xml.Unmarshal(r, &resp); err != nil {
+		return "", err
+	}
+
+	if resp.Location == "" {
+		return "us-east-1", nil
+	} else {
+		return resp.Location, nil
+	}
+}
+
 // URL returns a non-signed URL that allows retriving the
 // object at path. It only works if the object is publicly
 // readable (see SignedURL).
@@ -611,10 +739,25 @@ func (b *Bucket) URL(path string) string {
 // SignedURL returns a signed URL that allows anyone holding the URL
 // to retrieve the object at path. The signature is valid until expires.
 func (b *Bucket) SignedURL(path string, expires time.Time) string {
+	return b.SignedURLWithArgs(path, expires, nil, nil)
+}
+
+// SignedURLWithArgs returns a signed URL that allows anyone holding the URL
+// to retrieve the object at path. The signature is valid until expires.
+func (b *Bucket) SignedURLWithArgs(path string, expires time.Time, params url.Values, headers http.Header) string {
+	var uv = url.Values{}
+
+	if params != nil {
+		uv = params
+	}
+
+	uv.Set("Expires", strconv.FormatInt(expires.Unix(), 10))
+
 	req := &request{
-		bucket: b.Name,
-		path:   path,
-		params: url.Values{"Expires": {strconv.FormatInt(expires.Unix(), 10)}},
+		bucket:  b.Name,
+		path:    path,
+		params:  uv,
+		headers: headers,
 	}
 	err := b.S3.prepare(req)
 	if err != nil {
@@ -629,6 +772,44 @@ func (b *Bucket) SignedURL(path string, expires time.Time) string {
 	} else {
 		return u.String()
 	}
+}
+
+// UploadSignedURL returns a signed URL that allows anyone holding the URL
+// to upload the object at path. The signature is valid until expires.
+// contenttype is a string like image/png
+// path is the resource name in s3 terminalogy like images/ali.png [obviously exclusing the bucket name itself]
+func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time.Time) string {
+	expire_date := expires.Unix()
+	if method != "POST" {
+		method = "PUT"
+	}
+	stringToSign := method + "\n\n" + content_type + "\n" + strconv.FormatInt(expire_date, 10) + "\n/" + b.Name + "/" + path
+	fmt.Println("String to sign:\n", stringToSign)
+	a := b.S3.Auth
+	secretKey := a.SecretKey
+	accessId := a.AccessKey
+	mac := hmac.New(sha1.New, []byte(secretKey))
+	mac.Write([]byte(stringToSign))
+	macsum := mac.Sum(nil)
+	signature := base64.StdEncoding.EncodeToString([]byte(macsum))
+	signature = strings.TrimSpace(signature)
+
+	signedurl, err := url.Parse("https://" + b.Name + ".s3.amazonaws.com/")
+	if err != nil {
+		log.Println("ERROR sining url for S3 upload", err)
+		return ""
+	}
+	signedurl.Path += path
+	params := url.Values{}
+	params.Add("AWSAccessKeyId", accessId)
+	params.Add("Expires", strconv.FormatInt(expire_date, 10))
+	params.Add("Signature", signature)
+	if a.Token() != "" {
+		params.Add("token", a.Token())
+	}
+
+	signedurl.RawQuery = params.Encode()
+	return signedurl.String()
 }
 
 // PostFormArgs returns the action and input fields needed to allow anonymous
@@ -687,10 +868,88 @@ func (req *request) url() (*url.URL, error) {
 // body will be unmarshalled on it.
 func (s3 *S3) query(req *request, resp interface{}) error {
 	err := s3.prepare(req)
-	if err == nil {
-		_, err = s3.run(req, resp)
+	if err != nil {
+		return err
+	}
+	r, err := s3.run(req, resp)
+	if r != nil && r.Body != nil {
+		r.Body.Close()
 	}
 	return err
+}
+
+// queryV4Signprepares and runs the req request, signed with aws v4 signatures.
+// If resp is not nil, the XML data contained in the response
+// body will be unmarshalled on it.
+func (s3 *S3) queryV4Sign(req *request, resp interface{}) error {
+	if req.headers == nil {
+		req.headers = map[string][]string{}
+	}
+
+	s3.setBaseURL(req)
+
+	hreq, err := s3.setupHttpRequest(req)
+	if err != nil {
+		return err
+	}
+
+	// req.Host must be set for V4 signature calculation
+	hreq.Host = hreq.URL.Host
+
+	signer := aws.NewV4Signer(s3.Auth, "s3", s3.Region)
+	signer.IncludeXAmzContentSha256 = true
+	signer.Sign(hreq)
+
+	_, err = s3.doHttpRequest(hreq, resp)
+	return err
+}
+
+// Sets baseurl on req from bucket name and the region endpoint
+func (s3 *S3) setBaseURL(req *request) error {
+	if req.bucket == "" {
+		req.baseurl = s3.Region.S3Endpoint
+	} else {
+		req.baseurl = s3.Region.S3BucketEndpoint
+		if req.baseurl == "" {
+			// Use the path method to address the bucket.
+			req.baseurl = s3.Region.S3Endpoint
+			req.path = "/" + req.bucket + req.path
+		} else {
+			// Just in case, prevent injection.
+			if strings.IndexAny(req.bucket, "/:@") >= 0 {
+				return fmt.Errorf("bad S3 bucket: %q", req.bucket)
+			}
+			req.baseurl = strings.Replace(req.baseurl, "${bucket}", req.bucket, -1)
+		}
+	}
+
+	return nil
+}
+
+// partiallyEscapedPath partially escapes the S3 path allowing for all S3 REST API calls.
+//
+// Some commands including:
+//      GET Bucket acl              http://goo.gl/aoXflF
+//      GET Bucket cors             http://goo.gl/UlmBdx
+//      GET Bucket lifecycle        http://goo.gl/8Fme7M
+//      GET Bucket policy           http://goo.gl/ClXIo3
+//      GET Bucket location         http://goo.gl/5lh8RD
+//      GET Bucket Logging          http://goo.gl/sZ5ckF
+//      GET Bucket notification     http://goo.gl/qSSZKD
+//      GET Bucket tagging          http://goo.gl/QRvxnM
+// require the first character after the bucket name in the path to be a literal '?' and
+// not the escaped hex representation '%3F'.
+func partiallyEscapedPath(path string) string {
+	pathEscapedAndSplit := strings.Split((&url.URL{Path: path}).String(), "/")
+	if len(pathEscapedAndSplit) >= 3 {
+		if len(pathEscapedAndSplit[2]) >= 3 {
+			// Check for the one "?" that should not be escaped.
+			if pathEscapedAndSplit[2][0:3] == "%3F" {
+				pathEscapedAndSplit[2] = "?" + pathEscapedAndSplit[2][3:]
+			}
+		}
+	}
+	return strings.Replace(strings.Join(pathEscapedAndSplit, "/"), "+", "%2B", -1)
 }
 
 // prepare sets up req to be delivered to S3.
@@ -717,19 +976,12 @@ func (s3 *S3) prepare(req *request) error {
 			req.path = "/" + req.path
 		}
 		signpath = req.path
+
+		err := s3.setBaseURL(req)
+		if err != nil {
+			return err
+		}
 		if req.bucket != "" {
-			req.baseurl = s3.Region.S3BucketEndpoint
-			if req.baseurl == "" {
-				// Use the path method to address the bucket.
-				req.baseurl = s3.Region.S3Endpoint
-				req.path = "/" + req.bucket + req.path
-			} else {
-				// Just in case, prevent injection.
-				if strings.IndexAny(req.bucket, "/:@") >= 0 {
-					return fmt.Errorf("bad S3 bucket: %q", req.bucket)
-				}
-				req.baseurl = strings.Replace(req.baseurl, "${bucket}", req.bucket, -1)
-			}
 			signpath = "/" + req.bucket + signpath
 		}
 	}
@@ -740,28 +992,24 @@ func (s3 *S3) prepare(req *request) error {
 	if err != nil {
 		return fmt.Errorf("bad S3 endpoint URL %q: %v", req.baseurl, err)
 	}
-	reqSignpathSpaceFix := (&url.URL{Path: signpath}).String()
+
+	signpathPatiallyEscaped := partiallyEscapedPath(signpath)
 	req.headers["Host"] = []string{u.Host}
 	req.headers["Date"] = []string{time.Now().In(time.UTC).Format(time.RFC1123)}
 	if s3.Auth.Token() != "" {
 		req.headers["X-Amz-Security-Token"] = []string{s3.Auth.Token()}
 	}
-	sign(s3.Auth, req.method, reqSignpathSpaceFix, req.params, req.headers)
+	sign(s3.Auth, req.method, signpathPatiallyEscaped, req.params, req.headers)
 	return nil
 }
 
-// run sends req and returns the http response from the server.
-// If resp is not nil, the XML data contained in the response
-// body will be unmarshalled on it.
-func (s3 *S3) run(req *request, resp interface{}) (*http.Response, error) {
-	if debug {
-		log.Printf("Running S3 request: %#v", req)
-	}
-
+// Prepares an *http.Request for doHttpRequest
+func (s3 *S3) setupHttpRequest(req *request) (*http.Request, error) {
 	u, err := req.url()
 	if err != nil {
 		return nil, err
 	}
+	u.Opaque = fmt.Sprintf("//%s%s", u.Host, partiallyEscapedPath(u.Path))
 
 	hreq := http.Request{
 		URL:        u,
@@ -780,6 +1028,13 @@ func (s3 *S3) run(req *request, resp interface{}) (*http.Response, error) {
 		hreq.Body = ioutil.NopCloser(req.payload)
 	}
 
+	return &hreq, nil
+}
+
+// doHttpRequest sends hreq and returns the http response from the server.
+// If resp is not nil, the XML data contained in the response
+// body will be unmarshalled on it.
+func (s3 *S3) doHttpRequest(hreq *http.Request, resp interface{}) (*http.Response, error) {
 	c := http.Client{
 		Transport: &http.Transport{
 			Dial: func(netw, addr string) (c net.Conn, err error) {
@@ -797,10 +1052,11 @@ func (s3 *S3) run(req *request, resp interface{}) (*http.Response, error) {
 				}
 				return
 			},
+			Proxy: http.ProxyFromEnvironment,
 		},
 	}
 
-	hresp, err := c.Do(&hreq)
+	hresp, err := c.Do(hreq)
 	if err != nil {
 		return nil, err
 	}
@@ -808,7 +1064,7 @@ func (s3 *S3) run(req *request, resp interface{}) (*http.Response, error) {
 		dump, _ := httputil.DumpResponse(hresp, true)
 		log.Printf("} -> %s\n", dump)
 	}
-	if hresp.StatusCode != 200 && hresp.StatusCode != 204 {
+	if hresp.StatusCode != 200 && hresp.StatusCode != 204 && hresp.StatusCode != 206 {
 		return nil, buildError(hresp)
 	}
 	if resp != nil {
@@ -821,6 +1077,22 @@ func (s3 *S3) run(req *request, resp interface{}) (*http.Response, error) {
 
 	}
 	return hresp, err
+}
+
+// run sends req and returns the http response from the server.
+// If resp is not nil, the XML data contained in the response
+// body will be unmarshalled on it.
+func (s3 *S3) run(req *request, resp interface{}) (*http.Response, error) {
+	if debug {
+		log.Printf("Running S3 request: %#v", req)
+	}
+
+	hreq, err := s3.setupHttpRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return s3.doHttpRequest(hreq, resp)
 }
 
 // Error represents an error in an operation with S3.

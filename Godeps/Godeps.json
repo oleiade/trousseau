@@ -1,9 +1,6 @@
 {
 	"ImportPath": "github.com/oleiade/trousseau",
 	"GoVersion": "go1.3.1",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go.crypto/cast5",
@@ -16,14 +13,24 @@
 			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
 		},
 		{
+			"ImportPath": "code.google.com/p/go.crypto/pbkdf2",
+			"Comment": "null-232",
+			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
+		},
+		{
+			"ImportPath": "code.google.com/p/go.crypto/scrypt",
+			"Comment": "null-232",
+			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
+		},
+		{
 			"ImportPath": "code.google.com/p/go.crypto/ssh/terminal",
 			"Comment": "null-232",
 			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
 		},
 		{
 			"ImportPath": "code.google.com/p/goauth2/oauth",
-			"Comment": "weekly-43",
-			"Rev": "d4571a95014ff1fdd0055dc0f6b7e977a42b1e5a"
+			"Comment": "weekly-56",
+			"Rev": "afe77d958c701557ec5dc56f6936fcc194d15520"
 		},
 		{
 			"ImportPath": "code.google.com/p/gosshold/ssh",
@@ -32,28 +39,28 @@
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-24-g7381bc4",
-			"Rev": "7381bc4e62942763475703c7edd405f1e42adf4f"
+			"Comment": "1.2.0-26-gf7ebb76",
+			"Rev": "f7ebb761e83e21225d1d8954fde853bf8edd46c4"
 		},
 		{
 			"ImportPath": "github.com/crowdmob/goamz/aws",
-			"Rev": "26c9d18f01319c2e192dca8ac8dcd9e7cde01f60"
+			"Rev": "72b2a7fdeff7e5370eda0e88318f9a5d7242b339"
 		},
 		{
 			"ImportPath": "github.com/crowdmob/goamz/s3",
-			"Rev": "26c9d18f01319c2e192dca8ac8dcd9e7cde01f60"
+			"Rev": "72b2a7fdeff7e5370eda0e88318f9a5d7242b339"
 		},
 		{
 			"ImportPath": "github.com/google/go-github/github",
-			"Rev": "34a4afeea7e81dd8b333182da906692d72bdea1a"
+			"Rev": "5257f706765dede9b127e247327e55b3a89ccc1e"
 		},
 		{
 			"ImportPath": "github.com/google/go-querystring/query",
-			"Rev": "ec0a78e0f4db229b7897be36596a8944230b857a"
+			"Rev": "d8840cbb2baa915f4836edda4750050a2c0b7aea"
 		},
 		{
 			"ImportPath": "github.com/howeyc/gopass",
-			"Rev": "4cf66881dcc3d6f0071eb6473d95c39e460de696"
+			"Rev": "438f04ab2449de187e96e9b2dbaead5dde5f78ab"
 		},
 		{
 			"ImportPath": "github.com/oleiade/reflections",
@@ -65,17 +72,8 @@
 			"Rev": "1e4f5790d5066b19bd755d71402bb0b41f1e5ff9"
 		},
 		{
-			"ImportPath": "github.com/stretchr/testify/assert",
-			"Rev": "5cc789b89e1b0289394556166a1fccd55c93d868"
-		},
-		{
 			"ImportPath": "github.com/tmc/keyring",
 			"Rev": "c97358d3b0f2df246afedabacbad24fad4e3246e"
-		},
-		{
-			"ImportPath": "code.google.com/p/go.crypto/scrypt",
-			"Comment": "null-232",
-			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
 		}
 	]
 }

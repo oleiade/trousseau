@@ -47,8 +47,9 @@ type PushEvent struct {
 	PushID  *int              `json:"push_id,omitempty"`
 	Head    *string           `json:"head,omitempty"`
 	Ref     *string           `json:"ref,omitempty"`
-	Size    *int              `json:"ref,omitempty"`
+	Size    *int              `json:"size,omitempty"`
 	Commits []PushEventCommit `json:"commits,omitempty"`
+	Repo    *Repository       `json:"repository,omitempty"`
 }
 
 func (p PushEvent) String() string {
@@ -61,11 +62,42 @@ type PushEventCommit struct {
 	Message  *string       `json:"message,omitempty"`
 	Author   *CommitAuthor `json:"author,omitempty"`
 	URL      *string       `json:"url,omitempty"`
-	Distinct *bool         `json:"distinct"`
+	Distinct *bool         `json:"distinct,omitempty"`
+	Added    []string      `json:"added,omitempty"`
+	Removed  []string      `json:"removed,omitempty"`
+	Modified []string      `json:"modified,omitempty"`
 }
 
 func (p PushEventCommit) String() string {
 	return Stringify(p)
+}
+
+//PullRequestEvent represents the payload delivered by PullRequestEvent webhook
+type PullRequestEvent struct {
+	Action      *string      `json:"action,omitempty"`
+	Number      *int         `json:"number,omitempty"`
+	PullRequest *PullRequest `json:"pull_request,omitempty"`
+	Repo        *Repository  `json:"repository,omitempty"`
+	Sender      *User        `json:"sender,omitempty"`
+}
+
+// IssueActivityEvent represents the payload delivered by Issue webhook
+type IssueActivityEvent struct {
+	Action *string     `json:"action,omitempty"`
+	Issue  *Issue      `json:"issue,omitempty"`
+	Repo   *Repository `json:"repository,omitempty"`
+	Sender *User       `json:"sender,omitempty"`
+}
+
+// IssueCommentEvent represents the payload delivered by IssueComment webhook
+//
+// This webhook also gets fired for comments on pull requests
+type IssueCommentEvent struct {
+	Action  *string       `json:"action,omitempty"`
+	Issue   *Issue        `json:"issue,omitempty"`
+	Comment *IssueComment `json:"comment,omitempty"`
+	Repo    *Repository   `json:"repository,omitempty"`
+	Sender  *User         `json:"sender,omitempty"`
 }
 
 // ListEvents drinks from the firehose of all public events across GitHub.

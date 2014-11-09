@@ -17,6 +17,9 @@ type IssueComment struct {
 	User      *User      `json:"user,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	URL       *string    `json:"url,omitempty"`
+	HTMLURL   *string    `json:"html_url,omitempty"`
+	IssueURL  *string    `json:"issue_url,omitempty"`
 }
 
 func (i IssueComment) String() string {
@@ -34,6 +37,8 @@ type IssueListCommentsOptions struct {
 
 	// Since filters comments by time.
 	Since time.Time `url:"since,omitempty"`
+
+	ListOptions
 }
 
 // ListComments lists all comments on the specified issue.  Specifying an issue

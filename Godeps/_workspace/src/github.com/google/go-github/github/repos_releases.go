@@ -15,19 +15,20 @@ import (
 
 // RepositoryRelease represents a GitHub release in a repository.
 type RepositoryRelease struct {
-	ID              *int       `json:"id,omitempty"`
-	TagName         *string    `json:"tag_name,omitempty"`
-	TargetCommitish *string    `json:"target_commitish,omitempty"`
-	Name            *string    `json:"name,omitempty"`
-	Body            *string    `json:"body,omitempty"`
-	Draft           *bool      `json:"draft,omitempty"`
-	Prerelease      *bool      `json:"prerelease,omitempty"`
-	CreatedAt       *Timestamp `json:"created_at,omitempty"`
-	PublishedAt     *Timestamp `json:"published_at,omitempty"`
-	URL             *string    `json:"url,omitempty"`
-	HTMLURL         *string    `json:"html_url,omitempty"`
-	AssetsURL       *string    `json:"assets_url,omitempty"`
-	UploadURL       *string    `json:"upload_url,omitempty"`
+	ID              *int           `json:"id,omitempty"`
+	TagName         *string        `json:"tag_name,omitempty"`
+	TargetCommitish *string        `json:"target_commitish,omitempty"`
+	Name            *string        `json:"name,omitempty"`
+	Body            *string        `json:"body,omitempty"`
+	Draft           *bool          `json:"draft,omitempty"`
+	Prerelease      *bool          `json:"prerelease,omitempty"`
+	CreatedAt       *Timestamp     `json:"created_at,omitempty"`
+	PublishedAt     *Timestamp     `json:"published_at,omitempty"`
+	URL             *string        `json:"url,omitempty"`
+	HTMLURL         *string        `json:"html_url,omitempty"`
+	AssetsURL       *string        `json:"assets_url,omitempty"`
+	Assets          []ReleaseAsset `json:"assets,omitempty"`
+	UploadURL       *string        `json:"upload_url,omitempty"`
 }
 
 func (r RepositoryRelease) String() string {
@@ -36,16 +37,18 @@ func (r RepositoryRelease) String() string {
 
 // ReleaseAsset represents a Github release asset in a repository.
 type ReleaseAsset struct {
-	ID            *int       `json:"id,omitempty"`
-	URL           *string    `json:"url,omitempty"`
-	Name          *string    `json:"name,omitempty"`
-	Label         *string    `json:"label,omitempty"`
-	State         *string    `json:"state,omitempty"`
-	ContentType   *string    `json:"content_type,omitempty"`
-	Size          *int       `json:"size,omitempty"`
-	DownloadCount *int       `json:"download_count,omitempty"`
-	CreatedAt     *Timestamp `json:"created_at,omitempty"`
-	UpdatedAt     *Timestamp `json:"updated_at,omitempty"`
+	ID                 *int       `json:"id,omitempty"`
+	URL                *string    `json:"url,omitempty"`
+	Name               *string    `json:"name,omitempty"`
+	Label              *string    `json:"label,omitempty"`
+	State              *string    `json:"state,omitempty"`
+	ContentType        *string    `json:"content_type,omitempty"`
+	Size               *int       `json:"size,omitempty"`
+	DownloadCount      *int       `json:"download_count,omitempty"`
+	CreatedAt          *Timestamp `json:"created_at,omitempty"`
+	UpdatedAt          *Timestamp `json:"updated_at,omitempty"`
+	BrowserDownloadUrl *string    `json:"browser_download_url,omitempty"`
+	Uploader           *User      `json:"uploader,omitempty"`
 }
 
 func (r ReleaseAsset) String() string {
@@ -55,8 +58,12 @@ func (r ReleaseAsset) String() string {
 // ListReleases lists the releases for a repository.
 //
 // GitHub API docs: http://developer.github.com/v3/repos/releases/#list-releases-for-a-repository
-func (s *RepositoriesService) ListReleases(owner, repo string) ([]RepositoryRelease, *Response, error) {
+func (s *RepositoriesService) ListReleases(owner, repo string, opt *ListOptions) ([]RepositoryRelease, *Response, error) {
 	u := fmt.Sprintf("repos/%s/%s/releases", owner, repo)
+	u, err := addOptions(u, opt)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -144,8 +151,12 @@ func (s *RepositoriesService) DeleteRelease(owner, repo string, id int) (*Respon
 // ListReleaseAssets lists the release's assets.
 //
 // GitHub API docs : http://developer.github.com/v3/repos/releases/#list-assets-for-a-release
-func (s *RepositoriesService) ListReleaseAssets(owner, repo string, id int) ([]ReleaseAsset, *Response, error) {
+func (s *RepositoriesService) ListReleaseAssets(owner, repo string, id int, opt *ListOptions) ([]ReleaseAsset, *Response, error) {
 	u := fmt.Sprintf("repos/%s/%s/releases/%d/assets", owner, repo, id)
+	u, err := addOptions(u, opt)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -227,7 +238,7 @@ func (s *RepositoriesService) UploadReleaseAsset(owner, repo string, id int, opt
 		return nil, nil, err
 	}
 	if stat.IsDir() {
-		return nil, nil, errors.New("The asset to upload can't be a directory")
+		return nil, nil, errors.New("the asset to upload can't be a directory")
 	}
 
 	mediaType := mime.TypeByExtension(filepath.Ext(file.Name()))

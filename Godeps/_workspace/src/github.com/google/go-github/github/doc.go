@@ -67,6 +67,19 @@ up-to-date rate limit data for the client.
 Learn more about GitHub rate limiting at
 http://developer.github.com/v3/#rate-limiting.
 
+Conditional Requests
+
+The GitHub API has good support for conditional requests which will help
+prevent you from burning through your rate limit, as well as help speed up your
+application.  go-github does not handle conditional requests directly, but is
+instead designed to work with a caching http.Transport.  We recommend using
+https://github.com/gregjones/httpcache, which can be used in conjuction with
+https://github.com/sourcegraph/apiproxy to provide additional flexibility and
+control of caching rules.
+
+Learn more about GitHub conditional requests at
+https://developer.github.com/v3/#conditional-requests.
+
 Creating and Updating Resources
 
 All structs for GitHub resources use pointer values for all non-repeated fields.
@@ -75,12 +88,38 @@ Helper functions have been provided to easily create these pointers for string,
 bool, and int values.  For example:
 
 	// create a new private repository named "foo"
-	repo := &github.Repo{
+	repo := &github.Repository{
 		Name:    github.String("foo"),
 		Private: github.Bool(true),
 	}
 	client.Repositories.Create("", repo)
 
 Users who have worked with protocol buffers should find this pattern familiar.
+
+Pagination
+
+All requests for resource collections (repos, pull requests, issues, etc)
+support pagination. Pagination options are described in the
+ListOptions struct and passed to the list methods directly or as an
+embedded type of a more specific list options struct (for example
+PullRequestListOptions).  Pages information is available via Response struct.
+
+	opt := &github.RepositoryListByOrgOptions{
+		ListOptions: github.ListOptions{PerPage: 10},
+	}
+	// get all pages of results
+	var allRepos []github.Repository
+	for {
+		repos, resp, err := client.Repositories.ListByOrg("github", opt)
+		if err != nil {
+			return err
+		}
+		allRepos = append(allRepos, repos...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.ListOptions.Page = resp.NextPage
+	}
+
 */
 package github

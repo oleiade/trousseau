@@ -23,7 +23,7 @@ type Gist struct {
 	ID          *string                   `json:"id,omitempty"`
 	Description *string                   `json:"description,omitempty"`
 	Public      *bool                     `json:"public,omitempty"`
-	User        *User                     `json:"user,omitempty"`
+	Owner       *User                     `json:"owner,omitempty"`
 	Files       map[GistFilename]GistFile `json:"files,omitempty"`
 	Comments    *int                      `json:"comments,omitempty"`
 	HTMLURL     *string                   `json:"html_url,omitempty"`
@@ -56,6 +56,8 @@ func (g GistFile) String() string {
 type GistListOptions struct {
 	// Since filters Gists by time.
 	Since time.Time `url:"since,omitempty"`
+
+	ListOptions
 }
 
 // List gists for a user. Passing the empty string will list
