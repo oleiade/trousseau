@@ -1,6 +1,9 @@
 {
 	"ImportPath": "github.com/oleiade/trousseau",
 	"GoVersion": "go1.3.1",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go.crypto/cast5",
@@ -70,6 +73,10 @@
 		{
 			"ImportPath": "github.com/oleiade/tempura",
 			"Rev": "1e4f5790d5066b19bd755d71402bb0b41f1e5ff9"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Rev": "5cc789b89e1b0289394556166a1fccd55c93d868"
 		},
 		{
 			"ImportPath": "github.com/tmc/keyring",
