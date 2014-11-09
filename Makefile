@@ -25,16 +25,18 @@ INTEGRATION_TEST_FILES := $(filter-out $(INTEGRATION_TEST_DIR)/auth.bats, $(INTE
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 
 all: trousseau
+
+deps:
+	@(go get github.com/kr/godep)
 	@(mkdir -p $(BIN_DIR))
 
-trousseau:
-	@(go get github.com/kr/godep)
+trousseau: deps
 	@(echo "-> Compiling trousseau binary")
 	@(mkdir -p $(BIN_DIR))
 	@(cd $(TROUSSEAU_CMD_DIR) && godep go install && godep go build -o $(TROUSSEAU_BIN)) 
 	@(echo "-> trousseau binary created: $(TROUSSEAU_BIN)")
 
-test: unit integration
+test: deps unit integration
 
 unit:
 	@(go list ./... | xargs -n1 godep go test)
@@ -64,5 +66,5 @@ format:
 	@(go fmt ./...)
 	@(go vet ./...)
 
-.PHONY: all trousseau test unit integration package format
+.PHONY: all deps trousseau test unit integration package format
 
