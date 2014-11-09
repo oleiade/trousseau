@@ -7,18 +7,18 @@
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go.crypto/cast5",
-			"Comment": "null-226",
-			"Rev": "c9a0e9891d8ff16d1d41100bf923145b2bf25812"
+			"Comment": "null-232",
+			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
 		},
 		{
 			"ImportPath": "code.google.com/p/go.crypto/openpgp",
-			"Comment": "null-226",
-			"Rev": "c9a0e9891d8ff16d1d41100bf923145b2bf25812"
+			"Comment": "null-232",
+			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
 		},
 		{
 			"ImportPath": "code.google.com/p/go.crypto/ssh/terminal",
-			"Comment": "null-226",
-			"Rev": "c9a0e9891d8ff16d1d41100bf923145b2bf25812"
+			"Comment": "null-232",
+			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
 		},
 		{
 			"ImportPath": "code.google.com/p/goauth2/oauth",
@@ -73,8 +73,9 @@
 			"Rev": "c97358d3b0f2df246afedabacbad24fad4e3246e"
 		},
 		{
-			"ImportPath":"code.google.com/p/go.crypto/scrypt",
-			"Rev":" 7eef55bbd51c"
+			"ImportPath": "code.google.com/p/go.crypto/scrypt",
+			"Comment": "null-232",
+			"Rev": "7ad4bae3f4670ffa3f967e498c0e2db28564dd7d"
 		}
 	]
 }
