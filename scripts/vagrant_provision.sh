@@ -37,4 +37,7 @@ export PATH=$PATH:$GOROOT/bin
 cd /usr/local/gopath/src/github.com/oleiade/trousseau/ && make
 echo "<--- done"
 
+echo "---> running tests"
+cd /usr/local/gopath/src/github.com/oleiade/trousseau/ && make test
+
 echo "Your box is ready to use, enjoy!"
