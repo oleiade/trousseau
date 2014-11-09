@@ -2,14 +2,13 @@ language: go
 
 go:
   - 1.3
-  - release
 
 before_install:
+  - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
-  - git clone https://github.com/sstephenson/bats.git
-  - cd bats
-  - ./install.sh ../ 
-  - export BATS_BIN=~/bin/bin/bats
+  - sudo apt-get install -qq bats
+
+install: make deps
 
 script:
   - make test
