@@ -57,4 +57,7 @@ echo "---> configuring vagrant user"
 echo "cd $GOPATH/src/github.com/oleiade/trousseau" >> ~vagrant/.bash_profile
 echo "<--- done"
 
+echo "---> running tests"
+cd /usr/local/gopath/src/github.com/oleiade/trousseau/ && make test
+
 echo "Your box is ready to use, enjoy!"
