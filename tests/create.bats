@@ -10,6 +10,12 @@ load test_helpers
     [ -f $TROUSSEAU_TEST_STORE_CREATE ]
 }
 
+@test "create symmetric store succeeds" {
+    run $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_CREATE_AES create --encryption-type 'symmetric'
+    [ "$status" -eq 0 ]
+    [ -f $TROUSSEAU_TEST_STORE_CREATE_AES ]
+}
+
 @test "create generates a file in 0600 mode" {
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE_CREATE create $TROUSSEAU_TEST_FIRST_KEY_ID
     [ "$status" -eq 0 ]
@@ -45,8 +51,3 @@ load test_helpers
     [ ! -f $TROUSSEAU_TEST_STORE_CREATE ]
 }
 
-@test "create symmetric store succeeds" {
-	run $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_CREATE_AES create --encryption-type 'symmetric'
-    [ "$status" -eq 0 ]
-    [ -f $TROUSSEAU_TEST_STORE_CREATE_AES ]
-}
