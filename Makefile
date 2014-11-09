@@ -31,7 +31,7 @@ trousseau:
 	@(go get github.com/kr/godep)
 	@(echo "-> Compiling trousseau binary")
 	@(mkdir -p $(BIN_DIR))
-	@(cd $(TROUSSEAU_CMD_DIR) && godep go build -o $(TROUSSEAU_BIN)) 
+	@(cd $(TROUSSEAU_CMD_DIR) && godep go install && godep go build -o $(TROUSSEAU_BIN)) 
 	@(echo "-> trousseau binary created: $(TROUSSEAU_BIN)")
 
 test: unit integration
