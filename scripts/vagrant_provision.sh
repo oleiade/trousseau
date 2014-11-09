@@ -38,6 +38,9 @@ cd /usr/local/gopath/src/github.com/oleiade/trousseau/ && make
 echo "<--- done"
 
 echo "---> running tests"
-cd /usr/local/gopath/src/github.com/oleiade/trousseau/ && make test
+# Install bats framework
+git clone --branch v0.4.0 https://github.com/sstephenson/bats.git /tmp/bats
+export PATH=$PATH:/tmp/bats/bin
+cd $GOPATH/src/github.com/oleiade/trousseau/ && make test
 
 echo "Your box is ready to use, enjoy!"
