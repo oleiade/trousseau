@@ -28,8 +28,14 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 	}
 
 	if tr.CryptoType == SYMMETRIC_ENCRYPTION {
-		if !AskPassphraseFlagCheck() {
-			AskPassphrase(true)
+		passphrase, err := GetPassphrase()
+		if err != nil {
+
+			if !AskPassphraseFlagCheck() {
+				AskPassphrase(true)
+			}
+		} else {
+			SetPassphrase(passphrase)
 		}
 	}
 
