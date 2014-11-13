@@ -3,8 +3,9 @@ package trousseau
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/oleiade/trousseau/crypto/openpgp"
 	"sort"
+
+	"github.com/oleiade/trousseau/crypto/openpgp"
 )
 
 type VersionMatcher func([]byte) bool
@@ -121,7 +122,11 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	}
 
 	// Decrypt store version 0.3 (aka legacy)
-	plainData, err := openpgp.Decrypt(d, decryptionKeys, GetPassphrase())
+	passphrase, err := GetPassphrase()
+	if err != nil {
+		ErrorLogger.Fatal(err)
+	}
+	plainData, err := openpgp.Decrypt(d, decryptionKeys, passphrase)
 	if err != nil {
 		return nil, err
 	}

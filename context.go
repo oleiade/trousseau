@@ -1,6 +1,7 @@
 package trousseau
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -66,24 +67,24 @@ func AskPassphrase(confirm bool) {
 // to retrieve it from the environment, then it will try to fetch
 // it from the system keyring manager, ultimately it will try
 // to get it from a running gpg-agent daemon.
-func GetPassphrase() (passphrase string) {
-	var err error
+func GetPassphrase() (passphrase string, err error) {
+	//var err error
 
 	if gPassphrase != "" {
-		return gPassphrase
+		return gPassphrase, nil
 	}
 
 	// try to retrieve passphrase from env
 	passphrase = os.Getenv(ENV_PASSPHRASE_KEY)
 	if len(passphrase) > 0 {
-		return passphrase
+		return passphrase, nil
 	}
 
 	// if passphrase wasn't found in env, try to fetch it from
 	// system keyring manager.
 	passphrase, err = keyring.Get(os.Getenv(ENV_KEYRING_SERVICE_KEY), os.Getenv(ENV_KEYRING_USER_KEY))
 	if len(passphrase) > 0 {
-		return passphrase
+		return passphrase, nil
 	}
 
 	// if passphrase was enither found in the environment nor
@@ -93,10 +94,11 @@ func GetPassphrase() (passphrase string) {
 	}
 
 	if err != nil {
-		ErrorLogger.Fatal("no passphrase provided. unable to open data store")
+		// ErrorLogger.Fatal("no passphrase provided. unable to open data store")
+		return "", errors.New("no passphrase provided. unable to open data store")
 	}
 
-	return passphrase
+	return passphrase, nil
 }
 
 func getGpgPassphrase(gpgId string) (string, error) {
