@@ -43,7 +43,7 @@ func updateGnupgHome(c *cli.Context) {
 }
 
 func updateCheckPassphrase(c *cli.Context) {
-	if c.GlobalBool("ask-passphrase") {
+	if c.GlobalBool("ask-passphrase") && !trousseau.AskPassphraseFlagCheck() {
 		// This checks if the user is creating a store by
 		// looking in c.Args()
 		if c.Args().Get(0) == "create" {

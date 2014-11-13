@@ -74,7 +74,11 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
-		plainData, err := DecryptAsymmetricPGP(t.Data, GetPassphrase())
+		passphrase, err := GetPassphrase()
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+		plainData, err := DecryptAsymmetricPGP(t.Data, passphrase)
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +88,11 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 			return nil, err
 		}
 	case AES_256_ENCRYPTION:
-		plainData, err := aes.Decrypt(GetPassphrase(), t.Data)
+		passphrase, err := GetPassphrase()
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+		plainData, err := aes.Decrypt(passphrase, t.Data)
 		if err != nil {
 			return nil, err
 		}
@@ -117,7 +125,11 @@ func (t *Trousseau) Encrypt(store *Store) error {
 		if err != nil {
 			return err
 		}
-		t.Data, err = aes.Encrypt(GetPassphrase(), plainData)
+		passphrase, err := GetPassphrase()
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+		t.Data, err = aes.Encrypt(passphrase, plainData)
 		if err != nil {
 			return err
 		}
