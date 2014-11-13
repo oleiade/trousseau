@@ -23,6 +23,7 @@ var (
 // Global data store file path
 var gStorePath string
 var gPassphrase string
+var gPassphraseAskFlag bool
 
 func SetStorePath(storePath string) { gStorePath = storePath }
 func GetStorePath() string          { return gStorePath }
@@ -41,12 +42,23 @@ func InferStorePath() string {
 	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
 }
 
+func AskPassphraseFlagCheck() bool {
+	return gPassphraseAskFlag
+}
+
+func SetAsked() {
+	gPassphraseAskFlag = true
+}
+
 func AskPassphrase(confirm bool) {
 	if confirm {
 		SetPassphrase(PromptForHiddenInputConfirm())
 	} else {
 		SetPassphrase(PromptForHiddenInput("Passphrase: "))
 	}
+
+	// Set the global AskPassphraseFlag so as to not ask again
+	SetAsked()
 }
 
 // GetPassphrase attemps to retrieve the user's gpg master
