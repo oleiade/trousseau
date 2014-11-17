@@ -16,7 +16,7 @@ TROUSSEAU_BIN = $(BIN_DIR)/trousseau
 BATS_BIN := $(shell which bats 2>/dev/null)
 GOXC_BIN := $(shell which goxc 2>/dev/null)
 
-# Integration tests resources
+# Tests resources
 INTEGRATION_TEST_DIR := $(ROOT_DIR)/tests
 INTEGRATION_TEST_FILES := $(wildcard $(INTEGRATION_TEST_DIR)/*.bats)
 INTEGRATION_TEST_FILES := $(filter-out $(INTEGRATION_TEST_DIR)/auth.bats, $(INTEGRATION_TEST_FILES))
@@ -47,7 +47,7 @@ unit:
 # to bats eecutable via 'env BATS_BIN=myexec make integration'
 integration: all
 ifdef BATS_BIN
-	@(${BATS_BIN} $(INTEGRATION_TEST_FILES) 1>/dev/null)
+	@(${BATS_BIN} --tap $(INTEGRATION_TEST_FILES))
 else
 	@(echo "bats was not found on your PATH. Unable to run integration tests.")
 endif
