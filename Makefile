@@ -18,8 +18,6 @@ GOXC_BIN := $(shell which goxc 2>/dev/null)
 
 # Tests resources
 INTEGRATION_TEST_DIR := $(ROOT_DIR)/tests
-INTEGRATION_TEST_FILES := $(wildcard $(INTEGRATION_TEST_DIR)/*.bats)
-INTEGRATION_TEST_FILES := $(filter-out $(INTEGRATION_TEST_DIR)/auth.bats, $(INTEGRATION_TEST_FILES))
 
 # Actions
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
@@ -47,7 +45,7 @@ unit:
 # to bats eecutable via 'env BATS_BIN=myexec make integration'
 integration: all
 ifdef BATS_BIN
-	@(${BATS_BIN} --tap $(INTEGRATION_TEST_FILES))
+	@(${BATS_BIN} $(INTEGRATION_TEST_DIR))
 else
 	@(echo "bats was not found on your PATH. Unable to run integration tests.")
 endif
