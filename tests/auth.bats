@@ -6,6 +6,11 @@ load test_helpers
 
 
 @test "open data store with proper keyring service being set on osx succeeds" {
+    # Run this test only on osx
+    if [[ $platform != "Darwin" ]]; then
+       skip "test should only be ran on osx"
+    fi
+
     # Make sure we remove the environment entry
     # for the test key passphrase
     unset TROUSSEAU_PASSPHRASE
@@ -22,6 +27,11 @@ load test_helpers
 }
 
 @test "open data store with no keyring service set in environment on osx fails" {
+    # Run this test only on osx
+    if [[ $platform != 'Darwin' ]]; then
+        skip "test should only be performed on osx"
+    fi
+
     # Make sure we remove the environment entry
     # for the test key passphrase
     unset TROUSSEAU_PASSPHRASE
@@ -31,6 +41,11 @@ load test_helpers
 }
 
 @test "open data store with non existing keyring service set in environment on osx fails" {
+    # Run this test only on osx
+    if [[ $platform != 'Darwin' ]]; then
+        skip "test should only be performed on osx"
+    fi
+
     # Make sure we remove the environment entry
     # for the test key passphrase
     unset TROUSSEAU_PASSPHRASE
