@@ -12,7 +12,6 @@ TROUSSEAU_TEST_FILES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_WILDCARD}"
 
 # Build context
 TROUSSEAU_BINARY_DIR="$DIR/../bin"
-TROUSSEAU_TEST_OPTIONS="--gnupg-home=$TROUSSEAU_TEST_GNUPG_HOME"
 TROUSSEAU_COMMAND="$TROUSSEAU_BINARY_DIR/trousseau"
 
 # Include all the helpers
@@ -26,15 +25,8 @@ TROUSSEAU_COMMAND="$TROUSSEAU_BINARY_DIR/trousseau"
 setup() {
     # Make sure to fail fast if trousseau was not built
     # and no binary path could be found
-    if [ ! -d $TROUSSEAU_BINARY_DIR ]; then
-        echo "trousseau binary dir not found ${TROUSSEAU_BINARY_DIR}"
-        exit 1
-    fi
-
-    # Make sure to fail fast if trousseau was not built
-    # and no binary could be found
-    if [ ! -f $TROUSSEAU_BINARY ]; then
-        echo "trousseau binary not found: ${TROUSSEAU_BINARY}"
+    if [ ! -d $TROUSSEAU_BINARY_DIR ] || [ ! -f $TROUSSEAU_COMMAND ]; then
+        echo "whether trousseau binary dir ($TROUSSEAU_BINARY_DIR) or executable ($TROUSSEAU_COMMAND) not found" 
         exit 1
     fi
 
