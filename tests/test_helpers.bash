@@ -15,18 +15,12 @@ TROUSSEAU_BINARY_DIR="$DIR/../bin"
 TROUSSEAU_TEST_OPTIONS="--gnupg-home=$TROUSSEAU_TEST_GNUPG_HOME"
 TROUSSEAU_COMMAND="$TROUSSEAU_BINARY_DIR/trousseau"
 
-# Trousseau global context
-TROUSSEAU_TEST_STORE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}store"
-TROUSSEAU_TEST_STORE_AES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}aes_store"
-TROUSSEAU_TEST_STORE_CREATE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}create_store"
-TROUSSEAU_TEST_STORE_CREATE_AES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}aes_create_store"
-
 # Include all the helpers
 . "$DIR/keyring_helpers.bash"
 . "$DIR/system_helpers.bash"
 . "$DIR/gpg_helpers.bash"
 . "$DIR/env_helpers.bash"
-
+. "$DIR/store_helpers.bash"
 
 # Setup and teardown
 setup() {
@@ -46,19 +40,14 @@ setup() {
 
     setup_ggp
     setup_env
-
-    # Otherwise, create the base test store
-    $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME \
-                       --store $TROUSSEAU_TEST_STORE \
-                       create $TROUSSEAU_TEST_FIRST_KEY_ID > /dev/null
-
-    $TROUSSEAU_COMMAND --store $TROUSSEAU_TEST_STORE_AES \
-                       create --encryption-type 'symmetric' > /dev/null
+    setup_store 'asymmetric'
+    setup_store 'symmetric'
 }
 
 teardown() {
     teardown_gpg
     teardown_env
+    teardown_store
 
     # Remove every trousseau test prefixed files from 
     # tmp dir
