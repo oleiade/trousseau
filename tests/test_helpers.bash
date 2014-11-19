@@ -4,6 +4,7 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/keyring_helpers.bash"
+. "$DIR/system_helpers.bash"
 
 # Testing context
 TMP_DIR=/tmp
