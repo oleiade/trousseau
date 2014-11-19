@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# Test gnupg context
 TROUSSEAU_TEST_GNUPG_HOME="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}gnupg"
 TROUSSEAU_TEST_KEYS_DIR="${DIR}/keys"
 

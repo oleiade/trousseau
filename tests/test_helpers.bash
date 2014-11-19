@@ -25,16 +25,8 @@ TROUSSEAU_TEST_STORE_CREATE_AES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}aes_cr
 . "$DIR/keyring_helpers.bash"
 . "$DIR/system_helpers.bash"
 . "$DIR/gpg_helpers.bash"
+. "$DIR/env_helpers.bash"
 
-# setup_env exports tests common environment variables
-setup_env() {
-    export TROUSSEAU_PASSPHRASE=$TROUSSEAU_TEST_KEY_PASSPHRASE
-}
-
-# teardown_env cleans the environment from tests variables
-teardown_env() {
-    unset TROUSSEAU_PASSPHRASE
-}
 
 # Setup and teardown
 setup() {
