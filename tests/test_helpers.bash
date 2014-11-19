@@ -38,13 +38,22 @@ TROUSSEAU_TEST_STORE_AES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}aes_store"
 TROUSSEAU_TEST_STORE_CREATE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}create_store"
 TROUSSEAU_TEST_STORE_CREATE_AES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}aes_create_store"
 
-install_gpg_test_keys() {
-    mkdir $TROUSSEAU_TEST_GNUPG_HOME
-    chmod -R 0777 $TROUSSEAU_TEST_GNUPG_HOME
-    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --import $TROUSSEAU_TEST_FIRST_PUBLIC_KEY_FILE &> /dev/null
-    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --allow-secret-key-import --import $TROUSSEAU_TEST_FIRST_PRIVATE_KEY_FILE &> /dev/null
-    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --import $TROUSSEAU_TEST_SECOND_PUBLIC_KEY_FILE &> /dev/null
-    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --allow-secret-key-import --import $TROUSSEAU_TEST_SECOND_PRIVATE_KEY_FILE &> /dev/null
+# setup_gpg creates a temporary gnupg keyring
+# and import trousseau gpg test keys into it
+setup_ggp() {
+    # Create a temporary gnupg keyring for testing
+    mkdir -m 0700 $TROUSSEAU_TEST_GNUPG_HOME
+
+    # Import test keys in the test keyring
+    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --import $TROUSSEAU_TEST_FIRST_PUBLIC_KEY_FILE >&2
+    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --allow-secret-key-import --import $TROUSSEAU_TEST_FIRST_PRIVATE_KEY_FILE >&2 
+    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --import $TROUSSEAU_TEST_SECOND_PUBLIC_KEY_FILE >&2 
+    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --allow-secret-key-import --import $TROUSSEAU_TEST_SECOND_PRIVATE_KEY_FILE >&2 
+}
+
+# teardown_gpg destroys any existing temporary gnupg keyring
+teardown_gpg() {
+    rm -rf $TROUSSEAU_TEST_GNUPG_HOME
 }
 
 setup_env() {
@@ -71,7 +80,7 @@ setup() {
         exit 1
     fi
 
-    install_gpg_test_keys
+    setup_ggp
     setup_env
 
     # Otherwise, create the base test store
@@ -84,6 +93,7 @@ setup() {
 }
 
 teardown() {
+    teardown_gpg
     teardown_env
 
     # Remove every trousseau test prefixed files from 
