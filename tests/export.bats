@@ -4,7 +4,7 @@ load test_helpers
 
 
 # This file will be automatically collected at teardown
-TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
+TEST_FILE="${TEST_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
 
 
 @test "export store to valid destination succeeds" {

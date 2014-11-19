@@ -4,7 +4,7 @@ load test_helpers
 
 
 # This file will be automatically collected at teardown
-TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
+TEST_FILE="${TEST_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
 
 
 @test "import store from valid exported data store succeeds" {
@@ -33,7 +33,7 @@ TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
 }
 
 @test "import store from invalid file fails" {
-    echo "invalid" "/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_import_test"
+    echo "invalid" "${TEST_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}_import_test"
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE import $TEST_FILE
     [ "$status" -eq 1 ]
 }

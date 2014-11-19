@@ -5,21 +5,31 @@ DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 # Testing context
-TMP_DIR=/tmp
-TROUSSEAU_TEST_FILES_PREFIX=trousseau_test_
-TROUSSEAU_TEST_FILES_WILDCARD="${TROUSSEAU_TEST_FILES_PREFIX}*"
-TROUSSEAU_TEST_FILES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_WILDCARD}"
-
-# Build context
+TEST_DIR=$DIR/tmp
 TROUSSEAU_BINARY_DIR="$DIR/../bin"
 TROUSSEAU_COMMAND="$TROUSSEAU_BINARY_DIR/trousseau"
 
 # Include all the helpers
-. "$DIR/keyring_helpers.bash"
-. "$DIR/system_helpers.bash"
-. "$DIR/gpg_helpers.bash"
-. "$DIR/env_helpers.bash"
-. "$DIR/store_helpers.bash"
+HELPERS_DIR=$DIR/helpers
+shopt -s extglob
+for helper in $(ls $HELPERS_DIR/*.bash)
+do
+    . $helper
+done
+
+setup_tmp_dir() {
+    if [ ! -d $TEST_DIR ]
+    then
+        mkdir $TEST_DIR
+    fi
+}
+
+teardown_tmp_dir() {
+    if [ -d $TEST_DIR ]
+    then
+        rm -rf $TEST_DIR
+    fi
+}
 
 # Setup and teardown
 setup() {
@@ -29,6 +39,8 @@ setup() {
         echo "whether trousseau binary dir ($TROUSSEAU_BINARY_DIR) or executable ($TROUSSEAU_COMMAND) not found" 
         exit 1
     fi
+
+    setup_tmp_dir
 
     setup_ggp
     setup_env
@@ -41,7 +53,5 @@ teardown() {
     teardown_env
     teardown_store
 
-    # Remove every trousseau test prefixed files from 
-    # tmp dir
-    rm -rf $TROUSSEAU_TEST_FILES
+    teardown_tmp_dir
 }

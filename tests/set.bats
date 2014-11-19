@@ -4,7 +4,7 @@ load test_helpers
 
 
 # This file will be automatically collected at teardown
-TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
+TEST_FILE="${TEST_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
 
 
 @test "set valid key pair succeeds" {
@@ -39,7 +39,7 @@ TEST_FILE="/tmp/${TROUSSEAU_TEST_FILES_PREFIX}_outfile"
 }
 
 @test "set valid key's value import from non openable file fails" {
-    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE set 'easy as' -f /tmp/non_existing_file
+    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE set 'easy as' -f ${TEST_DIR}/non_existing_file
 
     [ "$status" -eq 1 ]
 }
