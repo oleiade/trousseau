@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Testing context
-TMP_DIR=/tmp
+TMP_DIR=tmp
 TROUSSEAU_TEST_FILES_PREFIX=trousseau_test_
 TROUSSEAU_TEST_FILES_WILDCARD="${TROUSSEAU_TEST_FILES_PREFIX}*"
 TROUSSEAU_TEST_FILES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_WILDCARD}"
@@ -56,10 +56,12 @@ teardown_gpg() {
     rm -rf $TROUSSEAU_TEST_GNUPG_HOME
 }
 
+# setup_env exports tests common environment variables
 setup_env() {
     export TROUSSEAU_PASSPHRASE=$TROUSSEAU_TEST_KEY_PASSPHRASE
 }
 
+# teardown_env cleans the environment from tests variables
 teardown_env() {
     unset TROUSSEAU_PASSPHRASE
 }
