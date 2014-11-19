@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 
+# Name of the entry storing the test keys passphrase in the keyring
+TROUSSEAU_KEYRING_SERVICE_NAME=trousseau_test
 
-create_keyring_service() {
+# Test keys passphrase
+TROUSSEAU_TEST_KEY_PASSPHRASE=trousseau
+
+# setup_keyring_entry will create an entry for the trousseau test keys
+# passphrase in the system keyring:
+#   - OSX: entry will be created in the system keychain
+#   - Linux: entry will whether be created in the gnome-keychain
+#     or in your SecretService provider, according to your setup
+setup_keyring_entry() {
     platform=$(uname)
 
     if [[ $platform == 'Linux' ]]; then
@@ -13,7 +23,9 @@ create_keyring_service() {
     fi
 }
 
-drop_keyring_service() {
+# teardown_keyring_entry will remove the trousseau test keys passphrase
+# entry from your system keyring.
+teardown_keyring_entry() {
     platform=$(uname)
 
     if [[ $platform == 'Linux' ]]; then

@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Include every _helpers.bash
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+. "$DIR/keyring_helpers.bash"
 
 # Testing context
-TMP_DIR=tmp
+TMP_DIR=/tmp
 TROUSSEAU_TEST_FILES_PREFIX=trousseau_test_
 TROUSSEAU_TEST_FILES_WILDCARD="${TROUSSEAU_TEST_FILES_PREFIX}*"
 TROUSSEAU_TEST_FILES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_WILDCARD}"
@@ -21,11 +24,6 @@ TROUSSEAU_TEST_SECOND_PUBLIC_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_publ
 TROUSSEAU_TEST_SECOND_PRIVATE_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_private_second_test.key"
 TROUSSEAU_TEST_SECOND_KEY_ID=EA7F9C59
 TROUSSEAU_TEST_SECOND_KEY_EMAIL=theo@trousseau.io
-#
-
-# Keyring context
-TROUSSEAU_KEYRING_SERVICE_NAME=trousseau_test
-TROUSSEAU_TEST_KEY_PASSPHRASE=trousseau
 
 # Build context
 TROUSSEAU_BINARY_DIR="$DIR/../bin"

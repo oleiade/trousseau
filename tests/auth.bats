@@ -1,13 +1,12 @@
 #!/usr/bin/env/bats
 
 load system_helpers
-load keyring_helpers
 load test_helpers
 
 
 @test "open data store with proper keyring service being set on osx succeeds" {
     # Run this test only on osx
-    if [[ $platform != "Darwin" ]]; then
+    if [[ $(uname) != "Darwin" ]]; then
        skip "test should only be ran on osx"
     fi
 
@@ -16,19 +15,19 @@ load test_helpers
     unset TROUSSEAU_PASSPHRASE
 
     # Create proper keyring entry
-    create_keyring_service
+    setup_keyring_entry
     export TROUSSEAU_KEYRING_SERVICE=$TROUSSEAU_KEYRING_SERVICE_NAME
 
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE keys
     [ "$status" -eq 0 ]
 
     # Drop the keyring entry
-    drop_keyring_service
+    teardown_keyring_entry
 }
 
 @test "open data store with no keyring service set in environment on osx fails" {
     # Run this test only on osx
-    if [[ $platform != 'Darwin' ]]; then
+    if [[ $(uname) != 'Darwin' ]]; then
         skip "test should only be performed on osx"
     fi
 
@@ -42,7 +41,7 @@ load test_helpers
 
 @test "open data store with non existing keyring service set in environment on osx fails" {
     # Run this test only on osx
-    if [[ $platform != 'Darwin' ]]; then
+    if [[ $(uname) != 'Darwin' ]]; then
         skip "test should only be performed on osx"
     fi
 
