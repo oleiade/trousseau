@@ -45,7 +45,7 @@ unit:
 # to bats eecutable via 'env BATS_BIN=myexec make integration'
 integration: all
 ifdef BATS_BIN
-	@(${BATS_BIN} $(INTEGRATION_TEST_DIR))
+	@(${BATS_BIN} -t $(INTEGRATION_TEST_DIR))
 else
 	@(echo "bats was not found on your PATH. Unable to run integration tests.")
 endif
