@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load test_helpers
+load helpers
 
 @test "list keys of an empty store succeeds" {
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE keys

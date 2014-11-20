@@ -1,6 +1,6 @@
 #!/usr/bin/env/bats
 
-load test_helpers
+load helpers
 
 
 @test "open data store with proper keyring service being set on osx succeeds" {

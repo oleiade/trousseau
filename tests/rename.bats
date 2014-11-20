@@ -1,6 +1,6 @@
 #!/usr/bin/env/bats
 
-load test_helpers
+load helpers
 
 @test "rename existing source key to non existing destination key succeeds" {
     run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE set abc 123

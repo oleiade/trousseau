@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load test_helpers
+load helpers
 
 @test "Opening store with passphrase set in environment succeeds" {
     # Remove it if it exists

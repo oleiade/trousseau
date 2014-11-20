@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 
-load test_helpers
+load helpers
 
 
 @test "create store with one valid recipient succeeds" {

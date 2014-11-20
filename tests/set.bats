@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load test_helpers
+load helpers
 
 
 # This file will be automatically collected at teardown

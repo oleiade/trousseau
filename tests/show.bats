@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load test_helpers
+load helpers
 
 
 @test "show values of an empty store succeeds" {
