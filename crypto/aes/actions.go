@@ -4,7 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"errors"
 	"io"
 )
 
@@ -14,14 +13,16 @@ func EncryptAES256(k AES256Key, plainData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ciphertext := make([]byte, aes.BlockSize+len(plainData))
-	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+	a, err := cipher.NewGCM(block)
+	if err != nil {
 		return nil, err
 	}
-	stream := cipher.NewCFBEncrypter(block, iv)
-	stream.XORKeyStream(ciphertext[aes.BlockSize:], plainData)
-	ciphertext = prependSalt(k.salt, ciphertext)
+	nonce := make([]byte, a.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return nil, err
+	}
+	ciphertext := a.Seal(nil, nonce, plainData, nil)
+	ciphertext = prependSalt(k.salt, prependSalt(nonce, ciphertext))
 	return ciphertext, nil
 }
 
@@ -31,14 +32,17 @@ func DecryptAES256(k AES256Key, ciphertext []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(ciphertext) < aes.BlockSize {
-		return nil, errors.New("Ciphertext too short")
+	a, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
 	}
-	iv := ciphertext[:aes.BlockSize]
-	ciphertext = ciphertext[aes.BlockSize:]
-	stream := cipher.NewCFBDecrypter(block, iv)
-	stream.XORKeyStream(ciphertext, ciphertext)
-	return ciphertext, nil
+	nonce := ciphertext[:a.NonceSize()]
+	ct := ciphertext[a.NonceSize():]
+	pt, err := a.Open(nil, nonce, ct, nil)
+	if err != nil {
+		return nil, err
+	}
+	return pt, nil
 }
 
 func Decrypt(passphrase string, msg []byte) ([]byte, error) {
