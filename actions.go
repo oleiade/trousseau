@@ -529,9 +529,11 @@ func UpgradeAction(yes, noBackup bool) error {
 		fmt.Printf("You are about to upgrade trousseau data "+
 			"store %s (version %s) up to version %s. Proceed? [Y/n] ",
 			InferStorePath(), version, TROUSSEAU_VERSION)
-		_, err = fmt.Scanf("%s", &proceed)
-		if err != nil {
-			return err
+		count, _ := fmt.Scanf("%s", &proceed)
+
+		// Default to "y" if return was pressed
+		if count == 0 {
+			proceed = "y"
 		}
 	}
 
