@@ -408,7 +408,7 @@ func SetCommand() cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "file, f",
-				Usage: "Write key's value to provided file",
+				Usage: "Read key's value from provided file",
 			},
 		},
 	}
@@ -433,7 +433,7 @@ func GetCommand() cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "file, f",
-				Usage: "Read key's value from provided file",
+				Usage: "Write key's value to provided file",
 			},
 		},
 	}
