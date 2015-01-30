@@ -26,7 +26,7 @@ setup() {
 	export TROUSSEAU_PASSPHRASE=$TEMP_ENCRYPTION_PASSPHRASE
 
 	# Create temporary trousseau data stores for test purpose
-	$TROUSSEAU_BIN --store $TEMP_AES_STORE create --encryption-type 'symmetric'
+	$TROUSSEAU_BIN --store $TEMP_AES_STORE create --encryption-type 'symmetric' > /dev/null
 }
 
 teardown() {
