@@ -40,12 +40,12 @@ unit:
 	@(go list ./... | xargs -n1 godep go test)
 
 # Running integration depends on bats test framework
-# https://github.com/sstephenson/bats
+# https://github.com/oleiade/bats
 # Make sure to set $BATS_BIN variable to point
 # to bats eecutable via 'env BATS_BIN=myexec make integration'
 integration: all
 ifdef BATS_BIN
-	@(${BATS_BIN} -t $(INTEGRATION_TEST_DIR))
+	@(for testfile in $(INTEGRATION_TEST_DIR)/*.bats; do if ! ${BATS_BIN} -t $$testfile; then exit 1; fi; done)
 else
 	@(echo "bats was not found on your PATH. Unable to run integration tests.")
 endif
