@@ -56,6 +56,51 @@ TEMP_GNUPG_KEY_B_KEY_EMAIL="theo@trousseau.io"
 TEMP_ENCRYPTION_PASSPHRASE="trousseau"
 
 
+# Defines the test keyring entry name to be used
+TEMP_KEYRING_ENTRY_NAME="trousseau_test"
+
+
+# polite_sudo exposes a verbose and explicit sudo command
+# so any test who might need to ask for sudo password
+# would be more user-friendly.
+polite_sudo() {
+    sudo -p "Bats testing framework requires sudo access to setup the test key passphrase in keychain. Password: " "$@"
+}
+
+
+# setup_keyring_entry will create an entry for the trousseau test keys
+# passphrase in the system keyring:
+#   - OSX: entry will be created in the system keychain
+#   - Linux: entry will whether be created in the gnome-keychain
+#     or in your SecretService provider, according to your setup
+setup_keyring_entry() {
+    platform=$(uname)
+
+    if [[ $platform == 'Linux' ]]; then
+        platform='linux'
+    elif [[ $platform == 'Darwin' ]]; then
+        polite_sudo security add-generic-password -a "${USER}" -s "${TEMP_KEYRING_ENTRY_NAME}" -w "${TEMP_ENCRYPTION_PASSPHRASE}" >&2
+    elif [[ $platform == 'FreeBSD' ]]; then
+        platform='freebsd'
+    fi
+}
+
+
+# teardown_keyring_entry will remove the trousseau test keys passphrase
+# entry from your system keyring.
+teardown_keyring_entry() {
+    platform=$(uname)
+
+    if [[ $platform == 'Linux' ]]; then
+        platform='linux'
+    elif [[ $platform == 'Darwin' ]]; then
+        polite_sudo security delete-generic-password -a "${USER}" -s "${TEMP_KEYRING_ENTRY_NAME}" >&2
+    elif [[ $platform == 'FreeBSD' ]]; then
+        platform='freebsd'
+    fi
+}
+
+
 setup() {
 	mkdir $TROUSSEAU_TESTS_DIR
 

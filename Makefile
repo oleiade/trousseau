@@ -16,8 +16,15 @@ TROUSSEAU_BIN = $(BIN_DIR)/trousseau
 BATS_BIN := $(shell which bats 2>/dev/null)
 GOXC_BIN := $(shell which goxc 2>/dev/null)
 
-# Tests resources
+# Integration tests resources
 INTEGRATION_TEST_DIR := $(ROOT_DIR)/tests
+INTEGRATION_TEST_FILES := $(wildcard $(INTEGRATION_TEST_DIR)/*.bats)
+
+# As auth.bats tests require sudo access, don't trigger it
+# in CI environment
+ifndef CI
+	INTEGRATION_TEST_FILES := $(filter-out $(INTEGRATION_TEST_DIR)/auth.bats, $(INTEGRATION_TEST_FILES))
+endif
 
 # Actions
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
@@ -45,7 +52,7 @@ unit:
 # to bats eecutable via 'env BATS_BIN=myexec make integration'
 integration: all
 ifdef BATS_BIN
-	@(for testfile in $(INTEGRATION_TEST_DIR)/*.bats; do if ! ${BATS_BIN} -t $$testfile; then exit 1; fi; done)
+	@(for testfile in $(INTEGRATION_TEST_FILES); do if ! ${BATS_BIN} -t $$testfile; then exit 1; fi; done)
 else
 	@(echo "bats was not found on your PATH. Unable to run integration tests.")
 endif
