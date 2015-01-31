@@ -70,7 +70,7 @@ setup() {
 
 	# Create temporary trousseau data stores for test purpose
 	$TROUSSEAU_BIN --store $TEMP_AES_STORE create --encryption-type 'symmetric' > /dev/null
-	$TROUSSEAU_BIN --store $TEMP_GPG_STORE --gnupg-home $TEMP_GNUPG_HOME create $TEMP_GNUPG_KEY_A_KEY_EMAIL > /dev/null
+	$TROUSSEAU_BIN --store $TEMP_GPG_STORE --gnupg-home $TEMP_GNUPG_HOME create $TEMP_GNUPG_KEY_A_KEY_ID > /dev/null
 }
 
 
