@@ -33,6 +33,11 @@ _trousseau() {
           keys=("${(@f)$(trousseau keys)}")
           compadd -a "$@" -- keys
         ;;
+        (remove-recipient)
+          # Retrieve autocomplete list from "list-recipients"
+          keys=("${(@f)$(trousseau list-recipients)}")
+          compadd -a "$@" -- keys
+        ;;
         *)
           # Fallback to standard filename completion
           compadd - *
@@ -47,4 +52,3 @@ _trousseau() {
 }
 
 _trousseau "$@"
-
