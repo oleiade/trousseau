@@ -24,11 +24,11 @@ _trousseau() {
   case $state in
     trousseaucmd)
       # List of available commands
-      compadd -Q create push pull export import add-recipient remove-recipient set get rename del keys show meta help
+      compadd -Q create push pull export import add-recipient remove-recipient list-recipients set get del keys show meta help upgrade
     ;;
     trousseausubcmd)
       case $words[2] in
-        (get|set|del)
+        (get|set|del|export)
           # Retrieve get/set autocomplete from "trousseau keys"
           keys=("${(@f)$(trousseau keys)}")
           compadd -a "$@" -- keys
