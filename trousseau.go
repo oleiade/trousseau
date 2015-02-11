@@ -124,15 +124,22 @@ func (t *Trousseau) Encrypt(store *Store) error {
 			return err
 		}
 	case AES_256_ENCRYPTION:
-		plainData, err := json.Marshal(*store)
+		pd, err := json.Marshal(*store)
 		if err != nil {
 			return err
 		}
+
 		passphrase, err := GetPassphrase()
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
-		t.Data, err = aes.Encrypt(passphrase, plainData)
+
+		d, err := aes.NewAES256Encrypter(passphrase, nil)
+		if err != nil {
+			return err
+		}
+
+		t.Data, err = d.Encrypt(pd)
 		if err != nil {
 			return err
 		}
