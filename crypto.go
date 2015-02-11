@@ -34,19 +34,23 @@ var GnupgPubring func() string = func() string { return path.Join(GnupgHome, "pu
 var GnupgSecring func() string = func() string { return path.Join(GnupgHome, "secring.gpg") }
 
 // DecryptAsymmetricPGP decrypts an OpenPGP message using GnuPG.
-func DecryptAsymmetricPGP(encryptedData []byte, passphrase string) ([]byte, error) {
+func DecryptAsymmetricPGP(ed []byte, passphrase string) ([]byte, error) {
+	d, err := openpgp.NewOpenPGPDecrypter(GnupgSecring(), passphrase)
+	if err != nil {
+		return nil, err
+	}
 	// Decrypt store data
 	decryptionKeys, err := openpgp.ReadSecRing(GnupgSecring())
 	if err != nil {
 		return nil, err
 	}
 
-	plainData, err := openpgp.Decrypt(encryptedData, decryptionKeys, passphrase)
+	pd, err := d.Decrypt(ed)
 	if err != nil {
 		return nil, err
 	}
 
-	return plainData, nil
+	return pd, nil
 }
 
 func EncryptAsymmetricPGP(plainData []byte, recipients []string) ([]byte, error) {
