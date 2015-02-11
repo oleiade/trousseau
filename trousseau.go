@@ -92,11 +92,14 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
-		plainData, err := aes.Decrypt(passphrase, t.Data)
+
+		d := aes.NewAES256Decrypter(passphrase)
+		pd, err := d.Decrypt(t.Data)
 		if err != nil {
 			return nil, err
 		}
-		err = json.Unmarshal(plainData, &store)
+
+		err = json.Unmarshal(pd, &store)
 		if err != nil {
 			return nil, err
 		}
