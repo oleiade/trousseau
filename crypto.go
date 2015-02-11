@@ -53,13 +53,13 @@ func DecryptAsymmetricPGP(ed []byte, passphrase string) ([]byte, error) {
 	return pd, nil
 }
 
-func EncryptAsymmetricPGP(plainData []byte, recipients []string) ([]byte, error) {
-	encryptionKeys, err := openpgp.ReadPubRing(GnupgPubring(), recipients)
+func EncryptAsymmetricPGP(pd []byte, recipients []string) ([]byte, error) {
+	e, err := openpgp.NewOpenPGPEncrypter(GnupgPubring(), recipients)
 	if err != nil {
 		return nil, err
 	}
 
-	encData, err := openpgp.Encrypt(plainData, encryptionKeys)
+	ed, err := e.Encrypt(pd)
 	if err != nil {
 		return nil, err
 	}
