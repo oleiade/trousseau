@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/oleiade/serrure/aes"
+	"github.com/oleiade/serrure/openpgp"
 )
 
 type Trousseau struct {
@@ -78,12 +79,18 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
-		plainData, err := DecryptAsymmetricPGP(t.Data, passphrase)
+
+		d, err := openpgp.NewOpenPGPDecrypter(GnupgSecring(), passphrase)
 		if err != nil {
 			return nil, err
 		}
 
-		err = json.Unmarshal(plainData, &store)
+		pd, err := d.Decrypt(t.Data)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(pd, &store)
 		if err != nil {
 			return nil, err
 		}
@@ -114,12 +121,17 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 func (t *Trousseau) Encrypt(store *Store) error {
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
-		plainData, err := json.Marshal(*store)
+		pd, err := json.Marshal(*store)
 		if err != nil {
 			return err
 		}
 
-		t.Data, err = EncryptAsymmetricPGP(plainData, store.Meta.Recipients)
+		e, err := openpgp.NewOpenPGPEncrypter(GnupgPubring(), store.Meta.Recipients)
+		if err != nil {
+			return err
+		}
+
+		t.Data, err = e.Encrypt(pd)
 		if err != nil {
 			return err
 		}
