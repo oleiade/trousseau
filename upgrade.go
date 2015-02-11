@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/oleiade/trousseau/crypto/openpgp"
+	"github.com/oleiade/serrure/openpgp"
 )
 
 type VersionMatcher func([]byte) bool

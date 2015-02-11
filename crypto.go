@@ -1,7 +1,7 @@
 package trousseau
 
 import (
-	"github.com/oleiade/trousseau/crypto/openpgp"
+	"github.com/oleiade/serrure/openpgp"
 	"os"
 	"path"
 )

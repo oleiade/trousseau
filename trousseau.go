@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/oleiade/trousseau/crypto/aes"
+	"github.com/oleiade/serrure/aes"
 )
 
 type Trousseau struct {
