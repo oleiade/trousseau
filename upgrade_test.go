@@ -2,7 +2,7 @@ package trousseau
 
 import (
 	"encoding/json"
-	"github.com/oleiade/trousseau/crypto/openpgp"
+	"github.com/oleiade/serrure/openpgp"
 	"testing"
 )
 
