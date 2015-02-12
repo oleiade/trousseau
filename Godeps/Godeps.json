@@ -76,6 +76,10 @@
 			"Rev": "c97358d3b0f2df246afedabacbad24fad4e3246e"
 		},
 		{
+			"ImportPath": "github.com/guelfey/go.dbus",
+			"Rev": "f6a3a2366cc39b8479cadc499d3c735fb10fbdda"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/cast5",
 			"Rev": "88b65fb66346493d43e735adad931bf69dee4297"
 		},
