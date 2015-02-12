@@ -2,14 +2,15 @@ package s3_test
 
 import (
 	"bytes"
-	"github.com/crowdmob/goamz/aws"
-	"github.com/crowdmob/goamz/s3"
-	"github.com/crowdmob/goamz/testutil"
-	"gopkg.in/check.v1"
 	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/crowdmob/goamz/aws"
+	"github.com/crowdmob/goamz/s3"
+	"github.com/crowdmob/goamz/testutil"
+	"gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) {
@@ -62,6 +63,29 @@ func (s *S) TestPutBucket(c *check.C) {
 	req := testServer.WaitRequest()
 	c.Assert(req.Method, check.Equals, "PUT")
 	c.Assert(req.URL.Path, check.Equals, "/bucket/")
+	c.Assert(req.Header["Date"], check.Not(check.Equals), "")
+}
+
+// PutBucketWebsite docs: http://goo.gl/TpRlUy
+
+func (s *S) TestPutBucketWebsite(c *check.C) {
+	testServer.Response(200, nil, "")
+
+	b := s.s3.Bucket("bucket")
+	config := s3.WebsiteConfiguration{
+		RedirectAllRequestsTo: &s3.RedirectAllRequestsTo{HostName: "example.com"},
+	}
+	err := b.PutBucketWebsite(config)
+	c.Assert(err, check.IsNil)
+
+	req := testServer.WaitRequest()
+	body, err := ioutil.ReadAll(req.Body)
+	req.Body.Close()
+	c.Assert(err, check.IsNil)
+	c.Assert(string(body), check.Equals, BucketWebsiteConfigurationDump)
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/bucket/")
+	c.Assert(req.URL.RawQuery, check.Equals, "website=")
 	c.Assert(req.Header["Date"], check.Not(check.Equals), "")
 }
 
@@ -189,9 +213,10 @@ func (s *S) TestGetNotFound(c *check.C) {
 
 func (s *S) TestPutObject(c *check.C) {
 	testServer.Response(200, nil, "")
+	const DISPOSITION = "attachment; filename=\"0x1a2b3c.jpg\""
 
 	b := s.s3.Bucket("bucket")
-	err := b.Put("name", []byte("content"), "content-type", s3.Private, s3.Options{})
+	err := b.Put("name", []byte("content"), "content-type", s3.Private, s3.Options{ContentDisposition: DISPOSITION})
 	c.Assert(err, check.IsNil)
 
 	req := testServer.WaitRequest()
@@ -200,6 +225,7 @@ func (s *S) TestPutObject(c *check.C) {
 	c.Assert(req.Header["Date"], check.Not(check.DeepEquals), []string{""})
 	c.Assert(req.Header["Content-Type"], check.DeepEquals, []string{"content-type"})
 	c.Assert(req.Header["Content-Length"], check.DeepEquals, []string{"7"})
+	c.Assert(req.Header["Content-Disposition"], check.DeepEquals, []string{DISPOSITION})
 	//c.Assert(req.Header["Content-MD5"], gocheck.DeepEquals, "...")
 	c.Assert(req.Header["X-Amz-Acl"], check.DeepEquals, []string{"private"})
 }

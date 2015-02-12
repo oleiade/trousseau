@@ -29,6 +29,8 @@ type RepositoryRelease struct {
 	AssetsURL       *string        `json:"assets_url,omitempty"`
 	Assets          []ReleaseAsset `json:"assets,omitempty"`
 	UploadURL       *string        `json:"upload_url,omitempty"`
+	ZipballURL      *string        `json:"zipball_url,omitempty"`
+	TarballURL      *string        `json:"tarball_url,omitempty"`
 }
 
 func (r RepositoryRelease) String() string {
@@ -47,7 +49,7 @@ type ReleaseAsset struct {
 	DownloadCount      *int       `json:"download_count,omitempty"`
 	CreatedAt          *Timestamp `json:"created_at,omitempty"`
 	UpdatedAt          *Timestamp `json:"updated_at,omitempty"`
-	BrowserDownloadUrl *string    `json:"browser_download_url,omitempty"`
+	BrowserDownloadURL *string    `json:"browser_download_url,omitempty"`
 	Uploader           *User      `json:"uploader,omitempty"`
 }
 

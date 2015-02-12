@@ -59,6 +59,7 @@ type Region struct {
 	SDBEndpoint            string
 	SNSEndpoint            string
 	SQSEndpoint            string
+	SESEndpoint            string
 	IAMEndpoint            string
 	ELBEndpoint            string
 	DynamoDBEndpoint       string
@@ -68,12 +69,14 @@ type Region struct {
 	KinesisEndpoint        string
 	STSEndpoint            string
 	CloudFormationEndpoint string
+	ElastiCacheEndpoint    string
 }
 
 var Regions = map[string]Region{
 	APNortheast.Name:  APNortheast,
 	APSoutheast.Name:  APSoutheast,
 	APSoutheast2.Name: APSoutheast2,
+	EUCentral.Name:    EUCentral,
 	EUWest.Name:       EUWest,
 	USEast.Name:       USEast,
 	USWest.Name:       USWest,
@@ -166,6 +169,11 @@ func (s *Service) BuildError(r *http.Response) error {
 	return &err
 }
 
+type ServiceError interface {
+	error
+	ErrorCode() string
+}
+
 type ErrorResponse struct {
 	Errors    Error  `xml:"Error"`
 	RequestId string // A unique ID for tracking the request
@@ -183,6 +191,10 @@ func (err *Error) Error() string {
 	return fmt.Sprintf("Type: %s, Code: %s, Message: %s",
 		err.Type, err.Code, err.Message,
 	)
+}
+
+func (err *Error) ErrorCode() string {
+	return err.Code
 }
 
 type Auth struct {
@@ -506,7 +518,7 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, time.Duration(2*time.Second))
 }
 
-func InstanceRegion() string {
+func AvailabilityZone() string {
 	transport := http.Transport{Dial: dialTimeout}
 	client := http.Client{
 		Transport: &transport,
@@ -520,10 +532,18 @@ func InstanceRegion() string {
 		if err != nil {
 			return "unknown"
 		} else {
-			b := string(body)
-			region := b[:len(b)-1]
-			return region
+			return string(body)
 		}
+	}
+}
+
+func InstanceRegion() string {
+	az := AvailabilityZone()
+	if az == "unknown" {
+		return az
+	} else {
+		region := az[:len(az)-1]
+		return region
 	}
 }
 

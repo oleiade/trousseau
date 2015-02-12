@@ -156,6 +156,42 @@ func (s *S) TestPutPart(c *check.C) {
 	c.Assert(req.Header["Content-Md5"], check.DeepEquals, []string{"JvkO/RDWFPEAJS/1bYja2A=="})
 }
 
+func (s *S) TestPutPartCopy(c *check.C) {
+	testServer.Response(200, nil, InitMultiResultDump)
+	// PutPartCopy makes a Head request internally to verify access to the source object
+	// and obtain its size
+	testServer.Response(200, nil, "content")
+	testServer.Response(200, nil, PutCopyResultDump)
+
+	b := s.s3.Bucket("sample")
+
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
+
+	res, part, err := multi.PutPartCopy(1, s3.CopyOptions{}, "source-bucket/\u00FCber-fil\u00E9.jpg")
+	c.Assert(err, check.IsNil)
+	c.Assert(part.N, check.Equals, 1)
+	c.Assert(part.Size, check.Equals, int64(7))
+	c.Assert(res, check.DeepEquals, &s3.CopyObjectResult{
+		ETag:         `"9b2cf535f27731c974343645a3985328"`,
+		LastModified: `2009-10-28T22:32:00`})
+
+	// Verify the Head request
+	req := testServer.WaitRequest()
+	c.Assert(req.Method, check.Equals, "POST")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Header["Date"], check.Not(check.Equals), "")
+	c.Assert(err, check.IsNil)
+
+	testServer.WaitRequest()
+	req = testServer.WaitRequest()
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form.Get("uploadId"), check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(req.Form["partNumber"], check.DeepEquals, []string{"1"})
+	c.Assert(req.Header["X-Amz-Copy-Source"], check.DeepEquals, []string{`source-bucket%2F%C3%BCber-fil%C3%A9.jpg`})
+}
+
 func readAll(r io.Reader) string {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {

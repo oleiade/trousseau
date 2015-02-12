@@ -86,6 +86,51 @@ func (s *V4SignerSuite) SetUpSuite(c *check.C) {
 			authorization:    "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/host/aws4_request, SignedHeaders=date;host;p, Signature=debf546796015d6f6ded8626f5ce98597c33b47b9164cf6b17b4642036fcb592",
 		},
 
+		// get-empty
+		V4SignerSuiteCase{
+			label: "get-relative-relative",
+			request: V4SignerSuiteCaseRequest{
+				method:  "GET",
+				host:    "host.foo.com",
+				url:     "",
+				headers: []string{"Date:Mon, 09 Sep 2011 23:36:00 GMT"},
+			},
+			canonicalRequest: "GET\n/\n\ndate:Mon, 09 Sep 2011 23:36:00 GMT\nhost:host.foo.com\n\ndate;host\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			stringToSign:     "AWS4-HMAC-SHA256\n20110909T233600Z\n20110909/us-east-1/host/aws4_request\n366b91fb121d72a00f46bbe8d395f53a102b06dfb7e79636515208ed3fa606b1",
+			signature:        "b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+			authorization:    "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/host/aws4_request, SignedHeaders=date;host, Signature=b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+		},
+
+		// get-single-relative
+		V4SignerSuiteCase{
+			label: "get-relative-relative",
+			request: V4SignerSuiteCaseRequest{
+				method:  "GET",
+				host:    "host.foo.com",
+				url:     "/.",
+				headers: []string{"Date:Mon, 09 Sep 2011 23:36:00 GMT"},
+			},
+			canonicalRequest: "GET\n/\n\ndate:Mon, 09 Sep 2011 23:36:00 GMT\nhost:host.foo.com\n\ndate;host\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			stringToSign:     "AWS4-HMAC-SHA256\n20110909T233600Z\n20110909/us-east-1/host/aws4_request\n366b91fb121d72a00f46bbe8d395f53a102b06dfb7e79636515208ed3fa606b1",
+			signature:        "b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+			authorization:    "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/host/aws4_request, SignedHeaders=date;host, Signature=b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+		},
+
+		// get-multiple-relative
+		V4SignerSuiteCase{
+			label: "get-relative-relative",
+			request: V4SignerSuiteCaseRequest{
+				method:  "GET",
+				host:    "host.foo.com",
+				url:     "/./././",
+				headers: []string{"Date:Mon, 09 Sep 2011 23:36:00 GMT"},
+			},
+			canonicalRequest: "GET\n/\n\ndate:Mon, 09 Sep 2011 23:36:00 GMT\nhost:host.foo.com\n\ndate;host\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			stringToSign:     "AWS4-HMAC-SHA256\n20110909T233600Z\n20110909/us-east-1/host/aws4_request\n366b91fb121d72a00f46bbe8d395f53a102b06dfb7e79636515208ed3fa606b1",
+			signature:        "b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+			authorization:    "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/host/aws4_request, SignedHeaders=date;host, Signature=b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+		},
+
 		// get-relative-relative
 		V4SignerSuiteCase{
 			label: "get-relative-relative",
