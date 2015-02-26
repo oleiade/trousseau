@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/oleiade/serrure/aes"
 	"github.com/oleiade/serrure/openpgp"
+	"github.com/oleiade/serrure/symmetric"
 )
 
 type Trousseau struct {
@@ -100,7 +100,7 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 			ErrorLogger.Fatal(err)
 		}
 
-		d := aes.NewAES256Decrypter(passphrase)
+		d := symmetric.NewSymmetricDecrypter(passphrase)
 		pd, err := d.Decrypt(t.Data)
 		if err != nil {
 			return nil, err
@@ -146,7 +146,7 @@ func (t *Trousseau) Encrypt(store *Store) error {
 			ErrorLogger.Fatal(err)
 		}
 
-		d, err := aes.NewAES256Encrypter(passphrase, nil)
+		d, err := symmetric.NewSymmetricEncrypter(passphrase, nil)
 		if err != nil {
 			return err
 		}
