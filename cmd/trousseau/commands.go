@@ -26,9 +26,23 @@ func CreateCommand() cli.Command {
 			"     $ export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
 		Action: func(c *cli.Context) {
 			var encryptionType string = c.String("encryption-type")
+			var encryptionAlgorithm string = c.String("encryption-algorithm")
 
 			if encryptionType == trousseau.SYMMETRIC_ENCRYPTION_REPR {
-				err := trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, trousseau.AES_256_ENCRYPTION, nil)
+				var encAlgo trousseau.CryptoAlgorithm
+
+				switch encryptionAlgorithm {
+				case trousseau.AES_256_ENCRYPTION_REPR:
+					encAlgo = trousseau.AES_256_ENCRYPTION
+				case trousseau.AES_256_GCM_ENCRYPTION_REPR:
+					encAlgo = trousseau.AES_256_GCM_ENCRYPTION
+				case trousseau.TWOFISH_256_GCM_ENCRYPTION_REPR:
+					encAlgo = trousseau.TWOFISH_256_GCM_ENCRYPTION
+				default:
+					encAlgo = trousseau.AES_256_ENCRYPTION
+				}
+
+				err := trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, encAlgo, nil)
 				if err != nil {
 					trousseau.ErrorLogger.Fatal(err)
 				}

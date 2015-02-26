@@ -94,13 +94,14 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 		if err != nil {
 			return nil, err
 		}
-	case AES_256_ENCRYPTION:
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION, TWOFISH_256_GCM_ENCRYPTION:
 		passphrase, err := GetPassphrase()
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
 
 		d := symmetric.NewSymmetricDecrypter(passphrase)
+		d.SetAlgo(int(t.CryptoAlgorithm))
 		pd, err := d.Decrypt(t.Data)
 		if err != nil {
 			return nil, err
@@ -135,7 +136,7 @@ func (t *Trousseau) Encrypt(store *Store) error {
 		if err != nil {
 			return err
 		}
-	case AES_256_ENCRYPTION:
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION, TWOFISH_256_GCM_ENCRYPTION:
 		pd, err := json.Marshal(*store)
 		if err != nil {
 			return err
@@ -150,6 +151,7 @@ func (t *Trousseau) Encrypt(store *Store) error {
 		if err != nil {
 			return err
 		}
+		d.SetAlgo(int(t.CryptoAlgorithm))
 
 		t.Data, err = d.Encrypt(pd)
 		if err != nil {

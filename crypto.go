@@ -20,11 +20,15 @@ const (
 type CryptoAlgorithm int
 
 const (
-	GPG_ENCRYPTION     CryptoAlgorithm = 0
-	AES_256_ENCRYPTION CryptoAlgorithm = 1
+	GPG_ENCRYPTION             CryptoAlgorithm = 0
+	AES_256_ENCRYPTION         CryptoAlgorithm = 1
+	AES_256_GCM_ENCRYPTION     CryptoAlgorithm = 2
+	TWOFISH_256_GCM_ENCRYPTION CryptoAlgorithm = 3
 
-	GPG_ENCRYPTION_REPR     string = "gpg"
-	AES_256_ENCRYPTION_REPR string = "aes256"
+	GPG_ENCRYPTION_REPR             string = "gpg"
+	AES_256_ENCRYPTION_REPR         string = "aes256"
+	AES_256_GCM_ENCRYPTION_REPR     string = "aes256gcm"
+	TWOFISH_256_GCM_ENCRYPTION_REPR string = "twofish256gcm"
 )
 
 // Gnupg variables
