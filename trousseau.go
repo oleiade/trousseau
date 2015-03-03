@@ -2,6 +2,7 @@ package trousseau
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -68,6 +69,44 @@ func FromBytes(d []byte) (*Trousseau, error) {
 	}
 
 	return trousseau, err
+}
+
+func (t *Trousseau) ChangeKey() error {
+	switch t.CryptoAlgorithm {
+	case GPG_ENCRYPTION:
+		return errors.New("You cannot change the key for GPG Encryption")
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION, TWOFISH_256_GCM_ENCRYPTION:
+		store, err := t.Decrypt()
+		if err != nil {
+			return err
+		}
+		var newPassphrase string
+		flag := true
+		for flag {
+			count := 0
+			newPassphrase = PromptForHiddenInput("Enter new passphrase: ")
+			confirmPassphrase := PromptForHiddenInput("Confirm new passphrase: ")
+			if newPassphrase == confirmPassphrase {
+				flag = false
+			}
+			if newPassphrase == "" {
+				if count > 2 {
+					return errors.New("Blank passphrase not allowed")
+				}
+				fmt.Println("Blank passphrase not allowed. Please try again")
+				count++
+			}
+
+		}
+		SetPassphrase(newPassphrase)
+
+		err = t.Encrypt(store)
+		if err != nil {
+			return err
+		}
+	}
+	//now write the store
+	return nil
 }
 
 func (t *Trousseau) Decrypt() (*Store, error) {

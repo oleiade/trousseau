@@ -10,6 +10,20 @@ import (
 	"github.com/oleiade/trousseau"
 )
 
+func ChangeKeyCommand() cli.Command {
+	return cli.Command{
+		Name:        "change-key",
+		Usage:       "Change the key for an encrypted data store",
+		Description: "FIXME",
+		Action: func(c *cli.Context) {
+			err := trousseau.ChangeKeyAction()
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
+		},
+	}
+}
+
 func CreateCommand() cli.Command {
 	return cli.Command{
 		Name:  "create",
