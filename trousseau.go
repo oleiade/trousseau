@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	aesenc "github.com/oleiade/serrure/aes"
 	"github.com/oleiade/serrure/openpgp"
-	"github.com/oleiade/serrure/symmetric"
 )
 
 type Trousseau struct {
@@ -75,7 +75,7 @@ func (t *Trousseau) ChangeKey() error {
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
 		return errors.New("You cannot change the key for GPG Encryption")
-	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION, TWOFISH_256_GCM_ENCRYPTION:
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION:
 		store, err := t.Decrypt()
 		if err != nil {
 			return err
@@ -133,14 +133,16 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 		if err != nil {
 			return nil, err
 		}
-	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION, TWOFISH_256_GCM_ENCRYPTION:
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION:
 		passphrase, err := GetPassphrase()
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
 
-		d := symmetric.NewSymmetricDecrypter(passphrase)
-		d.SetAlgo(int(t.CryptoAlgorithm))
+		d := aesenc.NewAES256Decrypter(passphrase)
+		if t.CryptoAlgorithm == AES_256_ENCRYPTION {
+			d.SetMode(1)
+		}
 		pd, err := d.Decrypt(t.Data)
 		if err != nil {
 			return nil, err
@@ -175,7 +177,7 @@ func (t *Trousseau) Encrypt(store *Store) error {
 		if err != nil {
 			return err
 		}
-	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION, TWOFISH_256_GCM_ENCRYPTION:
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION:
 		pd, err := json.Marshal(*store)
 		if err != nil {
 			return err
@@ -186,11 +188,13 @@ func (t *Trousseau) Encrypt(store *Store) error {
 			ErrorLogger.Fatal(err)
 		}
 
-		d, err := symmetric.NewSymmetricEncrypter(passphrase, nil)
+		d, err := aesenc.NewAES256Encrypter(passphrase, nil)
 		if err != nil {
 			return err
 		}
-		d.SetAlgo(int(t.CryptoAlgorithm))
+		if t.CryptoAlgorithm == AES_256_ENCRYPTION {
+			d.SetMode(1)
+		}
 
 		t.Data, err = d.Encrypt(pd)
 		if err != nil {

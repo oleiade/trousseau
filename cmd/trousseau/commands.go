@@ -50,8 +50,6 @@ func CreateCommand() cli.Command {
 					encAlgo = trousseau.AES_256_ENCRYPTION
 				case trousseau.AES_256_GCM_ENCRYPTION_REPR:
 					encAlgo = trousseau.AES_256_GCM_ENCRYPTION
-				case trousseau.TWOFISH_256_GCM_ENCRYPTION_REPR:
-					encAlgo = trousseau.TWOFISH_256_GCM_ENCRYPTION
 				default:
 					encAlgo = trousseau.AES_256_ENCRYPTION
 				}
