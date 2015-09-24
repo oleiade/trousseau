@@ -123,7 +123,7 @@ $ trousseau get abc
 Ultimately, you can pass you gpg passphrase through the command line global option:
 
 ```bash
-$ trousseau --passhphrase mysupperdupperpassphrase get abc
+$ trousseau --passphrase mysupperdupperpassphrase get abc
 ```
 
 #### Environment
