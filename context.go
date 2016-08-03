@@ -3,6 +3,7 @@ package trousseau
 import (
 	"os"
 	"path/filepath"
+
 	"github.com/tmc/keyring"
 )
 
@@ -21,8 +22,11 @@ var (
 
 // Global data store file path
 var gStorePath string
+var gPassphrase string
+
 func SetStorePath(storePath string) { gStorePath = storePath }
 func GetStorePath() string          { return gStorePath }
+func SetPassphrase(p string)        { gPassphrase = p }
 
 func InferStorePath() string {
 	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
@@ -37,6 +41,10 @@ func InferStorePath() string {
 	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
 }
 
+func AskPassphrase() {
+	SetPassphrase(PromptForPassword())
+}
+
 // GetPassphrase attemps to retrieve the user's gpg master
 // key passphrase using multiple methods. First it will attempt
 // to retrieve it from the environment, then it will try to fetch
@@ -44,6 +52,10 @@ func InferStorePath() string {
 // to get it from a running gpg-agent daemon.
 func GetPassphrase() (passphrase string) {
 	var err error
+
+	if gPassphrase != "" {
+		return gPassphrase
+	}
 
 	// try to retrieve passphrase from env
 	passphrase = os.Getenv(ENV_PASSPHRASE_KEY)
