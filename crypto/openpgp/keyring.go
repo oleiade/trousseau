@@ -1,7 +1,7 @@
 package openpgp
 
 import (
-	"code.google.com/p/go.crypto/openpgp"
+	"golang.org/x/crypto/openpgp"
 	"fmt"
 	"os"
 	"strings"
