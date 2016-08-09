@@ -2,7 +2,7 @@ package ssh
 
 import (
 	"bytes"
-	"code.google.com/p/gosshold/ssh"
+	"golang.org/x/crypto/ssh"
 	"crypto"
 	"crypto/dsa"
 	"crypto/rsa"
