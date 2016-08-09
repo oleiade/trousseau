@@ -1,7 +1,7 @@
 package gist
 
 import (
-	"code.google.com/p/goauth2/oauth"
+	"golang.org/x/oauth2"
 	"github.com/google/go-github/github"
 	"io/ioutil"
 )
