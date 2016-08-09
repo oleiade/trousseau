@@ -2,11 +2,10 @@ package trousseau
 
 import (
 	"fmt"
+
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
-	"github.com/oleiade/trousseau/remote/gist"
 	"github.com/oleiade/trousseau/remote/s3"
-	"github.com/oleiade/trousseau/remote/ssh"
 )
 
 // uploadUsingS3 executes the whole process of pushing
@@ -37,39 +36,39 @@ func UploadUsingS3(dsn *dsn.Dsn) error {
 // uploadUsingScp executes the whole process of pushing
 // the trousseau data store file to scp remote storage
 // using the provided environment.
-func UploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
-	keychain := new(ssh.Keychain)
-	keychain.AddPEMKey(privateKey)
+// func UploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
+// 	keychain := new(ssh.Keychain)
+// 	keychain.AddPEMKey(privateKey)
 
-	scpStorage := ssh.NewScpStorage(dsn.Host,
-		dsn.Port,
-		dsn.Id,
-		dsn.Secret,
-		keychain)
-	err = scpStorage.Connect()
-	if err != nil {
-		return err
-	}
+// 	scpStorage := ssh.NewScpStorage(dsn.Host,
+// 		dsn.Port,
+// 		dsn.Id,
+// 		dsn.Secret,
+// 		keychain)
+// 	err = scpStorage.Connect()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	err = scpStorage.Push(GetStorePath(), dsn.Path)
-	if err != nil {
-		return err
-	}
+// 	err = scpStorage.Push(GetStorePath(), dsn.Path)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // uploadUsingGist executes the whole process of pushing
 // the trousseau data store file to gist remote storage
 // using the provided dsn informations.
-func UploadUsingGist(dsn *dsn.Dsn) (err error) {
-	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
-	gistStorage.Connect()
+// func UploadUsingGist(dsn *dsn.Dsn) (err error) {
+// 	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
+// 	gistStorage.Connect()
 
-	err = gistStorage.Push(GetStorePath(), dsn.Path)
-	if err != nil {
-		return err
-	}
+// 	err = gistStorage.Push(GetStorePath(), dsn.Path)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

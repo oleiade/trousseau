@@ -2,11 +2,10 @@ package trousseau
 
 import (
 	"fmt"
+
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
-	"github.com/oleiade/trousseau/remote/gist"
 	"github.com/oleiade/trousseau/remote/s3"
-	"github.com/oleiade/trousseau/remote/ssh"
 )
 
 // downloadUsingS3 executes the whole process of pulling
@@ -37,39 +36,39 @@ func DownloadUsingS3(dsn *dsn.Dsn) error {
 // downloadUsingScp executes the whole process of pulling
 // the trousseau data store file from scp remote storage
 // using the provided environment.
-func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
-	keychain := new(ssh.Keychain)
-	keychain.AddPEMKey(privateKey)
+// func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
+// 	keychain := new(ssh.Keychain)
+// 	keychain.AddPEMKey(privateKey)
 
-	scpStorage := ssh.NewScpStorage(dsn.Host,
-		dsn.Port,
-		dsn.Id,
-		dsn.Secret,
-		keychain)
-	err = scpStorage.Connect()
-	if err != nil {
-		return err
-	}
+// 	scpStorage := ssh.NewScpStorage(dsn.Host,
+// 		dsn.Port,
+// 		dsn.Id,
+// 		dsn.Secret,
+// 		keychain)
+// 	err = scpStorage.Connect()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	err = scpStorage.Pull(dsn.Path, GetStorePath())
-	if err != nil {
-		return err
-	}
+// 	err = scpStorage.Pull(dsn.Path, GetStorePath())
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // downloadUsingGist executes the whole process of pulling
 // the trousseau data store file from gist remote storage
-// using the provided scheme informations.
-func DownloadUsingGist(dsn *dsn.Dsn) (err error) {
-	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
-	gistStorage.Connect()
+// // using the provided scheme informations.
+// func DownloadUsingGist(dsn *dsn.Dsn) (err error) {
+// 	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
+// 	gistStorage.Connect()
 
-	err = gistStorage.Pull(dsn.Path, GetStorePath())
-	if err != nil {
-		return err
-	}
+// 	err = gistStorage.Pull(dsn.Path, GetStorePath())
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

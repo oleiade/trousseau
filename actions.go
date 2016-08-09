@@ -5,11 +5,12 @@ import (
 
 	"encoding/json"
 	"fmt"
-	"github.com/oleiade/trousseau/dsn"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/oleiade/trousseau/dsn"
 )
 
 func CreateAction(recipients []string) {
@@ -58,27 +59,29 @@ func PushAction(destination string, sshPrivateKey string, askPassword bool) {
 		}
 		InfoLogger.Println("Trousseau data store succesfully pushed to s3")
 	case "scp":
-		err := endpointDsn.SetDefaults(ScpDefaults)
-		if err != nil {
-			ErrorLogger.Fatal(err)
-		}
+		// err := endpointDsn.SetDefaults(ScpDefaults)
+		// if err != nil {
+		// 	ErrorLogger.Fatal(err)
+		// }
 
-		if askPassword == true {
-			password := PromptForPassword()
-			endpointDsn.Secret = password
-		}
+		// if askPassword == true {
+		// 	password := PromptForPassword()
+		// 	endpointDsn.Secret = password
+		// }
 
-		err = UploadUsingScp(endpointDsn, sshPrivateKey)
-		if err != nil {
-			ErrorLogger.Fatal(err)
-		}
-		InfoLogger.Println("Trousseau data store succesfully pushed to ssh remote storage")
+		// err = UploadUsingScp(endpointDsn, sshPrivateKey)
+		// if err != nil {
+		// 	ErrorLogger.Fatal(err)
+		// }
+		// InfoLogger.Println("Trousseau data store succesfully pushed to ssh remote storage")
+		InfoLogger.Println("ssh push temporarily deactivated")
 	case "gist":
-		err = UploadUsingGist(endpointDsn)
-		if err != nil {
-			ErrorLogger.Fatal(err)
-		}
-		InfoLogger.Println("Trousseau data store succesfully pushed to gist")
+		// err = UploadUsingGist(endpointDsn)
+		// if err != nil {
+		// 	ErrorLogger.Fatal(err)
+		// }
+		// InfoLogger.Println("Trousseau data store succesfully pushed to gist")
+		InfoLogger.Println("gist push temporarily deactivated")
 	}
 }
 
@@ -101,27 +104,29 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) {
 		}
 		InfoLogger.Println("Trousseau data store succesfully pulled from S3")
 	case "scp":
-		err := endpointDsn.SetDefaults(ScpDefaults)
-		if err != nil {
-			ErrorLogger.Fatal(err)
-		}
+		// err := endpointDsn.SetDefaults(ScpDefaults)
+		// if err != nil {
+		// 	ErrorLogger.Fatal(err)
+		// }
 
-		if askPassword == true {
-			password := PromptForPassword()
-			endpointDsn.Secret = password
-		}
+		// if askPassword == true {
+		// 	password := PromptForPassword()
+		// 	endpointDsn.Secret = password
+		// }
 
-		err = DownloadUsingScp(endpointDsn, sshPrivateKey)
-		if err != nil {
-			ErrorLogger.Fatal(err)
-		}
-		InfoLogger.Println("Trousseau data store succesfully pulled from ssh remote storage")
+		// err = DownloadUsingScp(endpointDsn, sshPrivateKey)
+		// if err != nil {
+		// 	ErrorLogger.Fatal(err)
+		// }
+		// InfoLogger.Println("Trousseau data store succesfully pulled from ssh remote storage")
+		InfoLogger.Println("ssh pull temporarily deactivated")
 	case "gist":
-		err = DownloadUsingGist(endpointDsn)
-		if err != nil {
-			ErrorLogger.Fatal(err)
-		}
-		InfoLogger.Println("Trousseau data store succesfully pulled from gist")
+		// err = DownloadUsingGist(endpointDsn)
+		// if err != nil {
+		// 	ErrorLogger.Fatal(err)
+		// }
+		// InfoLogger.Println("Trousseau data store succesfully pulled from gist")
+		InfoLogger.Println("gist pull temporarily deactivated")
 	default:
 		if endpointDsn.Scheme == "" {
 			ErrorLogger.Fatalf("No dsn scheme supplied")

@@ -1,155 +1,156 @@
 package ssh
 
-import (
-	"bytes"
-	"golang.org/x/crypto/ssh"
-	"crypto"
-	"crypto/dsa"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
-	"errors"
-	"fmt"
-	"io"
-	"io/ioutil"
-)
+// import (
+// 	"bytes"
+// 	"crypto"
+// 	"crypto/dsa"
+// 	"crypto/rsa"
+// 	"crypto/x509"
+// 	"encoding/pem"
+// 	"errors"
+// 	"fmt"
+// 	"io"
+// 	"io/ioutil"
 
-type Keychain struct {
-	keys []interface{}
-}
+// 	"golang.org/x/crypto/ssh"
+// )
 
-func (k *Keychain) AddPEMKey(privateKeyPath string) error {
-	var rsakey interface{}
-	var err error
+// type Keychain struct {
+// 	keys []interface{}
+// }
 
-	keyContent, err := ioutil.ReadFile(privateKeyPath)
-	if err != nil {
-		return err
-	}
+// func (k *Keychain) AddPEMKey(privateKeyPath string) error {
+// 	var rsakey interface{}
+// 	var err error
 
-	block, _ := pem.Decode([]byte(keyContent))
-	if block == nil {
-		return errors.New("no block in key")
-	}
+// 	keyContent, err := ioutil.ReadFile(privateKeyPath)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	rsakey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		rsakey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
-	}
+// 	block, _ := pem.Decode([]byte(keyContent))
+// 	if block == nil {
+// 		return errors.New("no block in key")
+// 	}
 
-	if err != nil {
-		return err
-	}
+// 	rsakey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+// 	if err != nil {
+// 		rsakey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+// 	}
 
-	k.keys = append(k.keys, rsakey)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	k.keys = append(k.keys, rsakey)
 
-func (k *Keychain) AddPEMKeyPassword(key string, password string) (err error) {
-	block, _ := pem.Decode([]byte(key))
-	bytes, _ := x509.DecryptPEMBlock(block, []byte(password))
-	rsakey, err := x509.ParsePKCS1PrivateKey(bytes)
-	if err != nil {
-		return
-	}
+// 	return nil
+// }
 
-	k.keys = append(k.keys, rsakey)
+// func (k *Keychain) AddPEMKeyPassword(key string, password string) (err error) {
+// 	block, _ := pem.Decode([]byte(key))
+// 	bytes, _ := x509.DecryptPEMBlock(block, []byte(password))
+// 	rsakey, err := x509.ParsePKCS1PrivateKey(bytes)
+// 	if err != nil {
+// 		return
+// 	}
 
-	return
-}
+// 	k.keys = append(k.keys, rsakey)
 
-func (k *Keychain) Key(i int) (key ssh.PublicKey, err error) {
-	if i < 0 || i >= len(k.keys) {
-		return nil, nil
-	}
+// 	return
+// }
 
-	switch key := k.keys[i].(type) {
-	case *rsa.PrivateKey:
-		return ssh.NewPublicKey(&key.PublicKey)
-	case *dsa.PrivateKey:
-		return ssh.NewPublicKey(&key.PublicKey)
-	}
+// func (k *Keychain) Key(i int) (key ssh.PublicKey, err error) {
+// 	if i < 0 || i >= len(k.keys) {
+// 		return nil, nil
+// 	}
 
-	return nil, errors.New("ssh: Unknown key type")
-}
+// 	switch key := k.keys[i].(type) {
+// 	case *rsa.PrivateKey:
+// 		return ssh.NewPublicKey(&key.PublicKey)
+// 	case *dsa.PrivateKey:
+// 		return ssh.NewPublicKey(&key.PublicKey)
+// 	}
 
-func (k *Keychain) Sign(i int, rand io.Reader, data []byte) (sig []byte, err error) {
-	hashFunc := crypto.SHA1
-	h := hashFunc.New()
-	h.Write(data)
-	digest := h.Sum(nil)
+// 	return nil, errors.New("ssh: Unknown key type")
+// }
 
-	switch key := k.keys[i].(type) {
-	case *rsa.PrivateKey:
-		return rsa.SignPKCS1v15(rand, key, hashFunc, digest)
-	}
+// func (k *Keychain) Sign(i int, rand io.Reader, data []byte) (sig []byte, err error) {
+// 	hashFunc := crypto.SHA1
+// 	h := hashFunc.New()
+// 	h.Write(data)
+// 	digest := h.Sum(nil)
 
-	return nil, errors.New("ssh: Unknown key type")
-}
+// 	switch key := k.keys[i].(type) {
+// 	case *rsa.PrivateKey:
+// 		return rsa.SignPKCS1v15(rand, key, hashFunc, digest)
+// 	}
 
-func (ss *ScpStorage) Connect() error {
-	var err error
+// 	return nil, errors.New("ssh: Unknown key type")
+// }
 
-	clientConfig := &ssh.ClientConfig{
-		User: ss.User,
-		Auth: []ssh.ClientAuth{
-			ssh.ClientAuthPassword(password(ss.Password)),
-			ssh.ClientAuthKeyring(ss.Keychain),
-		},
-	}
+// func (ss *ScpStorage) Connect() error {
+// 	var err error
 
-	ss.connexion, err = ssh.Dial("tcp", ss.Endpoint, clientConfig)
-	if err != nil {
-		return fmt.Errorf("Failed to dial: %s", err.Error())
-	}
+// 	clientConfig := &ssh.ClientConfig{
+// 		User: ss.User,
+// 		Auth: []ssh.AuthMethod{
+// 			ssh.Password(password(ss.Password)),
+// 			ssh.ClientAuthKeyring(ss.Keychain),
+// 		},
+// 	}
 
-	return nil
-}
+// 	ss.connexion, err = ssh.Dial("tcp", ss.Endpoint, clientConfig)
+// 	if err != nil {
+// 		return fmt.Errorf("Failed to dial: %s", err.Error())
+// 	}
 
-func (ss *ScpStorage) Push(localPath, remotePath string) error {
-	session, err := ss.connexion.NewSession()
-	if err != nil {
-		return fmt.Errorf("Failed to create session: %s", err.Error())
-	}
-	defer session.Close()
+// 	return nil
+// }
 
-	go func() {
-		w, _ := session.StdinPipe()
-		defer w.Close()
+// func (ss *ScpStorage) Push(localPath, remotePath string) error {
+// 	session, err := ss.connexion.NewSession()
+// 	if err != nil {
+// 		return fmt.Errorf("Failed to create session: %s", err.Error())
+// 	}
+// 	defer session.Close()
 
-		content, _ := ioutil.ReadFile(localPath)
+// 	go func() {
+// 		w, _ := session.StdinPipe()
+// 		defer w.Close()
 
-		fmt.Fprintln(w, "C0755", len(content), remotePath)
-		fmt.Fprint(w, string(content))
-		fmt.Fprint(w, "\x00")
-	}()
+// 		content, _ := ioutil.ReadFile(localPath)
 
-	if err := session.Run("/usr/bin/scp -qrt ./"); err != nil {
-		return fmt.Errorf("Failed to run: %s", err.Error())
-	}
+// 		fmt.Fprintln(w, "C0755", len(content), remotePath)
+// 		fmt.Fprint(w, string(content))
+// 		fmt.Fprint(w, "\x00")
+// 	}()
 
-	return nil
-}
+// 	if err := session.Run("/usr/bin/scp -qrt ./"); err != nil {
+// 		return fmt.Errorf("Failed to run: %s", err.Error())
+// 	}
 
-func (ss *ScpStorage) Pull(remotePath, localPath string) error {
-	session, err := ss.connexion.NewSession()
-	if err != nil {
-		return fmt.Errorf("Failed to create session: %s", err.Error())
-	}
-	defer session.Close()
+// 	return nil
+// }
 
-	var remoteFileBuffer bytes.Buffer
-	session.Stdout = &remoteFileBuffer
+// func (ss *ScpStorage) Pull(remotePath, localPath string) error {
+// 	session, err := ss.connexion.NewSession()
+// 	if err != nil {
+// 		return fmt.Errorf("Failed to create session: %s", err.Error())
+// 	}
+// 	defer session.Close()
 
-	if err := session.Run(fmt.Sprintf("cat %s", remotePath)); err != nil {
-		return fmt.Errorf("Failed to run: %s", err.Error())
-	}
+// 	var remoteFileBuffer bytes.Buffer
+// 	session.Stdout = &remoteFileBuffer
 
-	err = ioutil.WriteFile(localPath, remoteFileBuffer.Bytes(), 0744)
-	if err != nil {
-		return err
-	}
+// 	if err := session.Run(fmt.Sprintf("cat %s", remotePath)); err != nil {
+// 		return fmt.Errorf("Failed to run: %s", err.Error())
+// 	}
 
-	return nil
-}
+// 	err = ioutil.WriteFile(localPath, remoteFileBuffer.Bytes(), 0744)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
