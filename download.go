@@ -5,6 +5,7 @@ import (
 
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
+	"github.com/oleiade/trousseau/remote/gist"
 	"github.com/oleiade/trousseau/remote/s3"
 	"github.com/oleiade/trousseau/remote/ssh"
 )
@@ -58,15 +59,15 @@ func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
 
 // downloadUsingGist executes the whole process of pulling
 // the trousseau data store file from gist remote storage
-// // using the provided scheme informations.
-// func DownloadUsingGist(dsn *dsn.Dsn) (err error) {
-// 	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
-// 	gistStorage.Connect()
+// using the provided scheme informations.
+func DownloadUsingGist(dsn *dsn.Dsn) (err error) {
+	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
+	gistStorage.Connect()
 
-// 	err = gistStorage.Pull(dsn.Path, GetStorePath())
-// 	if err != nil {
-// 		return err
-// 	}
+	err = gistStorage.Pull(dsn.Path, GetStorePath())
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}

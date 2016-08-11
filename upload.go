@@ -5,6 +5,7 @@ import (
 
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
+	"github.com/oleiade/trousseau/remote/gist"
 	"github.com/oleiade/trousseau/remote/s3"
 	"github.com/oleiade/trousseau/remote/ssh"
 )
@@ -62,14 +63,14 @@ func UploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
 // uploadUsingGist executes the whole process of pushing
 // the trousseau data store file to gist remote storage
 // using the provided dsn informations.
-// func UploadUsingGist(dsn *dsn.Dsn) (err error) {
-// 	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
-// 	gistStorage.Connect()
+func UploadUsingGist(dsn *dsn.Dsn) (err error) {
+	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
+	gistStorage.Connect()
 
-// 	err = gistStorage.Push(GetStorePath(), dsn.Path)
-// 	if err != nil {
-// 		return err
-// 	}
+	err = gistStorage.Push(GetStorePath(), dsn.Path)
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}

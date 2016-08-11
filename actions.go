@@ -75,12 +75,11 @@ func PushAction(destination string, sshPrivateKey string, askPassword bool) {
 		}
 		InfoLogger.Println("Trousseau data store succesfully pushed to ssh remote storage")
 	case "gist":
-		// err = UploadUsingGist(endpointDsn)
-		// if err != nil {
-		// 	ErrorLogger.Fatal(err)
-		// }
-		// InfoLogger.Println("Trousseau data store succesfully pushed to gist")
-		InfoLogger.Println("gist push temporarily deactivated")
+		err = UploadUsingGist(endpointDsn)
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+		InfoLogger.Println("Trousseau data store succesfully pushed to gist")
 	}
 }
 
@@ -119,12 +118,11 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) {
 		}
 		InfoLogger.Println("Trousseau data store succesfully pulled from ssh remote storage")
 	case "gist":
-		// err = DownloadUsingGist(endpointDsn)
-		// if err != nil {
-		// 	ErrorLogger.Fatal(err)
-		// }
-		// InfoLogger.Println("Trousseau data store succesfully pulled from gist")
-		InfoLogger.Println("gist pull temporarily deactivated")
+		err = DownloadUsingGist(endpointDsn)
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+		InfoLogger.Println("Trousseau data store succesfully pulled from gist")
 	default:
 		if endpointDsn.Scheme == "" {
 			ErrorLogger.Fatalf("No dsn scheme supplied")
