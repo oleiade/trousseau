@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/codegangsta/cli"
 	"github.com/oleiade/trousseau"
+	"github.com/urfave/cli"
 )
 
 func Before(c *cli.Context) error {

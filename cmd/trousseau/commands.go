@@ -1,27 +1,28 @@
 package main
 
 import (
-	"github.com/codegangsta/cli"
-	"github.com/oleiade/trousseau"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/oleiade/trousseau"
+	"github.com/urfave/cli"
 )
 
 func CreateCommand() cli.Command {
 	return cli.Command{
-		Name:   "create",
-		Usage:  "Create an encrypted data store",
+		Name:  "create",
+		Usage: "Create an encrypted data store",
 		Description: "The create command will generate an encrypted data store " +
-					 "placed at $HOME/.trousseau.tr or at the location described by " +
-					 "the $TROUSSEAU_HOME environment variable if you provided it.\n\n" +
-					 "   Encryption is made using your GPG main identity, and targets the " +
-					 "GPG recipients you provide as the command arguments.\n\n" +
-					 "   Examples:\n\n" +
-					 "     trousseau create 16DB4F3\n" +
-					 "     trousseau create tcrevon@gmail.com\n" +
-					 "     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
-		Action: func(c *cli.Context) {
+			"placed at $HOME/.trousseau.tr or at the location described by " +
+			"the $TROUSSEAU_HOME environment variable if you provided it.\n\n" +
+			"   Encryption is made using your GPG main identity, and targets the " +
+			"GPG recipients you provide as the command arguments.\n\n" +
+			"   Examples:\n\n" +
+			"     trousseau create 16DB4F3\n" +
+			"     trousseau create tcrevon@gmail.com\n" +
+			"     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
+		Action: func(c *cli.Context) error {
 			var recipients []string
 
 			if len(c.Args()) > 0 {
@@ -29,39 +30,43 @@ func CreateCommand() cli.Command {
 				trousseau.CreateAction(recipients)
 			} else {
 				trousseau.ErrorLogger.Fatal("invalid number of arguments provided to " +
-											"the create command. At least one recipient to encrypt the " +
-											"data store for is needed.")
+					"the create command. At least one recipient to encrypt the " +
+					"data store for is needed.")
 			}
+
+			return nil
 		},
 	}
 }
 
 func PushCommand() cli.Command {
 	return cli.Command{
-		Name:   "push",
-		Usage:  "Push the encrypted data store to a remote storage",
+		Name:  "push",
+		Usage: "Push the encrypted data store to a remote storage",
 		Description: "The local encrypted data store will be pushed to a remote destination " +
-					 "described by a data source name.\n\n" +
-					 "   Trousseau data source name goes as follow:\n\n" +
-					 "     {protocol}://{identifier}:{secret}@{host}:{port}/{path}\n\n" +
-					 "   Given:\n" +
-					 "     * protocol: The remote service target type. Can be one of: s3 or scp\n" +
-					 "     * identifier: The login/key/whatever to authenticate trousseau to the remote service. Provide your aws_access_key if you're targeting s3, or your remote login if you're targeting scp\n" +
-					 "     * secret: The secret to authenticate trousseau to the remote service. Provide your aws_secret_key if you're targeting s3, or your remote password if you're targeting scp\n" +
-					 "     * host: Your bucket name is you're targeting s3. The host to login to using scp otherwise\n" +
-					 "     * port: The aws_region if you're targeting s3. The port to login to using scp otherwise\n" +
-					 "     * path: The remote path to push to or retrieve from the trousseau file on a push or pull action\n\n" +
-					 "   Examples:\n\n" +
-					 "     s3://1298u1928eu9182dj19d2:1928u192ijdnh1b2d8@my-super-bucket:eu-west-1/topsecret-trousseau.tr\n" +
-					 "     scp://myuser:@myhost.io:6453/topsecret-trousseau.tr  (use the password option to supply password)\n" +
-					 "     gist://oleiade:1928u3019j2d9812dn0192u490128dj@:/topsecret-trousseau.tr\n",
-		Action: func(c *cli.Context) {
+			"described by a data source name.\n\n" +
+			"   Trousseau data source name goes as follow:\n\n" +
+			"     {protocol}://{identifier}:{secret}@{host}:{port}/{path}\n\n" +
+			"   Given:\n" +
+			"     * protocol: The remote service target type. Can be one of: s3 or scp\n" +
+			"     * identifier: The login/key/whatever to authenticate trousseau to the remote service. Provide your aws_access_key if you're targeting s3, or your remote login if you're targeting scp\n" +
+			"     * secret: The secret to authenticate trousseau to the remote service. Provide your aws_secret_key if you're targeting s3, or your remote password if you're targeting scp\n" +
+			"     * host: Your bucket name is you're targeting s3. The host to login to using scp otherwise\n" +
+			"     * port: The aws_region if you're targeting s3. The port to login to using scp otherwise\n" +
+			"     * path: The remote path to push to or retrieve from the trousseau file on a push or pull action\n\n" +
+			"   Examples:\n\n" +
+			"     s3://1298u1928eu9182dj19d2:1928u192ijdnh1b2d8@my-super-bucket:eu-west-1/topsecret-trousseau.tr\n" +
+			"     scp://myuser:@myhost.io:6453/topsecret-trousseau.tr  (use the password option to supply password)\n" +
+			"     gist://oleiade:1928u3019j2d9812dn0192u490128dj@:/topsecret-trousseau.tr\n",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to push command")
 			}
 
 			var destination string = c.Args().First()
 			trousseau.PushAction(destination, c.String("ssh-private-key"), c.Bool("ask-password"))
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -83,30 +88,32 @@ func PushCommand() cli.Command {
 
 func PullCommand() cli.Command {
 	return cli.Command{
-		Name:   "pull",
-		Usage:  "Pull the encrypted data store from a remote storage",
+		Name:  "pull",
+		Usage: "Pull the encrypted data store from a remote storage",
 		Description: "The remote encrypted data store described by a data source name " +
-					 "will be pulled and replace the local data store.\n\n" +
-					 "   Trousseau data source name goes as follow:\n\n" +
-					 "     {protocol}://{identifier}:{secret}@{host}:{port}/{path}\n\n" +
-					 "   Given:\n" +
-					 "     * protocol: The remote service target type. Can be one of: s3 or scp\n" +
-					 "     * identifier: The login/key/whatever to authenticate trousseau to the remote service. Provide your aws_access_key if you're targeting s3, or your remote login if you're targeting scp\n" +
-					 "     * secret: The secret to authenticate trousseau to the remote service. Provide your aws_secret_key if you're targeting s3, or your remote password if you're targeting scp\n" +
-					 "     * host: Your bucket name is you're targeting s3. The host to login to using scp otherwise\n" +
-					 "     * port: The aws_region if you're targeting s3. The port to login to using scp otherwise\n" +
-					 "     * path: The remote path to push to or retrieve from the trousseau file on a push or pull action\n\n" +
-					 "   Examples:\n\n" +
-					 "     s3://1298u1928eu9182dj19d2:1928u192ijdnh1b2d8@my-super-bucket:eu-west-1/topsecret-trousseau.tr\n" +
-					 "     scp://myuser:@myhost.io:6453/topsecret-trousseau.tr  (use the password option to supply password)\n" +
-					 "     gist://oleiade:1928u3019j2d9812dn0192u490128dj@:/topsecret-trousseau.tr\n",
-		Action: func(c *cli.Context) {
+			"will be pulled and replace the local data store.\n\n" +
+			"   Trousseau data source name goes as follow:\n\n" +
+			"     {protocol}://{identifier}:{secret}@{host}:{port}/{path}\n\n" +
+			"   Given:\n" +
+			"     * protocol: The remote service target type. Can be one of: s3 or scp\n" +
+			"     * identifier: The login/key/whatever to authenticate trousseau to the remote service. Provide your aws_access_key if you're targeting s3, or your remote login if you're targeting scp\n" +
+			"     * secret: The secret to authenticate trousseau to the remote service. Provide your aws_secret_key if you're targeting s3, or your remote password if you're targeting scp\n" +
+			"     * host: Your bucket name is you're targeting s3. The host to login to using scp otherwise\n" +
+			"     * port: The aws_region if you're targeting s3. The port to login to using scp otherwise\n" +
+			"     * path: The remote path to push to or retrieve from the trousseau file on a push or pull action\n\n" +
+			"   Examples:\n\n" +
+			"     s3://1298u1928eu9182dj19d2:1928u192ijdnh1b2d8@my-super-bucket:eu-west-1/topsecret-trousseau.tr\n" +
+			"     scp://myuser:@myhost.io:6453/topsecret-trousseau.tr  (use the password option to supply password)\n" +
+			"     gist://oleiade:1928u3019j2d9812dn0192u490128dj@:/topsecret-trousseau.tr\n",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to pull command")
 			}
 
 			var source string = c.Args().First()
 			trousseau.PullAction(source, c.String("ssh-private-key"), c.Bool("ask-password"))
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -128,18 +135,20 @@ func PullCommand() cli.Command {
 
 func ExportCommand() cli.Command {
 	return cli.Command{
-		Name:   "export",
-		Usage:  "Export the encrypted data store to a file system location",
+		Name:  "export",
+		Usage: "Export the encrypted data store to a file system location",
 		Description: "The encrypted data store at the default location ($HOME/.trousseau.tr) or " +
-					 "the one pointed by the $TROUSSEAU_STORE environment variable will be pushed as is " +
-					 "to the filesystem location provided as first argument.",
-		Action: func(c *cli.Context) {
+			"the one pointed by the $TROUSSEAU_STORE environment variable will be pushed as is " +
+			"to the filesystem location provided as first argument.",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to export command")
 			}
 
 			var to string = c.Args().First()
 			trousseau.ExportAction(to, c.Bool("plain"))
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -156,12 +165,12 @@ func ExportCommand() cli.Command {
 
 func ImportCommand() cli.Command {
 	return cli.Command{
-		Name:   "import",
-		Usage:  "Import an encrypted data store from a file system location",
+		Name:  "import",
+		Usage: "Import an encrypted data store from a file system location",
 		Description: "The encrypted data store at the filesystem location provided as first argument " +
-					 "will be imported to the default trousseau location ($HOME/.trousseau.tr) or " +
-					 "the one pointed by the $TROUSSEAU_STORE environment variable",
-		Action: func(c *cli.Context) {
+			"will be imported to the default trousseau location ($HOME/.trousseau.tr) or " +
+			"the one pointed by the $TROUSSEAU_STORE environment variable",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to import command")
 			}
@@ -195,6 +204,8 @@ func ImportCommand() cli.Command {
 
 			var from string = c.Args().First()
 			trousseau.ImportAction(from, strategy, c.Bool("plain"))
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -219,28 +230,30 @@ func ImportCommand() cli.Command {
 
 func ListRecipientsCommand() cli.Command {
 	return cli.Command{
-		Name:   "list-recipients",
-		Usage:  "List the data store encryption recipients",
-		Action: func(c *cli.Context) {
+		Name:  "list-recipients",
+		Usage: "List the data store encryption recipients",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to list-recipients command")
 			}
 
 			trousseau.ListRecipientsAction()
+
+			return nil
 		},
 	}
 }
 
 func AddRecipientCommand() cli.Command {
 	return cli.Command{
-		Name:   "add-recipient",
-		Usage:  "Add a recipient to the encrypted data store",
+		Name:  "add-recipient",
+		Usage: "Add a recipient to the encrypted data store",
 		Description: "Add a valid GPG recipient to the encrypted data store. To proceed you must " +
-					 "make sure the recipient's GPG public key is available in your public keyring (this " +
-					 "can be done by making sure it appears in the 'gpg --list-keys' command's output).\n" +
-					 "   And you can whether provide it whether as an openpgp id or by using the email attached " +
-					 "to it's key",
-		Action: func(c *cli.Context) {
+			"make sure the recipient's GPG public key is available in your public keyring (this " +
+			"can be done by making sure it appears in the 'gpg --list-keys' command's output).\n" +
+			"   And you can whether provide it whether as an openpgp id or by using the email attached " +
+			"to it's key",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to add-recipient command")
 			}
@@ -250,15 +263,17 @@ func AddRecipientCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("Recipient added to trousseau data store: %s", c.Args().First()))
 			}
+
+			return nil
 		},
 	}
 }
 
 func RemoveRecipientCommand() cli.Command {
 	return cli.Command{
-		Name:   "remove-recipient",
-		Usage:  "Remove a recipient from the encrypted data store",
-		Action: func(c *cli.Context) {
+		Name:  "remove-recipient",
+		Usage: "Remove a recipient from the encrypted data store",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to remove-recipient command")
 			}
@@ -269,15 +284,16 @@ func RemoveRecipientCommand() cli.Command {
 				fmt.Printf("Recipient removed from trousseau data store: %s", c.Args().First())
 			}
 
+			return nil
 		},
 	}
 }
 
 func SetCommand() cli.Command {
 	return cli.Command{
-		Name:   "set",
-		Usage:  "Set a key value pair in the encrypted data store",
-		Action: func(c *cli.Context) {
+		Name:  "set",
+		Usage: "Set a key value pair in the encrypted data store",
+		Action: func(c *cli.Context) error {
 			var file string = c.String("file")
 			var key string = c.Args().First()
 			var value string
@@ -299,6 +315,8 @@ func SetCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("%s:%s", key, value))
 			}
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -311,9 +329,9 @@ func SetCommand() cli.Command {
 
 func GetCommand() cli.Command {
 	return cli.Command{
-		Name:   "get",
-		Usage:  "Get a key's value from the encrypted data store",
-		Action: func(c *cli.Context) {
+		Name:  "get",
+		Usage: "Get a key's value from the encrypted data store",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to get command")
 			}
@@ -321,6 +339,8 @@ func GetCommand() cli.Command {
 			var key string = c.Args().First()
 			var file string = c.String("file")
 			trousseau.GetAction(key, file)
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -333,9 +353,9 @@ func GetCommand() cli.Command {
 
 func RenameCommand() cli.Command {
 	return cli.Command{
-		Name:   "rename",
-		Usage:  "Rename an encrypted data store's key",
-		Action: func(c *cli.Context) {
+		Name:  "rename",
+		Usage: "Rename an encrypted data store's key",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 2) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to rename command")
 			}
@@ -348,6 +368,8 @@ func RenameCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("renamed: %s to %s", src, dest))
 			}
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -360,9 +382,9 @@ func RenameCommand() cli.Command {
 
 func DelCommand() cli.Command {
 	return cli.Command{
-		Name:   "del",
-		Usage:  "Delete a key value pair from the store",
-		Action: func(c *cli.Context) {
+		Name:  "del",
+		Usage: "Delete a key value pair from the store",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to del command")
 			}
@@ -374,62 +396,72 @@ func DelCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("deleted: %s", c.Args()[0]))
 			}
+
+			return nil
 		},
 	}
 }
 
 func KeysCommand() cli.Command {
 	return cli.Command{
-		Name:   "keys",
-		Usage:  "List the encrypted data store keys",
-		Action: func(c *cli.Context) {
+		Name:  "keys",
+		Usage: "List the encrypted data store keys",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to keys command")
 			}
 
 			trousseau.KeysAction()
+
+			return nil
 		},
 	}
 }
 
 func ShowCommand() cli.Command {
 	return cli.Command{
-		Name:   "show",
-		Usage:  "Show the encrypted data store key value pairs",
-		Action: func(c *cli.Context) {
+		Name:  "show",
+		Usage: "Show the encrypted data store key value pairs",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to show command")
 			}
 
 			trousseau.ShowAction()
+
+			return nil
 		},
 	}
 }
 
 func MetaCommand() cli.Command {
 	return cli.Command{
-		Name:   "meta",
-		Usage:  "Show the encrypted data store metadata",
-		Action: func(c *cli.Context) {
+		Name:  "meta",
+		Usage: "Show the encrypted data store metadata",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to meta command")
 			}
 
 			trousseau.MetaAction()
+
+			return nil
 		},
 	}
 }
 
 func UpgradeCommand() cli.Command {
 	return cli.Command{
-		Name:   "upgrade",
-		Usage:  "Upgrade the encrypted data store to a newer version's file format",
-		Action: func(c *cli.Context) {
+		Name:  "upgrade",
+		Usage: "Upgrade the encrypted data store to a newer version's file format",
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to upgrade command")
 			}
 
 			trousseau.UpgradeAction(c.Bool("yes"), c.Bool("no-backup"))
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -461,4 +493,3 @@ func hasExpectedArgs(args []string, expected int) bool {
 		}
 	}
 }
-
