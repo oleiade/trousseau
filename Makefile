@@ -28,6 +28,7 @@ all: trousseau
 
 trousseau:
 	@(go get github.com/kr/godep)
+	@(go get github.com/guelfey/go.dbus)  # This as a dependency fails on CI for some reason
 	@(echo "-> Compiling trousseau binary")
 	@(mkdir -p $(BIN_DIR))
 	@(cd $(TROUSSEAU_CMD_DIR) && godep go build -o $(TROUSSEAU_BIN)) 
