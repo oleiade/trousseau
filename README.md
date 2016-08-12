@@ -46,7 +46,7 @@ A binary debian repository provides *trousseau* packages for *i386*, *x86_64* an
 Just add the repository to your sources.list:
 
 ```bash
-$ echo "deb http://dl.bintray.com/oleiade/deb /" | sudo tee /etc/apt/sources.list.d/trousseau.list
+$ echo "deb https://dl.bintray.com/oleiade/deb /" | sudo tee /etc/apt/sources.list.d/trousseau.list
 ```
 
 And you're ready to go:
