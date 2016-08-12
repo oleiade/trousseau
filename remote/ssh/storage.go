@@ -38,9 +38,6 @@ func (ss *ScpStorage) Connect() error {
 
 	ss.client, err = ssh.Dial("tcp", ss.Endpoint, clientConfig)
 	if err != nil {
-		fmt.Println(clientConfig.User)
-		fmt.Println(ss.Endpoint)
-		fmt.Println(ss.Password)
 		return fmt.Errorf("Failed to dial: %s", err.Error())
 	}
 

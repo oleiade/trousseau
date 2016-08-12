@@ -25,7 +25,6 @@ func CreateCommand() cli.Command {
 			"     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
 		Action: func(c *cli.Context) error {
 			var encryptionType string = c.String("encryption-type")
-			var recipients []string
 
 			if encryptionType == trousseau.SYMMETRIC_ENCRYPTION_REPR {
 				err := trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, trousseau.AES_256_ENCRYPTION, nil)
@@ -149,7 +148,7 @@ func PullCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal(err)
 			}
 
-			trousseau.InfoLogger.Println("Encrypted data store succesfully pulled from %s remote storage\n", source)
+			trousseau.InfoLogger.Println("Encrypted data store succesfully pulled from remote storage\n")
 
 			return nil
 		},
