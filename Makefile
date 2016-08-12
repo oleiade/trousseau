@@ -37,7 +37,7 @@ trousseau:
 test: unit integration
 
 unit:
-	@(go list ./... | xargs -n1 go test)
+	@(go list ./... | xargs -n1 godep go test)
 
 # Running integration depends on bats test framework
 # https://github.com/sstephenson/bats
