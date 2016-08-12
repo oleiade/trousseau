@@ -13,7 +13,7 @@ func (s *V4Signer) RequestTime(req *http.Request) time.Time {
 }
 
 func (s *V4Signer) CanonicalRequest(req *http.Request) string {
-	return s.canonicalRequest(req)
+	return s.canonicalRequest(req, "")
 }
 
 func (s *V4Signer) StringToSign(t time.Time, creq string) string {

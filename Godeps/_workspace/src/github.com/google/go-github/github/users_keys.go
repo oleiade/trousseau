@@ -23,12 +23,16 @@ func (k Key) String() string {
 // string will fetch keys for the authenticated user.
 //
 // GitHub API docs: http://developer.github.com/v3/users/keys/#list-public-keys-for-a-user
-func (s *UsersService) ListKeys(user string) ([]Key, *Response, error) {
+func (s *UsersService) ListKeys(user string, opt *ListOptions) ([]Key, *Response, error) {
 	var u string
 	if user != "" {
 		u = fmt.Sprintf("users/%v/keys", user)
 	} else {
 		u = "user/keys"
+	}
+	u, err := addOptions(u, opt)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	req, err := s.client.NewRequest("GET", u, nil)
@@ -72,26 +76,6 @@ func (s *UsersService) CreateKey(key *Key) (*Key, *Response, error) {
 	u := "user/keys"
 
 	req, err := s.client.NewRequest("POST", u, key)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	k := new(Key)
-	resp, err := s.client.Do(req, k)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return k, resp, err
-}
-
-// EditKey edits a public key.
-//
-// GitHub API docs: http://developer.github.com/v3/users/keys/#update-a-public-key
-func (s *UsersService) EditKey(id int, key *Key) (*Key, *Response, error) {
-	u := fmt.Sprintf("user/keys/%v", id)
-
-	req, err := s.client.NewRequest("PATCH", u, key)
 	if err != nil {
 		return nil, nil, err
 	}

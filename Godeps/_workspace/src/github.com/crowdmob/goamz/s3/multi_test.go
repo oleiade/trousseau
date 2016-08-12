@@ -3,31 +3,50 @@ package s3_test
 import (
 	"encoding/xml"
 	"github.com/crowdmob/goamz/s3"
+	"gopkg.in/check.v1"
 	"io"
 	"io/ioutil"
-	"launchpad.net/gocheck"
 	"strings"
 )
 
-func (s *S) TestInitMulti(c *gocheck.C) {
+func (s *S) TestInitMulti(c *check.C) {
 	testServer.Response(200, nil, InitMultiResultDump)
-
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.InitMulti("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	metadata := make(map[string][]string)
+	metadata["key1"] = []string{"value1"}
+	metadata["key2"] = []string{"value2"}
+	options := s3.Options{
+		SSE:              true,
+		Meta:             metadata,
+		ContentEncoding:  "text/utf8",
+		CacheControl:     "no-cache",
+		RedirectLocation: "http://github.com/crowdmob/goamz",
+		ContentMD5:       "0000000000000000",
+	}
+
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, options)
+	c.Assert(err, check.IsNil)
 
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "POST")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Header["Content-Type"], gocheck.DeepEquals, []string{"text/plain"})
-	c.Assert(req.Header["X-Amz-Acl"], gocheck.DeepEquals, []string{"private"})
-	c.Assert(req.Form["uploads"], gocheck.DeepEquals, []string{""})
+	c.Assert(req.Method, check.Equals, "POST")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Header["Content-Type"], check.DeepEquals, []string{"text/plain"})
+	c.Assert(req.Header["X-Amz-Acl"], check.DeepEquals, []string{"private"})
+	c.Assert(req.Form["uploads"], check.DeepEquals, []string{""})
 
-	c.Assert(multi.UploadId, gocheck.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(req.Header["X-Amz-Server-Side-Encryption"], check.DeepEquals, []string{"AES256"})
+	c.Assert(req.Header["Content-Encoding"], check.DeepEquals, []string{"text/utf8"})
+	c.Assert(req.Header["Cache-Control"], check.DeepEquals, []string{"no-cache"})
+	c.Assert(req.Header["Content-Md5"], check.DeepEquals, []string{"0000000000000000"})
+	c.Assert(req.Header["X-Amz-Website-Redirect-Location"], check.DeepEquals, []string{"http://github.com/crowdmob/goamz"})
+	c.Assert(req.Header["X-Amz-Meta-Key1"], check.DeepEquals, []string{"value1"})
+	c.Assert(req.Header["X-Amz-Meta-Key2"], check.DeepEquals, []string{"value2"})
+
+	c.Assert(multi.UploadId, check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
 }
 
-func (s *S) TestMultiNoPreviousUpload(c *gocheck.C) {
+func (s *S) TestMultiNoPreviousUpload(c *check.C) {
 	// Don't retry the NoSuchUpload error.
 	s.DisableRetries()
 
@@ -36,41 +55,41 @@ func (s *S) TestMultiNoPreviousUpload(c *gocheck.C) {
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.Multi("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	multi, err := b.Multi("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
 
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "GET")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/")
-	c.Assert(req.Form["uploads"], gocheck.DeepEquals, []string{""})
-	c.Assert(req.Form["prefix"], gocheck.DeepEquals, []string{"multi"})
+	c.Assert(req.Method, check.Equals, "GET")
+	c.Assert(req.URL.Path, check.Equals, "/sample/")
+	c.Assert(req.Form["uploads"], check.DeepEquals, []string{""})
+	c.Assert(req.Form["prefix"], check.DeepEquals, []string{"multi"})
 
 	req = testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "POST")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form["uploads"], gocheck.DeepEquals, []string{""})
+	c.Assert(req.Method, check.Equals, "POST")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form["uploads"], check.DeepEquals, []string{""})
 
-	c.Assert(multi.UploadId, gocheck.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(multi.UploadId, check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
 }
 
-func (s *S) TestMultiReturnOld(c *gocheck.C) {
+func (s *S) TestMultiReturnOld(c *check.C) {
 	testServer.Response(200, nil, ListMultiResultDump)
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.Multi("multi1", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(multi.Key, gocheck.Equals, "multi1")
-	c.Assert(multi.UploadId, gocheck.Equals, "iUVug89pPvSswrikD")
+	multi, err := b.Multi("multi1", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
+	c.Assert(multi.Key, check.Equals, "multi1")
+	c.Assert(multi.UploadId, check.Equals, "iUVug89pPvSswrikD")
 
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "GET")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/")
-	c.Assert(req.Form["uploads"], gocheck.DeepEquals, []string{""})
-	c.Assert(req.Form["prefix"], gocheck.DeepEquals, []string{"multi1"})
+	c.Assert(req.Method, check.Equals, "GET")
+	c.Assert(req.URL.Path, check.Equals, "/sample/")
+	c.Assert(req.Form["uploads"], check.DeepEquals, []string{""})
+	c.Assert(req.Form["prefix"], check.DeepEquals, []string{"multi1"})
 }
 
-func (s *S) TestListParts(c *gocheck.C) {
+func (s *S) TestListParts(c *check.C) {
 	testServer.Response(200, nil, InitMultiResultDump)
 	testServer.Response(200, nil, ListPartsResultDump1)
 	testServer.Response(404, nil, NoSuchUploadErrorDump) // :-(
@@ -78,38 +97,38 @@ func (s *S) TestListParts(c *gocheck.C) {
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.InitMulti("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
 
 	parts, err := multi.ListParts()
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(parts, gocheck.HasLen, 3)
-	c.Assert(parts[0].N, gocheck.Equals, 1)
-	c.Assert(parts[0].Size, gocheck.Equals, int64(5))
-	c.Assert(parts[0].ETag, gocheck.Equals, `"ffc88b4ca90a355f8ddba6b2c3b2af5c"`)
-	c.Assert(parts[1].N, gocheck.Equals, 2)
-	c.Assert(parts[1].Size, gocheck.Equals, int64(5))
-	c.Assert(parts[1].ETag, gocheck.Equals, `"d067a0fa9dc61a6e7195ca99696b5a89"`)
-	c.Assert(parts[2].N, gocheck.Equals, 3)
-	c.Assert(parts[2].Size, gocheck.Equals, int64(5))
-	c.Assert(parts[2].ETag, gocheck.Equals, `"49dcd91231f801159e893fb5c6674985"`)
+	c.Assert(err, check.IsNil)
+	c.Assert(parts, check.HasLen, 3)
+	c.Assert(parts[0].N, check.Equals, 1)
+	c.Assert(parts[0].Size, check.Equals, int64(5))
+	c.Assert(parts[0].ETag, check.Equals, `"ffc88b4ca90a355f8ddba6b2c3b2af5c"`)
+	c.Assert(parts[1].N, check.Equals, 2)
+	c.Assert(parts[1].Size, check.Equals, int64(5))
+	c.Assert(parts[1].ETag, check.Equals, `"d067a0fa9dc61a6e7195ca99696b5a89"`)
+	c.Assert(parts[2].N, check.Equals, 3)
+	c.Assert(parts[2].Size, check.Equals, int64(5))
+	c.Assert(parts[2].ETag, check.Equals, `"49dcd91231f801159e893fb5c6674985"`)
 	testServer.WaitRequest()
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "GET")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form.Get("uploadId"), gocheck.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
-	c.Assert(req.Form["max-parts"], gocheck.DeepEquals, []string{"1000"})
+	c.Assert(req.Method, check.Equals, "GET")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form.Get("uploadId"), check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(req.Form["max-parts"], check.DeepEquals, []string{"1000"})
 
 	testServer.WaitRequest() // The internal error.
 	req = testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "GET")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form.Get("uploadId"), gocheck.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
-	c.Assert(req.Form["max-parts"], gocheck.DeepEquals, []string{"1000"})
-	c.Assert(req.Form["part-number-marker"], gocheck.DeepEquals, []string{"2"})
+	c.Assert(req.Method, check.Equals, "GET")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form.Get("uploadId"), check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(req.Form["max-parts"], check.DeepEquals, []string{"1000"})
+	c.Assert(req.Form["part-number-marker"], check.DeepEquals, []string{"2"})
 }
 
-func (s *S) TestPutPart(c *gocheck.C) {
+func (s *S) TestPutPart(c *check.C) {
 	headers := map[string]string{
 		"ETag": `"26f90efd10d614f100252ff56d88dad8"`,
 	}
@@ -118,23 +137,59 @@ func (s *S) TestPutPart(c *gocheck.C) {
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.InitMulti("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
 
 	part, err := multi.PutPart(1, strings.NewReader("<part 1>"))
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(part.N, gocheck.Equals, 1)
-	c.Assert(part.Size, gocheck.Equals, int64(8))
-	c.Assert(part.ETag, gocheck.Equals, headers["ETag"])
+	c.Assert(err, check.IsNil)
+	c.Assert(part.N, check.Equals, 1)
+	c.Assert(part.Size, check.Equals, int64(8))
+	c.Assert(part.ETag, check.Equals, headers["ETag"])
 
 	testServer.WaitRequest()
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "PUT")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form.Get("uploadId"), gocheck.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
-	c.Assert(req.Form["partNumber"], gocheck.DeepEquals, []string{"1"})
-	c.Assert(req.Header["Content-Length"], gocheck.DeepEquals, []string{"8"})
-	c.Assert(req.Header["Content-Md5"], gocheck.DeepEquals, []string{"JvkO/RDWFPEAJS/1bYja2A=="})
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form.Get("uploadId"), check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(req.Form["partNumber"], check.DeepEquals, []string{"1"})
+	c.Assert(req.Header["Content-Length"], check.DeepEquals, []string{"8"})
+	c.Assert(req.Header["Content-Md5"], check.DeepEquals, []string{"JvkO/RDWFPEAJS/1bYja2A=="})
+}
+
+func (s *S) TestPutPartCopy(c *check.C) {
+	testServer.Response(200, nil, InitMultiResultDump)
+	// PutPartCopy makes a Head request internally to verify access to the source object
+	// and obtain its size
+	testServer.Response(200, nil, "content")
+	testServer.Response(200, nil, PutCopyResultDump)
+
+	b := s.s3.Bucket("sample")
+
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
+
+	res, part, err := multi.PutPartCopy(1, s3.CopyOptions{}, "source-bucket/\u00FCber-fil\u00E9.jpg")
+	c.Assert(err, check.IsNil)
+	c.Assert(part.N, check.Equals, 1)
+	c.Assert(part.Size, check.Equals, int64(7))
+	c.Assert(res, check.DeepEquals, &s3.CopyObjectResult{
+		ETag:         `"9b2cf535f27731c974343645a3985328"`,
+		LastModified: `2009-10-28T22:32:00`})
+
+	// Verify the Head request
+	req := testServer.WaitRequest()
+	c.Assert(req.Method, check.Equals, "POST")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Header["Date"], check.Not(check.Equals), "")
+	c.Assert(err, check.IsNil)
+
+	testServer.WaitRequest()
+	req = testServer.WaitRequest()
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form.Get("uploadId"), check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(req.Form["partNumber"], check.DeepEquals, []string{"1"})
+	c.Assert(req.Header["X-Amz-Copy-Source"], check.DeepEquals, []string{`source-bucket%2F%C3%BCber-fil%C3%A9.jpg`})
 }
 
 func readAll(r io.Reader) string {
@@ -145,7 +200,7 @@ func readAll(r io.Reader) string {
 	return string(data)
 }
 
-func (s *S) TestPutAllNoPreviousUpload(c *gocheck.C) {
+func (s *S) TestPutAllNoPreviousUpload(c *check.C) {
 	// Don't retry the NoSuchUpload error.
 	s.DisableRetries()
 
@@ -160,50 +215,50 @@ func (s *S) TestPutAllNoPreviousUpload(c *gocheck.C) {
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.InitMulti("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
 
 	parts, err := multi.PutAll(strings.NewReader("part1part2last"), 5)
-	c.Assert(parts, gocheck.HasLen, 3)
-	c.Assert(parts[0].ETag, gocheck.Equals, `"etag1"`)
-	c.Assert(parts[1].ETag, gocheck.Equals, `"etag2"`)
-	c.Assert(parts[2].ETag, gocheck.Equals, `"etag3"`)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(parts, check.HasLen, 3)
+	c.Assert(parts[0].ETag, check.Equals, `"etag1"`)
+	c.Assert(parts[1].ETag, check.Equals, `"etag2"`)
+	c.Assert(parts[2].ETag, check.Equals, `"etag3"`)
+	c.Assert(err, check.IsNil)
 
 	// Init
 	testServer.WaitRequest()
 
 	// List old parts. Won't find anything.
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "GET")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
+	c.Assert(req.Method, check.Equals, "GET")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
 
 	// Send part 1.
 	req = testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "PUT")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form["partNumber"], gocheck.DeepEquals, []string{"1"})
-	c.Assert(req.Header["Content-Length"], gocheck.DeepEquals, []string{"5"})
-	c.Assert(readAll(req.Body), gocheck.Equals, "part1")
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form["partNumber"], check.DeepEquals, []string{"1"})
+	c.Assert(req.Header["Content-Length"], check.DeepEquals, []string{"5"})
+	c.Assert(readAll(req.Body), check.Equals, "part1")
 
 	// Send part 2.
 	req = testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "PUT")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form["partNumber"], gocheck.DeepEquals, []string{"2"})
-	c.Assert(req.Header["Content-Length"], gocheck.DeepEquals, []string{"5"})
-	c.Assert(readAll(req.Body), gocheck.Equals, "part2")
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form["partNumber"], check.DeepEquals, []string{"2"})
+	c.Assert(req.Header["Content-Length"], check.DeepEquals, []string{"5"})
+	c.Assert(readAll(req.Body), check.Equals, "part2")
 
 	// Send part 3 with shorter body.
 	req = testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "PUT")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form["partNumber"], gocheck.DeepEquals, []string{"3"})
-	c.Assert(req.Header["Content-Length"], gocheck.DeepEquals, []string{"4"})
-	c.Assert(readAll(req.Body), gocheck.Equals, "last")
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form["partNumber"], check.DeepEquals, []string{"3"})
+	c.Assert(req.Header["Content-Length"], check.DeepEquals, []string{"4"})
+	c.Assert(readAll(req.Body), check.Equals, "last")
 }
 
-func (s *S) TestPutAllZeroSizeFile(c *gocheck.C) {
+func (s *S) TestPutAllZeroSizeFile(c *check.C) {
 	// Don't retry the NoSuchUpload error.
 	s.DisableRetries()
 
@@ -214,33 +269,33 @@ func (s *S) TestPutAllZeroSizeFile(c *gocheck.C) {
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.InitMulti("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
 
 	// Must send at least one part, so that completing it will work.
 	parts, err := multi.PutAll(strings.NewReader(""), 5)
-	c.Assert(parts, gocheck.HasLen, 1)
-	c.Assert(parts[0].ETag, gocheck.Equals, `"etag1"`)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(parts, check.HasLen, 1)
+	c.Assert(parts[0].ETag, check.Equals, `"etag1"`)
+	c.Assert(err, check.IsNil)
 
 	// Init
 	testServer.WaitRequest()
 
 	// List old parts. Won't find anything.
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "GET")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
+	c.Assert(req.Method, check.Equals, "GET")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
 
 	// Send empty part.
 	req = testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "PUT")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form["partNumber"], gocheck.DeepEquals, []string{"1"})
-	c.Assert(req.Header["Content-Length"], gocheck.DeepEquals, []string{"0"})
-	c.Assert(readAll(req.Body), gocheck.Equals, "")
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form["partNumber"], check.DeepEquals, []string{"1"})
+	c.Assert(req.Header["Content-Length"], check.DeepEquals, []string{"0"})
+	c.Assert(readAll(req.Body), check.Equals, "")
 }
 
-func (s *S) TestPutAllResume(c *gocheck.C) {
+func (s *S) TestPutAllResume(c *check.C) {
 	etag2 := map[string]string{"ETag": `"etag2"`}
 	testServer.Response(200, nil, InitMultiResultDump)
 	testServer.Response(200, nil, ListPartsResultDump1)
@@ -249,23 +304,23 @@ func (s *S) TestPutAllResume(c *gocheck.C) {
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.InitMulti("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
 
 	// "part1" and "part3" match the checksums in ResultDump1.
 	// The middle one is a mismatch (it refers to "part2").
 	parts, err := multi.PutAll(strings.NewReader("part1partXpart3"), 5)
-	c.Assert(parts, gocheck.HasLen, 3)
-	c.Assert(parts[0].N, gocheck.Equals, 1)
-	c.Assert(parts[0].Size, gocheck.Equals, int64(5))
-	c.Assert(parts[0].ETag, gocheck.Equals, `"ffc88b4ca90a355f8ddba6b2c3b2af5c"`)
-	c.Assert(parts[1].N, gocheck.Equals, 2)
-	c.Assert(parts[1].Size, gocheck.Equals, int64(5))
-	c.Assert(parts[1].ETag, gocheck.Equals, `"etag2"`)
-	c.Assert(parts[2].N, gocheck.Equals, 3)
-	c.Assert(parts[2].Size, gocheck.Equals, int64(5))
-	c.Assert(parts[2].ETag, gocheck.Equals, `"49dcd91231f801159e893fb5c6674985"`)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(parts, check.HasLen, 3)
+	c.Assert(parts[0].N, check.Equals, 1)
+	c.Assert(parts[0].Size, check.Equals, int64(5))
+	c.Assert(parts[0].ETag, check.Equals, `"ffc88b4ca90a355f8ddba6b2c3b2af5c"`)
+	c.Assert(parts[1].N, check.Equals, 2)
+	c.Assert(parts[1].Size, check.Equals, int64(5))
+	c.Assert(parts[1].ETag, check.Equals, `"etag2"`)
+	c.Assert(parts[2].N, check.Equals, 3)
+	c.Assert(parts[2].Size, check.Equals, int64(5))
+	c.Assert(parts[2].ETag, check.Equals, `"49dcd91231f801159e893fb5c6674985"`)
+	c.Assert(err, check.IsNil)
 
 	// Init
 	testServer.WaitRequest()
@@ -273,20 +328,20 @@ func (s *S) TestPutAllResume(c *gocheck.C) {
 	// List old parts, broken in two requests.
 	for i := 0; i < 2; i++ {
 		req := testServer.WaitRequest()
-		c.Assert(req.Method, gocheck.Equals, "GET")
-		c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
+		c.Assert(req.Method, check.Equals, "GET")
+		c.Assert(req.URL.Path, check.Equals, "/sample/multi")
 	}
 
 	// Send part 2, as it didn't match the checksum.
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "PUT")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form["partNumber"], gocheck.DeepEquals, []string{"2"})
-	c.Assert(req.Header["Content-Length"], gocheck.DeepEquals, []string{"5"})
-	c.Assert(readAll(req.Body), gocheck.Equals, "partX")
+	c.Assert(req.Method, check.Equals, "PUT")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form["partNumber"], check.DeepEquals, []string{"2"})
+	c.Assert(req.Header["Content-Length"], check.DeepEquals, []string{"5"})
+	c.Assert(readAll(req.Body), check.Equals, "partX")
 }
 
-func (s *S) TestMultiComplete(c *gocheck.C) {
+func (s *S) TestMultiComplete(c *check.C) {
 	testServer.Response(200, nil, InitMultiResultDump)
 	// Note the 200 response. Completing will hold the connection on some
 	// kind of long poll, and may return a late error even after a 200.
@@ -295,17 +350,17 @@ func (s *S) TestMultiComplete(c *gocheck.C) {
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.InitMulti("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
 
 	err = multi.Complete([]s3.Part{{2, `"ETag2"`, 32}, {1, `"ETag1"`, 64}})
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 
 	testServer.WaitRequest()
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "POST")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form.Get("uploadId"), gocheck.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(req.Method, check.Equals, "POST")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form.Get("uploadId"), check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
 
 	var payload struct {
 		XMLName xml.Name
@@ -317,54 +372,54 @@ func (s *S) TestMultiComplete(c *gocheck.C) {
 
 	dec := xml.NewDecoder(req.Body)
 	err = dec.Decode(&payload)
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 
-	c.Assert(payload.XMLName.Local, gocheck.Equals, "CompleteMultipartUpload")
-	c.Assert(len(payload.Part), gocheck.Equals, 2)
-	c.Assert(payload.Part[0].PartNumber, gocheck.Equals, 1)
-	c.Assert(payload.Part[0].ETag, gocheck.Equals, `"ETag1"`)
-	c.Assert(payload.Part[1].PartNumber, gocheck.Equals, 2)
-	c.Assert(payload.Part[1].ETag, gocheck.Equals, `"ETag2"`)
+	c.Assert(payload.XMLName.Local, check.Equals, "CompleteMultipartUpload")
+	c.Assert(len(payload.Part), check.Equals, 2)
+	c.Assert(payload.Part[0].PartNumber, check.Equals, 1)
+	c.Assert(payload.Part[0].ETag, check.Equals, `"ETag1"`)
+	c.Assert(payload.Part[1].PartNumber, check.Equals, 2)
+	c.Assert(payload.Part[1].ETag, check.Equals, `"ETag2"`)
 }
 
-func (s *S) TestMultiAbort(c *gocheck.C) {
+func (s *S) TestMultiAbort(c *check.C) {
 	testServer.Response(200, nil, InitMultiResultDump)
 	testServer.Response(200, nil, "")
 
 	b := s.s3.Bucket("sample")
 
-	multi, err := b.InitMulti("multi", "text/plain", s3.Private)
-	c.Assert(err, gocheck.IsNil)
+	multi, err := b.InitMulti("multi", "text/plain", s3.Private, s3.Options{})
+	c.Assert(err, check.IsNil)
 
 	err = multi.Abort()
-	c.Assert(err, gocheck.IsNil)
+	c.Assert(err, check.IsNil)
 
 	testServer.WaitRequest()
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "DELETE")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/multi")
-	c.Assert(req.Form.Get("uploadId"), gocheck.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
+	c.Assert(req.Method, check.Equals, "DELETE")
+	c.Assert(req.URL.Path, check.Equals, "/sample/multi")
+	c.Assert(req.Form.Get("uploadId"), check.Matches, "JNbR_[A-Za-z0-9.]+QQ--")
 }
 
-func (s *S) TestListMulti(c *gocheck.C) {
+func (s *S) TestListMulti(c *check.C) {
 	testServer.Response(200, nil, ListMultiResultDump)
 
 	b := s.s3.Bucket("sample")
 
 	multis, prefixes, err := b.ListMulti("", "/")
-	c.Assert(err, gocheck.IsNil)
-	c.Assert(prefixes, gocheck.DeepEquals, []string{"a/", "b/"})
-	c.Assert(multis, gocheck.HasLen, 2)
-	c.Assert(multis[0].Key, gocheck.Equals, "multi1")
-	c.Assert(multis[0].UploadId, gocheck.Equals, "iUVug89pPvSswrikD")
-	c.Assert(multis[1].Key, gocheck.Equals, "multi2")
-	c.Assert(multis[1].UploadId, gocheck.Equals, "DkirwsSvPp98guVUi")
+	c.Assert(err, check.IsNil)
+	c.Assert(prefixes, check.DeepEquals, []string{"a/", "b/"})
+	c.Assert(multis, check.HasLen, 2)
+	c.Assert(multis[0].Key, check.Equals, "multi1")
+	c.Assert(multis[0].UploadId, check.Equals, "iUVug89pPvSswrikD")
+	c.Assert(multis[1].Key, check.Equals, "multi2")
+	c.Assert(multis[1].UploadId, check.Equals, "DkirwsSvPp98guVUi")
 
 	req := testServer.WaitRequest()
-	c.Assert(req.Method, gocheck.Equals, "GET")
-	c.Assert(req.URL.Path, gocheck.Equals, "/sample/")
-	c.Assert(req.Form["uploads"], gocheck.DeepEquals, []string{""})
-	c.Assert(req.Form["prefix"], gocheck.DeepEquals, []string{""})
-	c.Assert(req.Form["delimiter"], gocheck.DeepEquals, []string{"/"})
-	c.Assert(req.Form["max-uploads"], gocheck.DeepEquals, []string{"1000"})
+	c.Assert(req.Method, check.Equals, "GET")
+	c.Assert(req.URL.Path, check.Equals, "/sample/")
+	c.Assert(req.Form["uploads"], check.DeepEquals, []string{""})
+	c.Assert(req.Form["prefix"], check.DeepEquals, []string{""})
+	c.Assert(req.Form["delimiter"], check.DeepEquals, []string{"/"})
+	c.Assert(req.Form["max-uploads"], check.DeepEquals, []string{"1000"})
 }

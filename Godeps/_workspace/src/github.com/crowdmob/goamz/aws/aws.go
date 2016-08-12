@@ -19,7 +19,17 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/user"
+	"path"
+	"regexp"
+	"strings"
 	"time"
+)
+
+// Regular expressions for INI files
+var (
+	iniSectionRegexp = regexp.MustCompile(`^\s*\[([^\[\]]+)\]\s*$`)
+	iniSettingRegexp = regexp.MustCompile(`^\s*(.+?)\s*=\s*(.*\S)\s*$`)
 )
 
 // Defines the valid signers
@@ -49,18 +59,24 @@ type Region struct {
 	SDBEndpoint            string
 	SNSEndpoint            string
 	SQSEndpoint            string
+	SESEndpoint            string
 	IAMEndpoint            string
 	ELBEndpoint            string
 	DynamoDBEndpoint       string
 	CloudWatchServicepoint ServiceInfo
 	AutoScalingEndpoint    string
 	RDSEndpoint            ServiceInfo
+	KinesisEndpoint        string
+	STSEndpoint            string
+	CloudFormationEndpoint string
+	ElastiCacheEndpoint    string
 }
 
 var Regions = map[string]Region{
 	APNortheast.Name:  APNortheast,
 	APSoutheast.Name:  APSoutheast,
 	APSoutheast2.Name: APSoutheast2,
+	EUCentral.Name:    EUCentral,
 	EUWest.Name:       EUWest,
 	USEast.Name:       USEast,
 	USWest.Name:       USWest,
@@ -153,6 +169,11 @@ func (s *Service) BuildError(r *http.Response) error {
 	return &err
 }
 
+type ServiceError interface {
+	error
+	ErrorCode() string
+}
+
 type ErrorResponse struct {
 	Errors    Error  `xml:"Error"`
 	RequestId string // A unique ID for tracking the request
@@ -170,6 +191,10 @@ func (err *Error) Error() string {
 	return fmt.Sprintf("Type: %s, Code: %s, Message: %s",
 		err.Type, err.Code, err.Message,
 	)
+}
+
+func (err *Error) ErrorCode() string {
+	return err.Code
 }
 
 type Auth struct {
@@ -190,6 +215,16 @@ func (a *Auth) Token() string {
 
 func (a *Auth) Expiration() time.Time {
 	return a.expiration
+}
+
+// To be used with other APIs that return auth credentials such as STS
+func NewAuth(accessKey, secretKey, token string, expiration time.Time) *Auth {
+	return &Auth{
+		AccessKey:  accessKey,
+		SecretKey:  secretKey,
+		token:      token,
+		expiration: expiration,
+	}
 }
 
 // ResponseMetadata
@@ -230,6 +265,9 @@ type credentials struct {
 	Expiration      string
 }
 
+// GetMetaData retrieves instance metadata about the current machine.
+//
+// See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AESDG-chapter-instancedata.html for more details.
 func GetMetaData(path string) (contents []byte, err error) {
 	c := http.Client{
 		Transport: &http.Transport{
@@ -265,7 +303,15 @@ func GetMetaData(path string) (contents []byte, err error) {
 	return []byte(body), err
 }
 
-func getInstanceCredentials() (cred credentials, err error) {
+func GetRegion(regionName string) (region Region) {
+	region = Regions[regionName]
+	return
+}
+
+// GetInstanceCredentials creates an Auth based on the instance's role credentials.
+// If the running instance is not in EC2 or does not have a valid IAM role, an error will be returned.
+// For more info about setting up IAM roles, see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
+func GetInstanceCredentials() (cred credentials, err error) {
 	credentialPath := "iam/security-credentials/"
 
 	// Get the instance role
@@ -300,7 +346,7 @@ func GetAuth(accessKey string, secretKey, token string, expiration time.Time) (a
 	}
 
 	// Next try getting auth from the instance role
-	cred, err := getInstanceCredentials()
+	cred, err := GetInstanceCredentials()
 	if err == nil {
 		// Found auth, return
 		auth.AccessKey = cred.AccessKeyId
@@ -308,12 +354,20 @@ func GetAuth(accessKey string, secretKey, token string, expiration time.Time) (a
 		auth.token = cred.Token
 		exptdate, err := time.Parse("2006-01-02T15:04:05Z", cred.Expiration)
 		if err != nil {
-			err = fmt.Errorf("Error Parseing expiration date: cred.Expiration :%s , error: %s \n", cred.Expiration, err)
+			err = fmt.Errorf("Error Parsing expiration date: cred.Expiration :%s , error: %s \n", cred.Expiration, err)
 		}
 		auth.expiration = exptdate
 		return auth, err
 	}
-	err = errors.New("No valid AWS authentication found")
+
+	// Next try getting auth from the credentials file
+	auth, err = CredentialFileAuth("", "", time.Minute*5)
+	if err == nil {
+		return
+	}
+
+	//err = errors.New("No valid AWS authentication found")
+	err = fmt.Errorf("No valid AWS authentication found: %s", err)
 	return auth, err
 }
 
@@ -337,6 +391,96 @@ func EnvAuth() (auth Auth, err error) {
 		err = errors.New("AWS_SECRET_ACCESS_KEY or AWS_SECRET_KEY not found in environment")
 	}
 	return
+}
+
+// CredentialFileAuth creates and Auth based on a credentials file. The file
+// contains various authentication profiles for use with AWS.
+//
+// The credentials file, which is used by other AWS SDKs, is documented at
+// http://blogs.aws.amazon.com/security/post/Tx3D6U6WSFGOK2H/A-New-and-Standardized-Way-to-Manage-Credentials-in-the-AWS-SDKs
+func CredentialFileAuth(filePath string, profile string, expiration time.Duration) (auth Auth, err error) {
+	if profile == "" {
+		profile = "default"
+	}
+
+	if filePath == "" {
+		u, err := user.Current()
+		if err != nil {
+			return auth, err
+		}
+
+		filePath = path.Join(u.HomeDir, ".aws", "credentials")
+	}
+
+	// read the file, then parse the INI
+	contents, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return
+	}
+
+	profiles := parseINI(string(contents))
+	profileData, ok := profiles[profile]
+
+	if !ok {
+		err = errors.New("The credentials file did not contain the profile")
+		return
+	}
+
+	keyId, ok := profileData["aws_access_key_id"]
+	if !ok {
+		err = errors.New("The credentials file did not contain required attribute aws_access_key_id")
+		return
+	}
+
+	secretKey, ok := profileData["aws_secret_access_key"]
+	if !ok {
+		err = errors.New("The credentials file did not contain required attribute aws_secret_access_key")
+		return
+	}
+
+	auth.AccessKey = keyId
+	auth.SecretKey = secretKey
+
+	if token, ok := profileData["aws_session_token"]; ok {
+		auth.token = token
+	}
+
+	auth.expiration = time.Now().Add(expiration)
+
+	return
+}
+
+// parseINI takes the contents of a credentials file and returns a map, whose keys
+// are the various profiles, and whose values are maps of the settings for the
+// profiles
+func parseINI(fileContents string) map[string]map[string]string {
+	profiles := make(map[string]map[string]string)
+
+	lines := strings.Split(fileContents, "\n")
+
+	var currentSection map[string]string
+	for _, line := range lines {
+		// remove comments, which start with a semi-colon
+		if split := strings.Split(line, ";"); len(split) > 1 {
+			line = split[0]
+		}
+
+		// check if the line is the start of a profile.
+		//
+		// for example:
+		//     [default]
+		//
+		// otherwise, check for the proper setting
+		//     property=value
+		if sectMatch := iniSectionRegexp.FindStringSubmatch(line); len(sectMatch) == 2 {
+			currentSection = make(map[string]string)
+			profiles[sectMatch[1]] = currentSection
+		} else if setMatch := iniSettingRegexp.FindStringSubmatch(line); len(setMatch) == 3 && currentSection != nil {
+			currentSection[setMatch[1]] = setMatch[2]
+		}
+	}
+
+	return profiles
 }
 
 // Encode takes a string and URI-encodes it in a way suitable
@@ -368,4 +512,113 @@ func Encode(s string) string {
 		}
 	}
 	return string(e[:ei])
+}
+
+func dialTimeout(network, addr string) (net.Conn, error) {
+	return net.DialTimeout(network, addr, time.Duration(2*time.Second))
+}
+
+func AvailabilityZone() string {
+	transport := http.Transport{Dial: dialTimeout}
+	client := http.Client{
+		Transport: &transport,
+	}
+	resp, err := client.Get("http://169.254.169.254/latest/meta-data/placement/availability-zone")
+	if err != nil {
+		return "unknown"
+	} else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "unknown"
+		} else {
+			return string(body)
+		}
+	}
+}
+
+func InstanceRegion() string {
+	az := AvailabilityZone()
+	if az == "unknown" {
+		return az
+	} else {
+		region := az[:len(az)-1]
+		return region
+	}
+}
+
+func InstanceId() string {
+	transport := http.Transport{Dial: dialTimeout}
+	client := http.Client{
+		Transport: &transport,
+	}
+	resp, err := client.Get("http://169.254.169.254/latest/meta-data/instance-id")
+	if err != nil {
+		return "unknown"
+	} else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "unknown"
+		} else {
+			return string(body)
+		}
+	}
+}
+
+func InstanceType() string {
+	transport := http.Transport{Dial: dialTimeout}
+	client := http.Client{
+		Transport: &transport,
+	}
+	resp, err := client.Get("http://169.254.169.254/latest/meta-data/instance-type")
+	if err != nil {
+		return "unknown"
+	} else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "unknown"
+		} else {
+			return string(body)
+		}
+	}
+}
+
+func ServerLocalIp() string {
+	transport := http.Transport{Dial: dialTimeout}
+	client := http.Client{
+		Transport: &transport,
+	}
+	resp, err := client.Get("http://169.254.169.254/latest/meta-data/local-ipv4")
+	if err != nil {
+		return "127.0.0.1"
+	} else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "127.0.0.1"
+		} else {
+			return string(body)
+		}
+	}
+}
+
+func ServerPublicIp() string {
+	transport := http.Transport{Dial: dialTimeout}
+	client := http.Client{
+		Transport: &transport,
+	}
+	resp, err := client.Get("http://169.254.169.254/latest/meta-data/public-ipv4")
+	if err != nil {
+		return "127.0.0.1"
+	} else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "127.0.0.1"
+		} else {
+			return string(body)
+		}
+	}
 }

@@ -19,10 +19,12 @@ func TestOrganizationsService_ListTeams(t *testing.T) {
 
 	mux.HandleFunc("/orgs/o/teams", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testFormValues(t, r, values{"page": "2"})
 		fmt.Fprint(w, `[{"id":1}]`)
 	})
 
-	teams, _, err := client.Organizations.ListTeams("o")
+	opt := &ListOptions{Page: 2}
+	teams, _, err := client.Organizations.ListTeams("o", opt)
 	if err != nil {
 		t.Errorf("Organizations.ListTeams returned error: %v", err)
 	}
@@ -34,7 +36,7 @@ func TestOrganizationsService_ListTeams(t *testing.T) {
 }
 
 func TestOrganizationsService_ListTeams_invalidOrg(t *testing.T) {
-	_, _, err := client.Organizations.ListTeams("%")
+	_, _, err := client.Organizations.ListTeams("%", nil)
 	testURLParseError(t, err)
 }
 
@@ -141,10 +143,12 @@ func TestOrganizationsService_ListTeamMembers(t *testing.T) {
 
 	mux.HandleFunc("/teams/1/members", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testFormValues(t, r, values{"page": "2"})
 		fmt.Fprint(w, `[{"id":1}]`)
 	})
 
-	members, _, err := client.Organizations.ListTeamMembers(1)
+	opt := &ListOptions{Page: 2}
+	members, _, err := client.Organizations.ListTeamMembers(1, opt)
 	if err != nil {
 		t.Errorf("Organizations.ListTeamMembers returned error: %v", err)
 	}
@@ -302,10 +306,12 @@ func TestOrganizationsService_ListTeamRepos(t *testing.T) {
 
 	mux.HandleFunc("/teams/1/repos", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testFormValues(t, r, values{"page": "2"})
 		fmt.Fprint(w, `[{"id":1}]`)
 	})
 
-	members, _, err := client.Organizations.ListTeamRepos(1)
+	opt := &ListOptions{Page: 2}
+	members, _, err := client.Organizations.ListTeamRepos(1, opt)
 	if err != nil {
 		t.Errorf("Organizations.ListTeamRepos returned error: %v", err)
 	}
@@ -428,4 +434,84 @@ func TestOrganizationsService_RemoveTeamRepo(t *testing.T) {
 func TestOrganizationsService_RemoveTeamRepo_invalidOwner(t *testing.T) {
 	_, err := client.Organizations.RemoveTeamRepo(1, "%", "r")
 	testURLParseError(t, err)
+}
+
+func TestOrganizationsService_GetTeamMembership(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/teams/1/memberships/u", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeMembershipPreview)
+		fmt.Fprint(w, `{"url":"u", "state":"active"}`)
+	})
+
+	membership, _, err := client.Organizations.GetTeamMembership(1, "u")
+	if err != nil {
+		t.Errorf("Organizations.GetTeamMembership returned error: %v", err)
+	}
+
+	want := &Membership{URL: String("u"), State: String("active")}
+	if !reflect.DeepEqual(membership, want) {
+		t.Errorf("Organizations.GetTeamMembership returned %+v, want %+v", membership, want)
+	}
+}
+
+func TestOrganizationsService_AddTeamMembership(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/teams/1/memberships/u", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		testHeader(t, r, "Accept", mediaTypeMembershipPreview)
+		fmt.Fprint(w, `{"url":"u", "state":"pending"}`)
+	})
+
+	membership, _, err := client.Organizations.AddTeamMembership(1, "u")
+	if err != nil {
+		t.Errorf("Organizations.AddTeamMembership returned error: %v", err)
+	}
+
+	want := &Membership{URL: String("u"), State: String("pending")}
+	if !reflect.DeepEqual(membership, want) {
+		t.Errorf("Organizations.AddTeamMembership returned %+v, want %+v", membership, want)
+	}
+}
+
+func TestOrganizationsService_RemoveTeamMembership(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/teams/1/memberships/u", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "DELETE")
+		testHeader(t, r, "Accept", mediaTypeMembershipPreview)
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	_, err := client.Organizations.RemoveTeamMembership(1, "u")
+	if err != nil {
+		t.Errorf("Organizations.RemoveTeamMembership returned error: %v", err)
+	}
+}
+
+func TestOrganizationsService_ListUserTeams(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/user/teams", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testFormValues(t, r, values{"page": "1"})
+		fmt.Fprint(w, `[{"id":1}]`)
+	})
+
+	opt := &ListOptions{Page: 1}
+	teams, _, err := client.Organizations.ListUserTeams(opt)
+	if err != nil {
+		t.Errorf("Organizations.ListUserTeams returned error: %v", err)
+	}
+
+	want := []Team{{ID: Int(1)}}
+	if !reflect.DeepEqual(teams, want) {
+		t.Errorf("Organizations.ListUserTeams returned %+v, want %+v", teams, want)
+	}
 }

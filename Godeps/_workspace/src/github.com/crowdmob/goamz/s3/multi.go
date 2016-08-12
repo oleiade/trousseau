@@ -8,8 +8,10 @@ import (
 	"encoding/xml"
 	"errors"
 	"io"
+	"net/url"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 // Multi represents an unfinished multipart upload.
@@ -88,7 +90,7 @@ func (b *Bucket) ListMulti(prefix, delim string) (multis []*Multi, prefixes []st
 // Multi returns a multipart upload handler for the provided key
 // inside b. If a multipart upload exists for key, it is returned,
 // otherwise a new multipart upload is initiated with contType and perm.
-func (b *Bucket) Multi(key, contType string, perm ACL) (*Multi, error) {
+func (b *Bucket) Multi(key, contType string, perm ACL, options Options) (*Multi, error) {
 	multis, _, err := b.ListMulti(key, "")
 	if err != nil && !hasCode(err, "NoSuchUpload") {
 		return nil, err
@@ -98,19 +100,20 @@ func (b *Bucket) Multi(key, contType string, perm ACL) (*Multi, error) {
 			return m, nil
 		}
 	}
-	return b.InitMulti(key, contType, perm)
+	return b.InitMulti(key, contType, perm, options)
 }
 
 // InitMulti initializes a new multipart upload at the provided
 // key inside b and returns a value for manipulating it.
 //
 // See http://goo.gl/XP8kL for details.
-func (b *Bucket) InitMulti(key string, contType string, perm ACL) (*Multi, error) {
+func (b *Bucket) InitMulti(key string, contType string, perm ACL, options Options) (*Multi, error) {
 	headers := map[string][]string{
 		"Content-Type":   {contType},
 		"Content-Length": {"0"},
 		"x-amz-acl":      {string(perm)},
 	}
+	options.addHeaders(headers)
 	params := map[string][]string{
 		"uploads": {""},
 	}
@@ -135,6 +138,46 @@ func (b *Bucket) InitMulti(key string, contType string, perm ACL) (*Multi, error
 		return nil, err
 	}
 	return &Multi{Bucket: b, Key: key, UploadId: resp.UploadId}, nil
+}
+
+func (m *Multi) PutPartCopy(n int, options CopyOptions, source string) (*CopyObjectResult, Part, error) {
+	headers := map[string][]string{
+		"x-amz-copy-source": {url.QueryEscape(source)},
+	}
+	options.addHeaders(headers)
+	params := map[string][]string{
+		"uploadId":   {m.UploadId},
+		"partNumber": {strconv.FormatInt(int64(n), 10)},
+	}
+
+	sourceBucket := m.Bucket.S3.Bucket(strings.TrimRight(strings.SplitAfterN(source, "/", 2)[0], "/"))
+	sourceMeta, err := sourceBucket.Head(strings.SplitAfterN(source, "/", 2)[1], nil)
+	if err != nil {
+		return nil, Part{}, err
+	}
+
+	for attempt := attempts.Start(); attempt.Next(); {
+		req := &request{
+			method:  "PUT",
+			bucket:  m.Bucket.Name,
+			path:    m.Key,
+			headers: headers,
+			params:  params,
+		}
+		resp := &CopyObjectResult{}
+		err = m.Bucket.S3.query(req, resp)
+		if shouldRetry(err) && attempt.HasNext() {
+			continue
+		}
+		if err != nil {
+			return nil, Part{}, err
+		}
+		if resp.ETag == "" {
+			return nil, Part{}, errors.New("part upload succeeded with no ETag")
+		}
+		return resp, Part{n, resp.ETag, sourceMeta.ContentLength}, nil
+	}
+	panic("unreachable")
 }
 
 // PutPart sends part n of the multipart upload, reading all the content from r.
@@ -228,14 +271,26 @@ type listPartsResp struct {
 // That's the default. Here just for testing.
 var listPartsMax = 1000
 
+// Kept for backcompatability. See the documentation for ListPartsFull
+func (m *Multi) ListParts() ([]Part, error) {
+	return m.ListPartsFull(0, listPartsMax)
+}
+
 // ListParts returns the list of previously uploaded parts in m,
-// ordered by part number.
+// ordered by part number (Only parts with higher part numbers than
+// partNumberMarker will be listed). Only up to maxParts parts will be
+// returned.
 //
 // See http://goo.gl/ePioY for details.
-func (m *Multi) ListParts() ([]Part, error) {
+func (m *Multi) ListPartsFull(partNumberMarker int, maxParts int) ([]Part, error) {
+	if maxParts > listPartsMax {
+		maxParts = listPartsMax
+	}
+
 	params := map[string][]string{
-		"uploadId":  {m.UploadId},
-		"max-parts": {strconv.FormatInt(int64(listPartsMax), 10)},
+		"uploadId":           {m.UploadId},
+		"max-parts":          {strconv.FormatInt(int64(maxParts), 10)},
+		"part-number-marker": {strconv.FormatInt(int64(partNumberMarker), 10)},
 	}
 	var parts partSlice
 	for attempt := attempts.Start(); attempt.Next(); {

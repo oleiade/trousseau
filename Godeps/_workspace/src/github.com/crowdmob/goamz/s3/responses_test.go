@@ -1,5 +1,13 @@
 package s3_test
 
+var PutCopyResultDump = `
+<?xml version="1.0" encoding="UTF-8"?>
+<CopyObjectResult>
+  <LastModified>2009-10-28T22:32:00</LastModified>
+  <ETag>&quot;9b2cf535f27731c974343645a3985328&quot;</ETag>
+</CopyObjectResult>
+`
+
 var GetObjectErrorDump = `
 <?xml version="1.0" encoding="UTF-8"?>
 <Error><Code>NoSuchBucket</Code><Message>The specified bucket does not exist</Message>
@@ -196,3 +204,36 @@ var InternalErrorDump = `
   <HostId>kjhwqk</HostId>
 </Error>
 `
+
+var GetServiceDump = `
+<?xml version="1.0" encoding="UTF-8"?>
+<ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01">
+  <Owner>
+    <ID>bcaf1ffd86f461ca5fb16fd081034f</ID>
+    <DisplayName>webfile</DisplayName>
+  </Owner>
+  <Buckets>
+    <Bucket>
+      <Name>quotes</Name>
+      <CreationDate>2006-02-03T16:45:09.000Z</CreationDate>
+    </Bucket>
+    <Bucket>
+      <Name>samples</Name>
+      <CreationDate>2006-02-03T16:41:58.000Z</CreationDate>
+    </Bucket>
+  </Buckets>
+</ListAllMyBucketsResult>
+`
+
+var GetLocationUsStandard = `
+<?xml version="1.0" encoding="UTF-8"?>
+<LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/"/>
+`
+
+var GetLocationUsWest1 = `
+<?xml version="1.0" encoding="UTF-8"?>
+<LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">us-west-1</LocationConstraint>
+`
+
+var BucketWebsiteConfigurationDump = `<?xml version="1.0" encoding="UTF-8"?>
+<WebsiteConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><RedirectAllRequestsTo><HostName>example.com</HostName></RedirectAllRequestsTo></WebsiteConfiguration>`

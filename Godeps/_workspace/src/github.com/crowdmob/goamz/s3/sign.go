@@ -36,12 +36,14 @@ var s3ParamsToSign = map[string]bool{
 	"response-content-disposition": true,
 	"response-content-encoding":    true,
 	"website":                      true,
+	"delete":                       true,
 }
 
 func sign(auth aws.Auth, method, canonicalPath string, params, headers map[string][]string) {
 	var md5, ctype, date, xamz string
 	var xamzDate bool
-	var sarray []string
+	var keys, sarray []string
+	xheaders := make(map[string]string)
 	for k, v := range headers {
 		k = strings.ToLower(k)
 		switch k {
@@ -55,8 +57,8 @@ func sign(auth aws.Auth, method, canonicalPath string, params, headers map[strin
 			}
 		default:
 			if strings.HasPrefix(k, "x-amz-") {
-				vall := strings.Join(v, ",")
-				sarray = append(sarray, k+":"+vall)
+				keys = append(keys, k)
+				xheaders[k] = strings.Join(v, ",")
 				if k == "x-amz-date" {
 					xamzDate = true
 					date = ""
@@ -64,8 +66,13 @@ func sign(auth aws.Auth, method, canonicalPath string, params, headers map[strin
 			}
 		}
 	}
-	if len(sarray) > 0 {
-		sort.StringSlice(sarray).Sort()
+	if len(keys) > 0 {
+		sort.StringSlice(keys).Sort()
+		for i := range keys {
+			key := keys[i]
+			value := xheaders[key]
+			sarray = append(sarray, key+":"+value)
+		}
 		xamz = strings.Join(sarray, "\n") + "\n"
 	}
 

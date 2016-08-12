@@ -1,71 +1,29 @@
 {
 	"ImportPath": "github.com/oleiade/trousseau",
-	"GoVersion": "go1.3",
+	"GoVersion": "go1.6.3",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
 		{
-			"ImportPath": "code.google.com/p/go.crypto/cast5",
-			"Comment": "null-191",
-			"Rev": "7aa593ce8ceaf0199504fff27455bbb60eedabc7"
-		},
-		{
-			"ImportPath": "code.google.com/p/go.crypto/openpgp",
-			"Comment": "null-191",
-			"Rev": "7aa593ce8ceaf0199504fff27455bbb60eedabc7"
-		},
-		{
-			"ImportPath": "code.google.com/p/go.crypto/ssh/terminal",
-			"Comment": "null-191",
-			"Rev": "7aa593ce8ceaf0199504fff27455bbb60eedabc7"
-		},
-		{
-			"ImportPath": "code.google.com/p/goauth2/oauth",
-			"Comment": "weekly-43",
-			"Rev": "d4571a95014ff1fdd0055dc0f6b7e977a42b1e5a"
-		},
-		{
-			"ImportPath": "code.google.com/p/gosshold/ssh",
-			"Comment": "null-3",
-			"Rev": "9dd3b6b6e7b3e1b7f30c2b58c5ec5fff6bf9feff"
-		},
-		{
-			"ImportPath": "github.com/Sirupsen/logrus",
-			"Rev": "7344642b501993e2ac905f516c9a948f371ec513"
-		},
-		{
-			"ImportPath": "github.com/burke/ttyutils",
-			"Rev": "70f0d73eb47f7033f514f7f8f5138152fe1088fc"
-		},
-		{
-			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-24-g7381bc4",
-			"Rev": "7381bc4e62942763475703c7edd405f1e42adf4f"
-		},
-		{
 			"ImportPath": "github.com/crowdmob/goamz/aws",
-			"Rev": "26c9d18f01319c2e192dca8ac8dcd9e7cde01f60"
+			"Rev": "3a06871fe9fc0281ca90f3a7d97258d042ed64c0"
 		},
 		{
 			"ImportPath": "github.com/crowdmob/goamz/s3",
-			"Rev": "26c9d18f01319c2e192dca8ac8dcd9e7cde01f60"
+			"Rev": "3a06871fe9fc0281ca90f3a7d97258d042ed64c0"
 		},
 		{
 			"ImportPath": "github.com/google/go-github/github",
-			"Rev": "34a4afeea7e81dd8b333182da906692d72bdea1a"
+			"Rev": "2431923100d4989611dcc339f1ff8d280bd9c84c"
 		},
 		{
 			"ImportPath": "github.com/google/go-querystring/query",
-			"Rev": "ec0a78e0f4db229b7897be36596a8944230b857a"
-		},
-		{
-			"ImportPath": "github.com/guelfey/go.dbus",
-			"Rev": "f6a3a2366cc39b8479cadc499d3c735fb10fbdda"
+			"Rev": "9235644dd9e52eeae6fa48efd539fdc351a0af53"
 		},
 		{
 			"ImportPath": "github.com/howeyc/gopass",
-			"Rev": "4cf66881dcc3d6f0071eb6473d95c39e460de696"
+			"Rev": "2c70fa70727c953c51695f800f25d6b44abb368e"
 		},
 		{
 			"ImportPath": "github.com/oleiade/reflections",
@@ -78,11 +36,37 @@
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
-			"Rev": "5cc789b89e1b0289394556166a1fccd55c93d868"
+			"Comment": "v1.0-17-g089c718",
+			"Rev": "089c7181b8c728499929ff09b62d3fdd8df8adff"
 		},
 		{
 			"ImportPath": "github.com/tmc/keyring",
 			"Rev": "c97358d3b0f2df246afedabacbad24fad4e3246e"
+		},
+		{
+			"ImportPath": "github.com/urfave/cli",
+			"Comment": "v1.18.0-47-g168c954",
+			"Rev": "168c95418e66e019fe17b8f4f5c45aa62ff80e23"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/cast5",
+			"Rev": "c57d4a71915a248dbad846d60825145062b4c18e"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/openpgp",
+			"Rev": "c57d4a71915a248dbad846d60825145062b4c18e"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "c57d4a71915a248dbad846d60825145062b4c18e"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "d9558e5c97f85372afee28cf2b6059d7d3818919"
+		},
+		{
+			"ImportPath": "golang.org/x/oauth2",
+			"Rev": "8914e5017ca260f2a3a1575b1e6868874050d95e"
 		}
 	]
 }

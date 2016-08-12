@@ -20,6 +20,7 @@ type RepositoryCommit struct {
 	Committer *User    `json:"committer,omitempty"`
 	Parents   []Commit `json:"parents,omitempty"`
 	Message   *string  `json:"message,omitempty"`
+	HTMLURL   *string  `json:"html_url,omitempty"`
 
 	// Details about how many changes were made in this commit. Only filled in during GetCommit!
 	Stats *CommitStats `json:"stats,omitempty"`
@@ -94,6 +95,8 @@ type CommitsListOptions struct {
 
 	// Until when should Commits be included in the response.
 	Until time.Time `url:"until,omitempty"`
+
+	ListOptions
 }
 
 // ListCommits lists the commits of a repository.

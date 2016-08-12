@@ -3,13 +3,13 @@ package aws_test
 import (
 	"fmt"
 	"github.com/crowdmob/goamz/aws"
-	"launchpad.net/gocheck"
+	"gopkg.in/check.v1"
 	"net/http"
 	"strings"
 	"time"
 )
 
-var _ = gocheck.Suite(&V4SignerSuite{})
+var _ = check.Suite(&V4SignerSuite{})
 
 type V4SignerSuite struct {
 	auth   aws.Auth
@@ -34,7 +34,7 @@ type V4SignerSuiteCaseRequest struct {
 	body    string
 }
 
-func (s *V4SignerSuite) SetUpSuite(c *gocheck.C) {
+func (s *V4SignerSuite) SetUpSuite(c *check.C) {
 	s.auth = aws.Auth{AccessKey: "AKIDEXAMPLE", SecretKey: "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"}
 	s.region = aws.USEast
 
@@ -84,6 +84,51 @@ func (s *V4SignerSuite) SetUpSuite(c *gocheck.C) {
 			stringToSign:     "AWS4-HMAC-SHA256\n20110909T233600Z\n20110909/us-east-1/host/aws4_request\ndddd1902add08da1ac94782b05f9278c08dc7468db178a84f8950d93b30b1f35",
 			signature:        "debf546796015d6f6ded8626f5ce98597c33b47b9164cf6b17b4642036fcb592",
 			authorization:    "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/host/aws4_request, SignedHeaders=date;host;p, Signature=debf546796015d6f6ded8626f5ce98597c33b47b9164cf6b17b4642036fcb592",
+		},
+
+		// get-empty
+		V4SignerSuiteCase{
+			label: "get-relative-relative",
+			request: V4SignerSuiteCaseRequest{
+				method:  "GET",
+				host:    "host.foo.com",
+				url:     "",
+				headers: []string{"Date:Mon, 09 Sep 2011 23:36:00 GMT"},
+			},
+			canonicalRequest: "GET\n/\n\ndate:Mon, 09 Sep 2011 23:36:00 GMT\nhost:host.foo.com\n\ndate;host\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			stringToSign:     "AWS4-HMAC-SHA256\n20110909T233600Z\n20110909/us-east-1/host/aws4_request\n366b91fb121d72a00f46bbe8d395f53a102b06dfb7e79636515208ed3fa606b1",
+			signature:        "b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+			authorization:    "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/host/aws4_request, SignedHeaders=date;host, Signature=b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+		},
+
+		// get-single-relative
+		V4SignerSuiteCase{
+			label: "get-relative-relative",
+			request: V4SignerSuiteCaseRequest{
+				method:  "GET",
+				host:    "host.foo.com",
+				url:     "/.",
+				headers: []string{"Date:Mon, 09 Sep 2011 23:36:00 GMT"},
+			},
+			canonicalRequest: "GET\n/\n\ndate:Mon, 09 Sep 2011 23:36:00 GMT\nhost:host.foo.com\n\ndate;host\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			stringToSign:     "AWS4-HMAC-SHA256\n20110909T233600Z\n20110909/us-east-1/host/aws4_request\n366b91fb121d72a00f46bbe8d395f53a102b06dfb7e79636515208ed3fa606b1",
+			signature:        "b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+			authorization:    "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/host/aws4_request, SignedHeaders=date;host, Signature=b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+		},
+
+		// get-multiple-relative
+		V4SignerSuiteCase{
+			label: "get-relative-relative",
+			request: V4SignerSuiteCaseRequest{
+				method:  "GET",
+				host:    "host.foo.com",
+				url:     "/./././",
+				headers: []string{"Date:Mon, 09 Sep 2011 23:36:00 GMT"},
+			},
+			canonicalRequest: "GET\n/\n\ndate:Mon, 09 Sep 2011 23:36:00 GMT\nhost:host.foo.com\n\ndate;host\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			stringToSign:     "AWS4-HMAC-SHA256\n20110909T233600Z\n20110909/us-east-1/host/aws4_request\n366b91fb121d72a00f46bbe8d395f53a102b06dfb7e79636515208ed3fa606b1",
+			signature:        "b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
+			authorization:    "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/host/aws4_request, SignedHeaders=date;host, Signature=b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470",
 		},
 
 		// get-relative-relative
@@ -465,13 +510,13 @@ func (s *V4SignerSuite) SetUpSuite(c *gocheck.C) {
 	)
 }
 
-func (s *V4SignerSuite) TestCases(c *gocheck.C) {
+func (s *V4SignerSuite) TestCases(c *check.C) {
 	signer := aws.NewV4Signer(s.auth, "host", s.region)
 
 	for _, testCase := range s.cases {
 
 		req, err := http.NewRequest(testCase.request.method, "http://"+testCase.request.host+testCase.request.url, strings.NewReader(testCase.request.body))
-		c.Assert(err, gocheck.IsNil, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Assert(err, check.IsNil, check.Commentf("Testcase: %s", testCase.label))
 		for _, v := range testCase.request.headers {
 			h := strings.SplitN(v, ":", 2)
 			req.Header.Add(h[0], h[1])
@@ -481,19 +526,19 @@ func (s *V4SignerSuite) TestCases(c *gocheck.C) {
 		t := signer.RequestTime(req)
 
 		canonicalRequest := signer.CanonicalRequest(req)
-		c.Check(canonicalRequest, gocheck.Equals, testCase.canonicalRequest, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(canonicalRequest, check.Equals, testCase.canonicalRequest, check.Commentf("Testcase: %s", testCase.label))
 
 		stringToSign := signer.StringToSign(t, canonicalRequest)
-		c.Check(stringToSign, gocheck.Equals, testCase.stringToSign, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(stringToSign, check.Equals, testCase.stringToSign, check.Commentf("Testcase: %s", testCase.label))
 
 		signature := signer.Signature(t, stringToSign)
-		c.Check(signature, gocheck.Equals, testCase.signature, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(signature, check.Equals, testCase.signature, check.Commentf("Testcase: %s", testCase.label))
 
 		authorization := signer.Authorization(req.Header, t, signature)
-		c.Check(authorization, gocheck.Equals, testCase.authorization, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(authorization, check.Equals, testCase.authorization, check.Commentf("Testcase: %s", testCase.label))
 
 		signer.Sign(req)
-		c.Check(req.Header.Get("Authorization"), gocheck.Equals, testCase.authorization, gocheck.Commentf("Testcase: %s", testCase.label))
+		c.Check(req.Header.Get("Authorization"), check.Equals, testCase.authorization, check.Commentf("Testcase: %s", testCase.label))
 	}
 }
 

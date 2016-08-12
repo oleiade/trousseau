@@ -108,6 +108,9 @@ func (s *Route53Signer) Sign(req *http.Request) {
 	req.Header.Set("X-Amzn-Authorization", authHeader)
 	req.Header.Set("X-Amz-Date", date)
 	req.Header.Set("Content-Type", "application/xml")
+	if s.auth.Token() != "" {
+		req.Header.Set("X-Amzn-Security-Token", s.auth.Token())
+	}
 }
 
 /*
@@ -118,13 +121,20 @@ type V4Signer struct {
 	auth        Auth
 	serviceName string
 	region      Region
+	// Add the x-amz-content-sha256 header
+	IncludeXAmzContentSha256 bool
 }
 
 /*
 Return a new instance of a V4Signer capable of signing AWS requests.
 */
 func NewV4Signer(auth Auth, serviceName string, region Region) *V4Signer {
-	return &V4Signer{auth: auth, serviceName: serviceName, region: region}
+	return &V4Signer{
+		auth:        auth,
+		serviceName: serviceName,
+		region:      region,
+		IncludeXAmzContentSha256: false,
+	}
 }
 
 /*
@@ -140,13 +150,38 @@ The signed request will include a new "Authorization" header indicating that the
 Any changes to the request after signing the request will invalidate the signature.
 */
 func (s *V4Signer) Sign(req *http.Request) {
-	req.Header.Set("host", req.Host)                  // host header must be included as a signed header
-	t := s.requestTime(req)                           // Get requst time
-	creq := s.canonicalRequest(req)                   // Build canonical request
+	req.Header.Set("host", req.Host) // host header must be included as a signed header
+	t := s.requestTime(req)          // Get request time
+
+	payloadHash := ""
+
+	if _, ok := req.Form["X-Amz-Expires"]; ok {
+		// We are authenticating the the request by using query params
+		// (also known as pre-signing a url, http://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html)
+		payloadHash = "UNSIGNED-PAYLOAD"
+		req.Header.Del("x-amz-date")
+
+		req.Form["X-Amz-SignedHeaders"] = []string{s.signedHeaders(req.Header)}
+		req.Form["X-Amz-Algorithm"] = []string{"AWS4-HMAC-SHA256"}
+		req.Form["X-Amz-Credential"] = []string{s.auth.AccessKey + "/" + s.credentialScope(t)}
+		req.Form["X-Amz-Date"] = []string{t.Format(ISO8601BasicFormat)}
+		req.URL.RawQuery = req.Form.Encode()
+	} else {
+		payloadHash = s.payloadHash(req)
+		if s.IncludeXAmzContentSha256 {
+			req.Header.Set("x-amz-content-sha256", payloadHash) // x-amz-content-sha256 contains the payload hash
+		}
+	}
+	creq := s.canonicalRequest(req, payloadHash)      // Build canonical request
 	sts := s.stringToSign(t, creq)                    // Build string to sign
 	signature := s.signature(t, sts)                  // Calculate the AWS Signature Version 4
 	auth := s.authorization(req.Header, t, signature) // Create Authorization header value
-	req.Header.Set("Authorization", auth)             // Add Authorization header to request
+
+	if _, ok := req.Form["X-Amz-Expires"]; ok {
+		req.Form["X-Amz-Signature"] = []string{signature}
+	} else {
+		req.Header.Set("Authorization", auth) // Add Authorization header to request
+	}
 	return
 }
 
@@ -199,28 +234,38 @@ canonicalRequest method creates the canonical request according to Task 1 of the
       CanonicalHeaders + '\n' +
       SignedHeaders + '\n' +
       HexEncode(Hash(Payload))
+
+payloadHash is optional; use the empty string and it will be calculated from the request
 */
-func (s *V4Signer) canonicalRequest(req *http.Request) string {
+func (s *V4Signer) canonicalRequest(req *http.Request, payloadHash string) string {
+	if payloadHash == "" {
+		payloadHash = s.payloadHash(req)
+	}
 	c := new(bytes.Buffer)
 	fmt.Fprintf(c, "%s\n", req.Method)
 	fmt.Fprintf(c, "%s\n", s.canonicalURI(req.URL))
 	fmt.Fprintf(c, "%s\n", s.canonicalQueryString(req.URL))
 	fmt.Fprintf(c, "%s\n\n", s.canonicalHeaders(req.Header))
 	fmt.Fprintf(c, "%s\n", s.signedHeaders(req.Header))
-	fmt.Fprintf(c, "%s", s.payloadHash(req))
+	fmt.Fprintf(c, "%s", payloadHash)
 	return c.String()
 }
 
 func (s *V4Signer) canonicalURI(u *url.URL) string {
-	canonicalPath := u.RequestURI()
-	if u.RawQuery != "" {
-		canonicalPath = canonicalPath[:len(canonicalPath)-len(u.RawQuery)-1]
-	}
+	u = &url.URL{Path: u.Path}
+	canonicalPath := u.String()
+
 	slash := strings.HasSuffix(canonicalPath, "/")
 	canonicalPath = path.Clean(canonicalPath)
+
+	if canonicalPath == "" || canonicalPath == "." {
+		canonicalPath = "/"
+	}
+
 	if canonicalPath != "/" && slash {
 		canonicalPath += "/"
 	}
+
 	return canonicalPath
 }
 
@@ -230,7 +275,7 @@ func (s *V4Signer) canonicalQueryString(u *url.URL) string {
 		k = url.QueryEscape(k)
 		for _, v := range vs {
 			if v == "" {
-				a = append(a, k)
+				a = append(a, k+"=")
 			} else {
 				v = url.QueryEscape(v)
 				a = append(a, k+"="+v)
@@ -242,8 +287,20 @@ func (s *V4Signer) canonicalQueryString(u *url.URL) string {
 }
 
 func (s *V4Signer) canonicalHeaders(h http.Header) string {
-	i, a := 0, make([]string, len(h))
+	i, a, lowerCase := 0, make([]string, len(h)), make(map[string][]string)
+
 	for k, v := range h {
+		lowerCase[strings.ToLower(k)] = v
+	}
+
+	var keys []string
+	for k := range lowerCase {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		v := lowerCase[k]
 		for j, w := range v {
 			v[j] = strings.Trim(w, " ")
 		}
@@ -251,7 +308,6 @@ func (s *V4Signer) canonicalHeaders(h http.Header) string {
 		a[i] = strings.ToLower(k) + ":" + strings.Join(v, ",")
 		i++
 	}
-	sort.Strings(a)
 	return strings.Join(a, "\n")
 }
 

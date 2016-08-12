@@ -21,11 +21,12 @@ func (t Tree) String() string {
 // represent either a blob, a commit (in the case of a submodule), or another
 // tree.
 type TreeEntry struct {
-	SHA  *string `json:"sha,omitempty"`
-	Path *string `json:"path,omitempty"`
-	Mode *string `json:"mode,omitempty"`
-	Type *string `json:"type,omitempty"`
-	Size *int    `json:"size,omitempty"`
+	SHA     *string `json:"sha,omitempty"`
+	Path    *string `json:"path,omitempty"`
+	Mode    *string `json:"mode,omitempty"`
+	Type    *string `json:"type,omitempty"`
+	Size    *int    `json:"size,omitempty"`
+	Content *string `json:"content,omitempty"`
 }
 
 func (t TreeEntry) String() string {
@@ -57,7 +58,7 @@ func (s *GitService) GetTree(owner string, repo string, sha string, recursive bo
 
 // createTree represents the body of a CreateTree request.
 type createTree struct {
-	BaseTree string      `json:"base_tree"`
+	BaseTree string      `json:"base_tree,omitempty"`
 	Entries  []TreeEntry `json:"tree"`
 }
 

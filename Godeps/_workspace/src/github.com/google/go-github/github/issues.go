@@ -20,19 +20,25 @@ type IssuesService struct {
 
 // Issue represents a GitHub issue on a repository.
 type Issue struct {
-	Number    *int       `json:"number,omitempty"`
-	State     *string    `json:"state,omitempty"`
-	Title     *string    `json:"title,omitempty"`
-	Body      *string    `json:"body,omitempty"`
-	User      *User      `json:"user,omitempty"`
-	Labels    []Label    `json:"labels,omitempty"`
-	Assignee  *User      `json:"assignee,omitempty"`
-	Comments  *int       `json:"comments,omitempty"`
-	ClosedAt  *time.Time `json:"closed_at,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	Number           *int              `json:"number,omitempty"`
+	State            *string           `json:"state,omitempty"`
+	Title            *string           `json:"title,omitempty"`
+	Body             *string           `json:"body,omitempty"`
+	User             *User             `json:"user,omitempty"`
+	Labels           []Label           `json:"labels,omitempty"`
+	Assignee         *User             `json:"assignee,omitempty"`
+	Comments         *int              `json:"comments,omitempty"`
+	ClosedAt         *time.Time        `json:"closed_at,omitempty"`
+	CreatedAt        *time.Time        `json:"created_at,omitempty"`
+	UpdatedAt        *time.Time        `json:"updated_at,omitempty"`
+	URL              *string           `json:"url,omitempty"`
+	HTMLURL          *string           `json:"html_url,omitempty"`
+	Milestone        *Milestone        `json:"milestone,omitempty"`
+	PullRequestLinks *PullRequestLinks `json:"pull_request,omitempty"`
 
-	// TODO(willnorris): milestone
+	// TextMatches is only populated from search results that request text matches
+	// See: search.go and https://developer.github.com/v3/search/#text-match-metadata
+	TextMatches []TextMatch `json:"text_matches,omitempty"`
 }
 
 func (i Issue) String() string {
@@ -43,13 +49,12 @@ func (i Issue) String() string {
 // It is separate from Issue above because otherwise Labels
 // and Assignee fail to serialize to the correct JSON.
 type IssueRequest struct {
-	Title    *string  `json:"title,omitempty"`
-	Body     *string  `json:"body,omitempty"`
-	Labels   []string `json:"labels,omitempty"`
-	Assignee *string  `json:"assignee,omitempty"`
-	State    *string  `json:"state,omitempty"`
-
-	// TODO(willnorris): milestone here too!
+	Title     *string  `json:"title,omitempty"`
+	Body      *string  `json:"body,omitempty"`
+	Labels    []string `json:"labels,omitempty"`
+	Assignee  *string  `json:"assignee,omitempty"`
+	State     *string  `json:"state,omitempty"`
+	Milestone *int     `json:"milestone,omitempty"`
 }
 
 // IssueListOptions specifies the optional parameters to the IssuesService.List
@@ -78,6 +83,15 @@ type IssueListOptions struct {
 	Since time.Time `url:"since,omitempty"`
 
 	ListOptions
+}
+
+// PullRequestLinks object is added to the Issue object when it's an issue included
+// in the IssueCommentEvent webhook payload, if the webhooks is fired by a comment on a PR
+type PullRequestLinks struct {
+	URL      *string `json:"url,omitempty"`
+	HTMLURL  *string `json:"html_url,omitempty"`
+	DiffURL  *string `json:"diff_url,omitempty"`
+	PatchURL *string `json:"patch_url,omitempty"`
 }
 
 // List the issues for the authenticated user.  If all is true, list issues
