@@ -2,6 +2,7 @@ package trousseau
 
 import (
 	"fmt"
+
 	"github.com/crowdmob/goamz/aws"
 	"github.com/oleiade/trousseau/dsn"
 	"github.com/oleiade/trousseau/remote/gist"
@@ -38,14 +39,11 @@ func DownloadUsingS3(dsn *dsn.Dsn) error {
 // the trousseau data store file from scp remote storage
 // using the provided environment.
 func DownloadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
-	keychain := new(ssh.Keychain)
-	keychain.AddPEMKey(privateKey)
-
 	scpStorage := ssh.NewScpStorage(dsn.Host,
 		dsn.Port,
 		dsn.Id,
 		dsn.Secret,
-		keychain)
+		privateKey)
 	err = scpStorage.Connect()
 	if err != nil {
 		return err

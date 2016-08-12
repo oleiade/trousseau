@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/codegangsta/cli"
 	"github.com/oleiade/trousseau"
+	"github.com/urfave/cli"
 )
 
 func CreateCommand() cli.Command {
@@ -17,15 +17,15 @@ func CreateCommand() cli.Command {
 		Description: "The create command will generate an encrypted data store " +
 			"placed at $HOME/.trousseau.tr or at the location described by " +
 			"the $TROUSSEAU_HOME environment variable if you provided it.\n\n" +
-			"   Encryption can be made whether using asymmetric or symmetric encryption algorithms " +
-			"such as gpg or aes. As a default the create command will use asymmetric gpg encryption.\n\n" +
+			"   Encryption is made using your GPG main identity, and targets the " +
+			"GPG recipients you provide as the command arguments.\n\n" +
 			"   Examples:\n\n" +
-			"     $ trousseau create 16DB4F3\n" +
-			"     $ trousseau create --encryption-type symmetric --encryption-algorithm aes256\n" +
-			"     $ trousseau create --encryption-type asymmetric --encryption-algorithm gpg tcrevon@gmail.com\n" +
-			"     $ export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
-		Action: func(c *cli.Context) {
+			"     trousseau create 16DB4F3\n" +
+			"     trousseau create tcrevon@gmail.com\n" +
+			"     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
+		Action: func(c *cli.Context) error {
 			var encryptionType string = c.String("encryption-type")
+			var recipients []string
 
 			if encryptionType == trousseau.SYMMETRIC_ENCRYPTION_REPR {
 				err := trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, trousseau.AES_256_ENCRYPTION, nil)
@@ -46,6 +46,8 @@ func CreateCommand() cli.Command {
 			}
 
 			trousseau.InfoLogger.Println("Trousseau data store succesfully created")
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -83,7 +85,7 @@ func PushCommand() cli.Command {
 			"     s3://1298u1928eu9182dj19d2:1928u192ijdnh1b2d8@my-super-bucket:eu-west-1/topsecret-trousseau.tr\n" +
 			"     scp://myuser:@myhost.io:6453/topsecret-trousseau.tr  (use the password option to supply password)\n" +
 			"     gist://oleiade:1928u3019j2d9812dn0192u490128dj@:/topsecret-trousseau.tr\n",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to push command")
 			}
@@ -95,6 +97,8 @@ func PushCommand() cli.Command {
 			}
 
 			trousseau.InfoLogger.Printf("Encrypted data store succesfully pushed to %s remote storage\n", destination)
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -133,18 +137,21 @@ func PullCommand() cli.Command {
 			"     s3://1298u1928eu9182dj19d2:1928u192ijdnh1b2d8@my-super-bucket:eu-west-1/topsecret-trousseau.tr\n" +
 			"     scp://myuser:@myhost.io:6453/topsecret-trousseau.tr  (use the password option to supply password)\n" +
 			"     gist://oleiade:1928u3019j2d9812dn0192u490128dj@:/topsecret-trousseau.tr\n",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to pull command")
 			}
 
 			var source string = c.Args().First()
+
 			err := trousseau.PullAction(source, c.String("ssh-private-key"), c.Bool("ask-password"))
 			if err != nil {
 				trousseau.ErrorLogger.Fatal(err)
 			}
 
 			trousseau.InfoLogger.Println("Encrypted data store succesfully pulled from %s remote storage\n", source)
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -171,7 +178,7 @@ func ExportCommand() cli.Command {
 		Description: "The encrypted data store at the default location ($HOME/.trousseau.tr) or " +
 			"the one pointed by the $TROUSSEAU_STORE environment variable will be pushed as is " +
 			"to the filesystem location provided as first argument.",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			// TODO: restore with further version of hasExpectedArgs
 			//			if !hasExpectedArgs(c.Args(), 1) {
 			//				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to export command")
@@ -203,6 +210,8 @@ func ExportCommand() cli.Command {
 
 				trousseau.InfoLogger.Printf("Data store exported to: %s", c.Args().First())
 			}
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -224,11 +233,10 @@ func ImportCommand() cli.Command {
 		Description: "The encrypted data store at the filesystem location provided as first argument " +
 			"will be imported to the default trousseau location ($HOME/.trousseau.tr) or " +
 			"the one pointed by the $TROUSSEAU_STORE environment variable",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			//			if !hasExpectedArgs(c.Args(), 1) {
 			//				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to import command")
 			//			}
-
 			var strategy trousseau.ImportStrategy
 			var yours bool = c.Bool("yours")
 			var theirs bool = c.Bool("theirs")
@@ -277,6 +285,8 @@ func ImportCommand() cli.Command {
 			}
 
 			trousseau.InfoLogger.Println(fmt.Sprintf("Trousseau data store imported: %s", c.Args().First()))
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -303,7 +313,7 @@ func ListRecipientsCommand() cli.Command {
 	return cli.Command{
 		Name:  "list-recipients",
 		Usage: "List the data store encryption recipients",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to list-recipients command")
 			}
@@ -313,6 +323,7 @@ func ListRecipientsCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal(err)
 			}
 
+			return nil
 		},
 	}
 }
@@ -326,7 +337,7 @@ func AddRecipientCommand() cli.Command {
 			"can be done by making sure it appears in the 'gpg --list-keys' command's output).\n" +
 			"   And you can whether provide it whether as an openpgp id or by using the email attached " +
 			"to it's key",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to add-recipient command")
 			}
@@ -339,6 +350,8 @@ func AddRecipientCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("Recipient added to trousseau data store: %s", c.Args().First()))
 			}
+
+			return nil
 		},
 	}
 }
@@ -347,7 +360,7 @@ func RemoveRecipientCommand() cli.Command {
 	return cli.Command{
 		Name:  "remove-recipient",
 		Usage: "Remove a recipient from the encrypted data store",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to remove-recipient command")
 			}
@@ -361,6 +374,7 @@ func RemoveRecipientCommand() cli.Command {
 				fmt.Printf("Recipient removed from trousseau data store: %s", c.Args().First())
 			}
 
+			return nil
 		},
 	}
 }
@@ -369,7 +383,7 @@ func SetCommand() cli.Command {
 	return cli.Command{
 		Name:  "set",
 		Usage: "Set a key value pair in the encrypted data store",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			var file string = c.String("file")
 			var key string = c.Args().First()
 			var value string
@@ -404,6 +418,8 @@ func SetCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("%s:%s", key, value))
 			}
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -418,17 +434,20 @@ func GetCommand() cli.Command {
 	return cli.Command{
 		Name:  "get",
 		Usage: "Get a key's value from the encrypted data store",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to get command")
 			}
 
 			var key string = c.Args().First()
 			var file string = c.String("file")
+
 			err := trousseau.GetAction(key, file)
 			if err != nil {
 				trousseau.ErrorLogger.Fatal(err)
 			}
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -443,7 +462,7 @@ func RenameCommand() cli.Command {
 	return cli.Command{
 		Name:  "rename",
 		Usage: "Rename an encrypted data store's key",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 2) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to rename command")
 			}
@@ -459,6 +478,8 @@ func RenameCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("renamed: %s to %s", src, dest))
 			}
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -473,7 +494,7 @@ func DelCommand() cli.Command {
 	return cli.Command{
 		Name:  "del",
 		Usage: "Delete a key value pair from the store",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 1) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to del command")
 			}
@@ -488,6 +509,8 @@ func DelCommand() cli.Command {
 			if c.Bool("verbose") == true {
 				trousseau.InfoLogger.Println(fmt.Sprintf("deleted: %s", c.Args()[0]))
 			}
+
+			return nil
 		},
 	}
 }
@@ -496,7 +519,7 @@ func KeysCommand() cli.Command {
 	return cli.Command{
 		Name:  "keys",
 		Usage: "List the encrypted data store keys",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to keys command")
 			}
@@ -505,6 +528,8 @@ func KeysCommand() cli.Command {
 			if err != nil {
 				trousseau.ErrorLogger.Fatal(err)
 			}
+
+			return nil
 		},
 	}
 }
@@ -513,7 +538,7 @@ func ShowCommand() cli.Command {
 	return cli.Command{
 		Name:  "show",
 		Usage: "Show the encrypted data store key value pairs",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to show command")
 			}
@@ -522,6 +547,8 @@ func ShowCommand() cli.Command {
 			if err != nil {
 				trousseau.ErrorLogger.Fatal(err)
 			}
+
+			return nil
 		},
 	}
 }
@@ -530,7 +557,7 @@ func MetaCommand() cli.Command {
 	return cli.Command{
 		Name:  "meta",
 		Usage: "Show the encrypted data store metadata",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to meta command")
 			}
@@ -539,6 +566,8 @@ func MetaCommand() cli.Command {
 			if err != nil {
 				trousseau.ErrorLogger.Fatal(err)
 			}
+
+			return nil
 		},
 	}
 }
@@ -547,7 +576,7 @@ func UpgradeCommand() cli.Command {
 	return cli.Command{
 		Name:  "upgrade",
 		Usage: "Upgrade the encrypted data store to a newer version's file format",
-		Action: func(c *cli.Context) {
+		Action: func(c *cli.Context) error {
 			if !hasExpectedArgs(c.Args(), 0) {
 				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to upgrade command")
 			}
@@ -558,6 +587,8 @@ func UpgradeCommand() cli.Command {
 			}
 
 			trousseau.InfoLogger.Print("Data store succesfully upgraded")
+
+			return nil
 		},
 		Flags: []cli.Flag{
 			cli.BoolFlag{

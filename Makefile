@@ -33,6 +33,7 @@ all: trousseau
 
 deps:
 	@(go get github.com/kr/godep)
+	@(go get github.com/guelfey/go.dbus)  # This as a dependency fails on CI for some reason
 	@(mkdir -p $(BIN_DIR))
 
 trousseau: deps

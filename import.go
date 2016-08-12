@@ -2,7 +2,8 @@ package trousseau
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+
+	"github.com/urfave/cli"
 )
 
 type ImportStrategy uint32
