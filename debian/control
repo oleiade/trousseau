@@ -1,0 +1,10 @@
+Source: trousseau
+Section: security
+Priority: extra
+Maintainer: Theo Crevon <tcrevon@gmail.com>
+Build-Depends: debhelper (>= 9.1.0), golang
+Standards-Version: 3.9.4
+
+Package: trousseau
+Architecture: any
+Description: Networked and encrypted key-value database

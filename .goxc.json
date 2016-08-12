@@ -2,17 +2,8 @@
 	"TasksExclude": [
 		"go-test"
 	],
-	"Arch": "386 amd64 arm",
+	"Arch": "amd64 arm",
 	"Os": "linux darwin",
-	"BuildConstraints": "linux darwin",
-	"PackageVersion": "0.3.4",
-	"ConfigVersion": "0.9",
-	"TaskSettings": {
-    "deb": {
-        "metadata": {
-            "description": "Networked and encrypted key-value database",
-            "maintainer": "Theo Crevon (https://github.com/oleiade) <theocrevon@fastmail.fm>"
-        }
-     }
-  }
+	"PackageVersion": "0.3.5",
+	"ConfigVersion": "0.9"
 }
