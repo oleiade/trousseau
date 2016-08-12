@@ -1,0 +1,96 @@
+{
+	"ImportPath": "github.com/oleiade/trousseau",
+	"GoVersion": "go1.6.3",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/crowdmob/goamz/aws",
+			"Rev": "3a06871fe9fc0281ca90f3a7d97258d042ed64c0"
+		},
+		{
+			"ImportPath": "github.com/crowdmob/goamz/s3",
+			"Rev": "3a06871fe9fc0281ca90f3a7d97258d042ed64c0"
+		},
+		{
+			"ImportPath": "github.com/google/go-github/github",
+			"Rev": "2431923100d4989611dcc339f1ff8d280bd9c84c"
+		},
+		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Rev": "9235644dd9e52eeae6fa48efd539fdc351a0af53"
+		},
+		{
+			"ImportPath": "github.com/howeyc/gopass",
+			"Rev": "2c70fa70727c953c51695f800f25d6b44abb368e"
+		},
+		{
+			"ImportPath": "github.com/oleiade/reflections",
+			"Comment": "0.1.2-2-g632977f",
+			"Rev": "632977f98cd34d217c4b57d0840ec188b3d3dcaf"
+		},
+		{
+			"ImportPath": "github.com/oleiade/serrure/aes",
+			"Rev": "28794589ac9bab179ccbfc79b4e3f531683812c1"
+		},
+		{
+			"ImportPath": "github.com/oleiade/serrure/openpgp",
+			"Rev": "28794589ac9bab179ccbfc79b4e3f531683812c1"
+		},
+		{
+			"ImportPath": "github.com/oleiade/tempura",
+			"Rev": "1e4f5790d5066b19bd755d71402bb0b41f1e5ff9"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.0-17-g089c718",
+			"Rev": "089c7181b8c728499929ff09b62d3fdd8df8adff"
+		},
+		{
+			"ImportPath": "github.com/tmc/keyring",
+			"Rev": "adec3bef79f7c4c2dc0637b25efe6979f52fd19d"
+		},
+		{
+			"ImportPath": "github.com/urfave/cli",
+			"Comment": "v1.18.0-47-g168c954",
+			"Rev": "168c95418e66e019fe17b8f4f5c45aa62ff80e23"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/cast5",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/openpgp",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/pbkdf2",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/scrypt",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "d9558e5c97f85372afee28cf2b6059d7d3818919"
+		},
+		{
+			"ImportPath": "golang.org/x/oauth2",
+			"Rev": "8914e5017ca260f2a3a1575b1e6868874050d95e"
+		}
+	]
+}
