@@ -3,8 +3,9 @@ package trousseau
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/oleiade/trousseau/crypto/openpgp"
 	"sort"
+
+	"github.com/oleiade/serrure/openpgp"
 )
 
 type VersionMatcher func([]byte) bool
@@ -114,20 +115,24 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 		Data: make(map[string]interface{}),
 	}
 
-	// Retrieve secret ring keys from openpgp
-	decryptionKeys, err := openpgp.ReadSecRing(openpgp.SecringFile)
+	// Decrypt store version 0.3 (aka legacy)
+	passphrase, err := GetPassphrase()
+	if err != nil {
+		ErrorLogger.Fatal(err)
+	}
+
+	decrypter, err := openpgp.NewOpenPGPDecrypter(GnupgSecring(), passphrase)
 	if err != nil {
 		return nil, err
 	}
 
-	// Decrypt store version 0.3 (aka legacy)
-	plainData, err := openpgp.Decrypt(d, decryptionKeys, GetPassphrase())
+	pd, err := decrypter.Decrypt(d)
 	if err != nil {
 		return nil, err
 	}
 
 	// Unmarshal it's content into the legacyStore
-	err = json.Unmarshal(plainData, &legacyStore)
+	err = json.Unmarshal(pd, &legacyStore)
 	if err != nil {
 		return nil, err
 	}
@@ -155,14 +160,13 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 		recipients = append(recipients, r.(string))
 	}
 
-	// Read the public openpgp ring to retrieve the recipients public keys
-	encryptionKeys, err := openpgp.ReadPubRing(openpgp.PubringFile, recipients)
+	encrypter, err := openpgp.NewOpenPGPEncrypter(GnupgPubring(), recipients)
 	if err != nil {
 		return nil, err
 	}
 
 	// Encrypt the encoded newStore content
-	encryptedData, err := openpgp.Encrypt(newStoreData, encryptionKeys)
+	ed, err := encrypter.Encrypt(newStoreData)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +181,7 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	}{
 		CryptoAlgorithm: GPG_ENCRYPTION,
 		CryptoType:      ASYMMETRIC_ENCRYPTION,
-		Data:            encryptedData,
+		Data:            ed,
 	}
 
 	// Encode the new trousseau data store

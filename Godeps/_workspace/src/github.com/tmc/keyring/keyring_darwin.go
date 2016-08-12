@@ -17,7 +17,7 @@ func (p osxProvider) Get(Service, Username string) (string, error) {
 		"-s", Service,
 		"-a", Username,
 		"-g"}
-	c := exec.Command("security", args...)
+	c := exec.Command("/usr/bin/security", args...)
 	o, err := c.CombinedOutput()
 	if err != nil {
 		exitCode := c.ProcessState.Sys().(syscall.WaitStatus).ExitStatus()
@@ -25,7 +25,7 @@ func (p osxProvider) Get(Service, Username string) (string, error) {
 		if exitCode == 44 {
 			return "", ErrNotFound
 		}
-		return "", fmt.Errorf("security: %s", err)
+		return "", fmt.Errorf("/usr/bin/security: %s", err)
 	}
 	matches := pwRe.FindStringSubmatch(string(o))
 	if len(matches) != 2 {
@@ -40,7 +40,7 @@ func (p osxProvider) Set(Service, Username, Password string) error {
 		"-a", Username,
 		"-w", Password,
 		"-U"}
-	c := exec.Command("security", args...)
+	c := exec.Command("/usr/bin/security", args...)
 	err := c.Run()
 	if err != nil {
 		o, _ := c.CombinedOutput()

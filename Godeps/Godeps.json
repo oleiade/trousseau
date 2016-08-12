@@ -31,6 +31,14 @@
 			"Rev": "632977f98cd34d217c4b57d0840ec188b3d3dcaf"
 		},
 		{
+			"ImportPath": "github.com/oleiade/serrure/aes",
+			"Rev": "28794589ac9bab179ccbfc79b4e3f531683812c1"
+		},
+		{
+			"ImportPath": "github.com/oleiade/serrure/openpgp",
+			"Rev": "28794589ac9bab179ccbfc79b4e3f531683812c1"
+		},
+		{
 			"ImportPath": "github.com/oleiade/tempura",
 			"Rev": "1e4f5790d5066b19bd755d71402bb0b41f1e5ff9"
 		},
@@ -41,7 +49,7 @@
 		},
 		{
 			"ImportPath": "github.com/tmc/keyring",
-			"Rev": "c97358d3b0f2df246afedabacbad24fad4e3246e"
+			"Rev": "adec3bef79f7c4c2dc0637b25efe6979f52fd19d"
 		},
 		{
 			"ImportPath": "github.com/urfave/cli",
@@ -50,15 +58,31 @@
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/cast5",
-			"Rev": "c57d4a71915a248dbad846d60825145062b4c18e"
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/openpgp",
-			"Rev": "c57d4a71915a248dbad846d60825145062b4c18e"
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/pbkdf2",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/scrypt",
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "c57d4a71915a248dbad846d60825145062b4c18e"
+			"Rev": "595bbbd7f5f308415a544d3c55743c91427c8d99"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",

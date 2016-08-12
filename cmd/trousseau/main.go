@@ -46,6 +46,10 @@ func main() {
 			Name:  "gnupg-home",
 			Usage: "Provide an alternate gnupg home",
 		},
+		cli.BoolFlag{
+			Name:  "ask-passphrase",
+			Usage: "Have trousseu prompt user for passphrase",
+		},
 	}
 
 	app.Before = Before

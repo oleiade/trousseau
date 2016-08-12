@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/oleiade/serrure/aes"
+	"github.com/oleiade/serrure/openpgp"
 )
 
 type Trousseau struct {
@@ -46,20 +49,68 @@ func OpenTrousseau(fp string) (*Trousseau, error) {
 	return trousseau, nil
 }
 
+func FromBytes(d []byte) (*Trousseau, error) {
+	var trousseau *Trousseau
+	var err error
+
+	err = json.Unmarshal(d, &trousseau)
+	if err != nil {
+		// Check if the content of the file matches with a legacy
+		// data store file format. Raise a proper error accordingly.
+		contentVersion := DiscoverVersion(d, VersionDiscoverClosures)
+		if contentVersion != "" {
+			return nil, fmt.Errorf("outdated data store file format detected: %s. "+
+				"You are currently using incompatible version: %s. "+
+				"Please upgrade the data store by using the upgrade command.",
+				contentVersion, TROUSSEAU_VERSION)
+		}
+		return nil, err
+	}
+
+	return trousseau, err
+}
+
 func (t *Trousseau) Decrypt() (*Store, error) {
 	var store Store
 
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
-		plainData, err := DecryptAsymmetricPGP(t.Data, GetPassphrase())
+		passphrase, err := GetPassphrase()
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+
+		d, err := openpgp.NewOpenPGPDecrypter(GnupgSecring(), passphrase)
 		if err != nil {
 			return nil, err
 		}
 
-		err = json.Unmarshal(plainData, &store)
+		pd, err := d.Decrypt(t.Data)
 		if err != nil {
 			return nil, err
 		}
+
+		err = json.Unmarshal(pd, &store)
+		if err != nil {
+			return nil, err
+		}
+	case AES_256_ENCRYPTION:
+		passphrase, err := GetPassphrase()
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+
+		d := aes.NewAES256Decrypter(passphrase)
+		pd, err := d.Decrypt(t.Data)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(pd, &store)
+		if err != nil {
+			return nil, err
+		}
+
 	default:
 		return nil, fmt.Errorf("Invalid encryption method provided")
 	}
@@ -70,12 +121,37 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 func (t *Trousseau) Encrypt(store *Store) error {
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
-		plainData, err := json.Marshal(*store)
+		pd, err := json.Marshal(*store)
 		if err != nil {
 			return err
 		}
 
-		t.Data, err = EncryptAsymmetricPGP(plainData, store.Meta.Recipients)
+		e, err := openpgp.NewOpenPGPEncrypter(GnupgPubring(), store.Meta.Recipients)
+		if err != nil {
+			return err
+		}
+
+		t.Data, err = e.Encrypt(pd)
+		if err != nil {
+			return err
+		}
+	case AES_256_ENCRYPTION:
+		pd, err := json.Marshal(*store)
+		if err != nil {
+			return err
+		}
+
+		passphrase, err := GetPassphrase()
+		if err != nil {
+			ErrorLogger.Fatal(err)
+		}
+
+		d, err := aes.NewAES256Encrypter(passphrase, nil)
+		if err != nil {
+			return err
+		}
+
+		t.Data, err = d.Encrypt(pd)
 		if err != nil {
 			return err
 		}

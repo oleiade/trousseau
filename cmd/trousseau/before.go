@@ -9,6 +9,7 @@ func Before(c *cli.Context) error {
 	checkHelp(c)
 	updateStorePath(c)
 	updateGnupgHome(c)
+	updateCheckPassphrase(c)
 
 	return nil
 }
@@ -38,5 +39,17 @@ func updateStorePath(c *cli.Context) {
 func updateGnupgHome(c *cli.Context) {
 	if c.String("gnupg-home") != "" {
 		trousseau.GnupgHome = c.String("gnupg-home")
+	}
+}
+
+func updateCheckPassphrase(c *cli.Context) {
+	if c.GlobalBool("ask-passphrase") && !trousseau.AskPassphraseFlagCheck() {
+		// This checks if the user is creating a store by
+		// looking in c.Args()
+		if c.Args().Get(0) == "create" {
+			trousseau.AskPassphrase(true)
+		} else {
+			trousseau.AskPassphrase(false)
+		}
 	}
 }

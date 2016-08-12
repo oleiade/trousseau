@@ -1,88 +1,125 @@
 #!/usr/bin/env bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Testing context
-TMP_DIR=/tmp
-TROUSSEAU_TEST_FILES_PREFIX=trousseau_test_
-TROUSSEAU_TEST_FILES_WILDCARD="${TROUSSEAU_TEST_FILES_PREFIX}*"
-TROUSSEAU_TEST_FILES="${TMP_DIR}/${TROUSSEAU_TEST_FILES_WILDCARD}"
-
-# Test gnupg context
-TROUSSEAU_TEST_GNUPG_HOME="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}gnupg"
-TROUSSEAU_TEST_KEYS_DIR="${DIR}/keys"
-
-TROUSSEAU_TEST_FIRST_PUBLIC_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_public_first_test.key"
-TROUSSEAU_TEST_FIRST_PRIVATE_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_private_first_test.key"
-TROUSSEAU_TEST_FIRST_KEY_ID=6F7FEB2D
-TROUSSEAU_TEST_FIRST_KEY_EMAIL=theo@trousseau.io
-
-TROUSSEAU_TEST_SECOND_PUBLIC_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_public_second_test.key"
-TROUSSEAU_TEST_SECOND_PRIVATE_KEY_FILE="${TROUSSEAU_TEST_KEYS_DIR}/trousseau_private_second_test.key"
-TROUSSEAU_TEST_SECOND_KEY_ID=EA7F9C59
-TROUSSEAU_TEST_SECOND_KEY_EMAIL=theo@trousseau.io
-#
-
-# Keyring context
-TROUSSEAU_KEYRING_SERVICE_NAME=trousseau_test
-TROUSSEAU_TEST_KEY_PASSPHRASE=trousseau
-
-# Build context
-TROUSSEAU_BINARY_DIR="$DIR/../bin"
-TROUSSEAU_TEST_OPTIONS="--gnupg-home=$TROUSSEAU_TEST_GNUPG_HOME"
-TROUSSEAU_COMMAND="$TROUSSEAU_BINARY_DIR/trousseau"
-
-# Trousseau global context
-TROUSSEAU_TEST_STORE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}store"
-TROUSSEAU_TEST_STORE_CREATE="${TMP_DIR}/${TROUSSEAU_TEST_FILES_PREFIX}create_store"
+# Path of the current helpers file. Used essentialy
+# to produce tests dir relative paths such as the test
+# gnupg keys dir.
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 
-install_gpg_test_keys() {
-    mkdir $TROUSSEAU_TEST_GNUPG_HOME
-    chmod -R 0777 $TROUSSEAU_TEST_GNUPG_HOME
-    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --import $TROUSSEAU_TEST_FIRST_PUBLIC_KEY_FILE &> /dev/null
-    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --allow-secret-key-import --import $TROUSSEAU_TEST_FIRST_PRIVATE_KEY_FILE &> /dev/null
-    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --import $TROUSSEAU_TEST_SECOND_PUBLIC_KEY_FILE &> /dev/null
-    gpg --quiet --homedir $TROUSSEAU_TEST_GNUPG_HOME --allow-secret-key-import --import $TROUSSEAU_TEST_SECOND_PRIVATE_KEY_FILE &> /dev/null
+# Which binary to run the tests against. As a default
+# this variable is set to the executable on your path.
+# Export the $TROUSSEAU_BIN env variable to override it.
+TROUSSEAU_BIN="${TROUSSEAU_BIN:=$(which trousseau)}"
+
+
+# If any of the tests function needs to write some file,
+# they should do it inside the destination pointed by
+# $TROUSSEAU_TESTS_DIR. As a default this variable is
+# set to /tmp/trousseau_tests.
+# Export the $TROUSSEAU_TESTS_DIR env variable to override it.
+TROUSSEAU_TESTS_DIR="${TROUSSEAU_TESTS_DIR:=/tmp/trousseau_tests}"
+
+
+# Define where to create test trousseau data stores 
+TEMP_AES_STORE="$TROUSSEAU_TESTS_DIR/aes_store"
+TEMP_GPG_STORE="$TROUSSEAU_TESTS_DIR/gpg_store"
+
+
+# Directory where are located the test gnupg keys.
+# Should be relative to helpers file location, AKA $DIR.
+TEMP_GNUPG_TESTS_KEYS_DIR="$DIR/keys"
+
+
+# Temporary directory where we're gonna store
+# the test gnupg data, and install our test keys
+TEMP_GNUPG_HOME="$TROUSSEAU_TESTS_DIR/gnupg"
+
+
+# Gnupg key A attributes definition
+TEMP_GNUPG_KEY_A_PUB_FILE="${TEMP_GNUPG_TESTS_KEYS_DIR}/trousseau_public_first_test.key"
+TEMP_GNUPG_KEY_A_SEC_FILE="${TEMP_GNUPG_TESTS_KEYS_DIR}/trousseau_private_first_test.key"
+TEMP_GNUPG_KEY_A_KEY_ID="6F7FEB2D"
+TEMP_GNUPG_KEY_A_KEY_EMAIL="theo@trousseau.io"
+
+
+# Gnupg key B attributes definition
+TEMP_GNUPG_KEY_B_PUB_FILE="${TEMP_GNUPG_TESTS_KEYS_DIR}/trousseau_public_second_test.key"
+TEMP_GNUPG_KEY_B_SEC_FILE="${TEMP_GNUPG_TESTS_KEYS_DIR}/trousseau_private_second_test.key"
+TEMP_GNUPG_KEY_B_KEY_ID="EA7F9C59"
+TEMP_GNUPG_KEY_B_KEY_EMAIL="theo@trousseau.io"
+
+
+# Whether created asymmetricaly or symmetricaly, always use the same
+# data store/gpg key passphrase
+TEMP_ENCRYPTION_PASSPHRASE="trousseau"
+
+
+# Defines the test keyring entry name to be used
+TEMP_KEYRING_ENTRY_NAME="trousseau_test"
+
+
+# polite_sudo exposes a verbose and explicit sudo command
+# so any test who might need to ask for sudo password
+# would be more user-friendly.
+polite_sudo() {
+    sudo -p "Bats testing framework requires sudo access to setup the test key passphrase in keychain. Password: " "$@"
 }
 
-setup_env() {
-    export TROUSSEAU_PASSPHRASE=$TROUSSEAU_TEST_KEY_PASSPHRASE
+
+# setup_keyring_entry will create an entry for the trousseau test keys
+# passphrase in the system keyring:
+#   - OSX: entry will be created in the system keychain
+#   - Linux: entry will whether be created in the gnome-keychain
+#     or in your SecretService provider, according to your setup
+setup_keyring_entry() {
+    platform=$(uname)
+
+    if [[ $platform == 'Linux' ]]; then
+        platform='linux'
+    elif [[ $platform == 'Darwin' ]]; then
+        polite_sudo security add-generic-password -a "${USER}" -s "${TEMP_KEYRING_ENTRY_NAME}" -w "${TEMP_ENCRYPTION_PASSPHRASE}" >&2
+    elif [[ $platform == 'FreeBSD' ]]; then
+        platform='freebsd'
+    fi
 }
 
-teardown_env() {
-    unset TROUSSEAU_PASSPHRASE
+
+# teardown_keyring_entry will remove the trousseau test keys passphrase
+# entry from your system keyring.
+teardown_keyring_entry() {
+    platform=$(uname)
+
+    if [[ $platform == 'Linux' ]]; then
+        platform='linux'
+    elif [[ $platform == 'Darwin' ]]; then
+        polite_sudo security delete-generic-password -a "${USER}" -s "${TEMP_KEYRING_ENTRY_NAME}" >&2
+    elif [[ $platform == 'FreeBSD' ]]; then
+        platform='freebsd'
+    fi
 }
 
-# Setup and teardown
+
 setup() {
-    # Make sure to fail fast if trousseau was not built
-    # and no binary path could be found
-    if [ ! -d $TROUSSEAU_BINARY_DIR ]; then
-        echo "trousseau binary dir not found ${TROUSSEAU_BINARY_DIR}"
-        exit 1
-    fi
+	mkdir $TROUSSEAU_TESTS_DIR
 
-    # Make sure to fail fast if trousseau was not built
-    # and no binary could be found
-    if [ ! -f $TROUSSEAU_BINARY ]; then
-        echo "trousseau binary not found: ${TROUSSEAU_BINARY}"
-        exit 1
-    fi
+	export TROUSSEAU_PASSPHRASE=$TEMP_ENCRYPTION_PASSPHRASE
 
-    install_gpg_test_keys
-    setup_env
+    # Create the temporary gnupg keyring and import test keys into it
+    mkdir -m 0700 $TEMP_GNUPG_HOME
+    gpg --quiet --homedir $TEMP_GNUPG_HOME --import $TEMP_GNUPG_KEY_A_PUB_FILE >&2
+    gpg --quiet --homedir $TEMP_GNUPG_HOME --allow-secret-key-import --import $TEMP_GNUPG_KEY_A_SEC_FILE >&2 
+    gpg --quiet --homedir $TEMP_GNUPG_HOME --import $TEMP_GNUPG_KEY_B_PUB_FILE >&2 
+    gpg --quiet --homedir $TEMP_GNUPG_HOME --allow-secret-key-import --import $TEMP_GNUPG_KEY_B_SEC_FILE >&2 
 
-    # Otherwise, create the base test store
-    $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME \
-                       --store $TROUSSEAU_TEST_STORE \
-                       create $TROUSSEAU_TEST_FIRST_KEY_ID > /dev/null
+	# Create temporary trousseau data stores for test purpose
+	$TROUSSEAU_BIN --store $TEMP_AES_STORE create --encryption-type 'symmetric' > /dev/null
+	$TROUSSEAU_BIN --store $TEMP_GPG_STORE --gnupg-home $TEMP_GNUPG_HOME create $TEMP_GNUPG_KEY_A_KEY_ID > /dev/null
 }
+
 
 teardown() {
-    teardown_env
-
-    # Remove every trousseau test prefixed files from 
-    # tmp dir
-    rm -rf $TROUSSEAU_TEST_FILES
+    rm -rf $TROUSSEAU_TESTS_DIR
+    unset $TROUSSEAU_PASSPHRASE
 }

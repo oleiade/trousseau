@@ -3,8 +3,8 @@
 load test_helpers
 
 @test "list-recipients succeeds" {
-    run $TROUSSEAU_COMMAND --gnupg-home $TROUSSEAU_TEST_GNUPG_HOME --store $TROUSSEAU_TEST_STORE list-recipients
+    run $TROUSSEAU_BIN --gnupg-home $TEMP_GNUPG_HOME --store $TEMP_GPG_STORE list-recipients
     
     [ "$status" -eq 0 ]
-    [ "${lines[0]}" = "6F7FEB2D" ]
+    [ "${lines[0]}" = "$TEMP_GNUPG_KEY_A_KEY_ID" ]
 }
