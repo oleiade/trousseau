@@ -1,5 +1,6 @@
-[![Stories in Ready](https://badge.waffle.io/oleiade/trousseau.png?label=ready&title=Ready)](https://waffle.io/oleiade/trousseau)
 ![Trousseau, a portable encrypted keyring](https://dl.dropboxusercontent.com/u/2497327/Github/trousseau/trousseau-animation.gif)
+
+[![Build Status](https://travis-ci.org/oleiade/trousseau.svg?branch=master)](https://travis-ci.org/oleiade/trousseau)
 
 ## What
 
