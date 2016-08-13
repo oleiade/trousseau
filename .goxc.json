@@ -4,6 +4,6 @@
 	],
 	"Arch": "amd64 arm",
 	"Os": "linux darwin",
-	"PackageVersion": "0.3.6",
+	"PackageVersion": "0.4.0",
 	"ConfigVersion": "0.9"
 }
