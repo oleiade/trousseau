@@ -452,5 +452,5 @@ See **Contribute** section.
 
 ## Changelog
 
-See [History](https://github.com/oleiade/trousseau/blob/master/History.md)
+See [CHANGELOG](https://github.com/oleiade/trousseau/blob/master/CHANGELOG.md)
 
