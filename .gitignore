@@ -1,3 +1,6 @@
+# Build artefacts
+build/
+
 # Makefile generated paths
 .gopath
 .sw?

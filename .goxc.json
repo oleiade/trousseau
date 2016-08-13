@@ -1,6 +1,7 @@
 {
 	"TasksExclude": [
-		"go-test"
+            "go-test",
+            "govet"
 	],
 	"Arch": "amd64 arm",
 	"Os": "linux darwin",
