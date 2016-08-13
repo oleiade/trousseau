@@ -79,7 +79,7 @@ func (gs *GistStorage) Pull(remotePath, localPath string) (err error) {
 	for _, g := range gists {
 		for k, _ := range g.Files {
 			if string(k) == remotePath {
-				gist = &g
+				gist = g
 				break
 			}
 		}

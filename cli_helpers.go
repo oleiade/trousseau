@@ -16,7 +16,9 @@ const errorMsg string = "Passphrase error occurred. Exiting..."
 // to ask the user for password or passphrase
 func PromptForHiddenInput(msg string) string {
 	fmt.Printf(msg)
-	return string(gopass.GetPasswd())
+	pass, _ := gopass.GetPasswd()
+
+	return string(pass)
 }
 
 func PromptForHiddenInputConfirm() string {
@@ -28,9 +30,9 @@ func PromptForHiddenInputConfirm() string {
 		}
 
 		fmt.Printf(passPhraseMsg)
-		inputPass := string(gopass.GetPasswd())
+		inputPass, _ := gopass.GetPasswd()
 
-		if inputPass == "" {
+		if string(inputPass) == "" {
 			fmt.Printf("Empty passphrase not allowed\n\n")
 			i++
 			continue
@@ -38,9 +40,9 @@ func PromptForHiddenInputConfirm() string {
 
 		fmt.Printf(confirmMsg)
 
-		confirmPass := string(gopass.GetPasswd())
-		if inputPass == confirmPass {
-			return inputPass
+		confirmPass, _ := gopass.GetPasswd()
+		if string(inputPass) == string(confirmPass) {
+			return string(inputPass)
 		} else {
 			fmt.Printf("Passphrases did not match. Please try again\n\n")
 		}
