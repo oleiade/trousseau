@@ -44,7 +44,10 @@ func CreateCommand() cli.Command {
 				}
 			}
 
-			trousseau.InfoLogger.Println("Trousseau data store succesfully created")
+			trousseau.InfoLogger.Printf(
+				"Trousseau data store succesfully created: %s\n",
+				trousseau.InferStorePath(),
+			)
 
 			return nil
 		},
