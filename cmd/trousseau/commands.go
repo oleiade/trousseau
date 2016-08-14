@@ -14,15 +14,20 @@ func CreateCommand() cli.Command {
 	return cli.Command{
 		Name:  "create",
 		Usage: "Create an encrypted data store",
-		Description: "The create command will generate an encrypted data store " +
-			"placed at $HOME/.trousseau.tr or at the location described by " +
-			"the $TROUSSEAU_HOME environment variable if you provided it.\n\n" +
-			"   Encryption is made using your GPG main identity, and targets the " +
-			"GPG recipients you provide as the command arguments.\n\n" +
-			"   Examples:\n\n" +
-			"     trousseau create 16DB4F3\n" +
-			"     trousseau create tcrevon@gmail.com\n" +
-			"     export TROUSSEAU_STORE=/tmp/test_trousseau.tr && trousseau create 16DB4F3\n",
+		Description: "The create command will generate a .trousseau encrypted data store " +
+			"in the current working directory or at the location provided through the " +
+			"store option or the $TROUSSEAU_HOME environment variable.\n\n" +
+			"   As a default the data store will be created using asymmetric OpenPGP encryption. " +
+			"However, trousseau also supports symmetric AES256 encryption. " +
+			"To select encryption type, provide the --encryption-type flag with symmetric or asymmetric as a value. " +
+			"    Examples:\n\n" +
+			"    Create a data store with asymetric encryption:\n" +
+			"        # create action support providing gpg recipients as email as well as hashes\n" +
+			"        $ trousseau create tcrevon@gmail.com theocrevon@fastmail.fm\n" +
+			"        $ trousseau create 16DB4F3\n" +
+			"        \n" +
+			"        # create an AES256 symmetrically encrypted data store\n" +
+			"        $ trousseau create --encryption-type aes\n",
 		Action: func(c *cli.Context) error {
 			var encryptionType string = c.String("encryption-type")
 

@@ -140,7 +140,7 @@ Passphrase:
 
 Trousseau behavior can be controlled through the system environment:
 
-* *TROUSSEAU_STORE* : if you want to have multiple trousseau data store, set this environment variable to the path of the one you want to use. Default is ``$HOME/.trousseau``
+* *TROUSSEAU_STORE* : if you want to have multiple trousseau data store, set this environment variable to the path of the one you want to use. Default is ``$PWD/.trousseau``
 
 ## Let's get started
 
@@ -158,7 +158,7 @@ To do so, you will need to decide the kind of encryption you wish to use:
 
 Then, you can proceed and create a data store with the `create` command.
 As a default:
-+ data stores will be created as `$HOME/.trousseau`. However the global option `store` will allow you to select the place on the filesystem where *trousseau* should create/open the data store.
++ data stores will be created at `$PWD/.trousseau`. However the global option `store` will allow you to select the place on the filesystem where *trousseau* should create/open the data store.
 + data stores will be created using asymmetric OpenPGP encryption. However `encryption-type` and  `encryption-algorithm` options will allow to select explicitly the encryption mode of your choice.
 
 ##### HOWTO
@@ -167,16 +167,16 @@ As a default:
 # create a trousseau for two gpg recipients
 # both key ids and key email are supported.
 $ trousseau create 4B7D890,foo@bar.com 
-trousseau created at $HOME/.trousseau
+trousseau created at $PWD/.trousseau
 
 # Or create a symmetrically encrypted data store
 # with a passphrase
 $ trousseau create --encryption-type symmetric
 Passphrase:
-trousseau created at $HOME/.trousseau
+trousseau created at $PWD/.trousseau
 ```
 
-Trousseau data store consists in a single encrypted file residing in your ``$HOME`` directory. Check by yourself.
+Trousseau data store consists in a single encrypted file residing in your current working directory. Check by yourself.
 
 ```bash
 $ cat ~/.trousseau
