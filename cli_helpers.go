@@ -7,15 +7,15 @@ import (
 	"github.com/howeyc/gopass"
 )
 
-const passPhraseMsg string = "Passphrase: "
-const confirmMsg string = "Confirm Passphrase: "
-const errorMsg string = "Passphrase error occurred. Exiting..."
+const passPhraseMsg string = "\rPassphrase: "
+const confirmMsg string = "\rConfirm Passphrase: "
+const errorMsg string = "\rPassphrase error occurred. Exiting..."
 
 // PromptForHiddenInput will prompt on stdin with the provided
 // message and will hide the user input. This is intended to be used
 // to ask the user for password or passphrase
 func PromptForHiddenInput(msg string) string {
-	fmt.Printf(msg)
+	fmt.Println(msg)
 	pass, _ := gopass.GetPasswd()
 
 	return string(pass)
