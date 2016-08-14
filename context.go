@@ -30,6 +30,10 @@ func SetStorePath(storePath string) { gStorePath = storePath }
 func GetStorePath() string          { return gStorePath }
 func SetPassphrase(p string)        { gPassphrase = p }
 
+// InferStorePath figures out what data store trousseau should
+// work with. It will take in account environment, global --store
+// option and defaults and returns the path of the data store
+// to be used. As a default it will return $PWD/.trousseau
 func InferStorePath() string {
 	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
 	contextPath := GetStorePath()
@@ -40,7 +44,17 @@ func InferStorePath() string {
 		return envPath
 	}
 
-	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
+	// InferStorePath is used all over the application,
+	// and introducing an error returned would polute the mecanism.
+	// The goal of this function is to figure out what data store
+	// is to be used. Therefore if it's unable to figure out the
+	// current working directory, we're better off failing fast.
+	cwd, err := os.Getwd()
+	if err != nil {
+		ErrorLogger.Fatal("unable to detect current working directory")
+	}
+
+	return filepath.Join(cwd, DEFAULT_STORE_FILENAME)
 }
 
 func AskPassphraseFlagCheck() bool {
