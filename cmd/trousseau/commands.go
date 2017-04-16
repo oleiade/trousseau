@@ -10,6 +10,20 @@ import (
 	"github.com/urfave/cli"
 )
 
+func ChangeKeyCommand() cli.Command {
+	return cli.Command{
+		Name:        "change-key",
+		Usage:       "Change the key for an encrypted data store",
+		Description: "FIXME",
+		Action: func(c *cli.Context) {
+			err := trousseau.ChangeKeyAction()
+			if err != nil {
+				trousseau.ErrorLogger.Fatal(err)
+			}
+		},
+	}
+}
+
 func CreateCommand() cli.Command {
 	return cli.Command{
 		Name:  "create",
@@ -30,9 +44,21 @@ func CreateCommand() cli.Command {
 			"        $ trousseau create --encryption-type aes\n",
 		Action: func(c *cli.Context) error {
 			var encryptionType string = c.String("encryption-type")
+			var encryptionAlgorithm string = c.String("encryption-algorithm")
 
 			if encryptionType == trousseau.SYMMETRIC_ENCRYPTION_REPR {
-				err := trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, trousseau.AES_256_ENCRYPTION, nil)
+				var encAlgo trousseau.CryptoAlgorithm
+
+				switch encryptionAlgorithm {
+				case trousseau.AES_256_ENCRYPTION_REPR:
+					encAlgo = trousseau.AES_256_ENCRYPTION
+				case trousseau.AES_256_GCM_ENCRYPTION_REPR:
+					encAlgo = trousseau.AES_256_GCM_ENCRYPTION
+				default:
+					encAlgo = trousseau.AES_256_ENCRYPTION
+				}
+
+				err := trousseau.CreateAction(trousseau.SYMMETRIC_ENCRYPTION, encAlgo, nil)
 				if err != nil {
 					trousseau.ErrorLogger.Fatal(err)
 				}

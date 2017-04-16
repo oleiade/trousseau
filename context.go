@@ -107,9 +107,16 @@ func GetPassphrase() (passphrase string, err error) {
 		passphrase, err = getGpgPassphrase(os.Getenv(ENV_MASTER_GPG_ID_KEY))
 	}
 
+	// Finally, if there is an error with the gpg-agent,
+	// ask for the passphrase manually
 	if err != nil {
 		// ErrorLogger.Fatal("no passphrase provided. unable to open data store")
-		return "", errors.New("no passphrase provided. unable to open data store")
+		passphrase := PromptForHiddenInput("Passphrase: ")
+		if passphrase == "" {
+			return "", errors.New("no passphrase provided. unable to open data store")
+		} else {
+			return passphrase, nil
+		}
 	}
 
 	return passphrase, nil

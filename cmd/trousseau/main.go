@@ -32,6 +32,7 @@ func main() {
 		RemoveRecipientCommand(),
 		MetaCommand(),
 		UpgradeCommand(),
+		ChangeKeyCommand(),
 	}
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{

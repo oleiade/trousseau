@@ -2,11 +2,12 @@ package trousseau
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 
-	"github.com/oleiade/serrure/aes"
+	aesenc "github.com/oleiade/serrure/aes"
 	"github.com/oleiade/serrure/openpgp"
 )
 
@@ -70,6 +71,44 @@ func FromBytes(d []byte) (*Trousseau, error) {
 	return trousseau, err
 }
 
+func (t *Trousseau) ChangeKey() error {
+	switch t.CryptoAlgorithm {
+	case GPG_ENCRYPTION:
+		return errors.New("You cannot change the key for GPG Encryption")
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION:
+		store, err := t.Decrypt()
+		if err != nil {
+			return err
+		}
+		var newPassphrase string
+		flag := true
+		for flag {
+			count := 0
+			newPassphrase = PromptForHiddenInput("Enter new passphrase: ")
+			confirmPassphrase := PromptForHiddenInput("Confirm new passphrase: ")
+			if newPassphrase == confirmPassphrase {
+				flag = false
+			}
+			if newPassphrase == "" {
+				if count > 2 {
+					return errors.New("Blank passphrase not allowed")
+				}
+				fmt.Println("Blank passphrase not allowed. Please try again")
+				count++
+			}
+
+		}
+		SetPassphrase(newPassphrase)
+
+		err = t.Encrypt(store)
+		if err != nil {
+			return err
+		}
+	}
+	//now write the store
+	return nil
+}
+
 func (t *Trousseau) Decrypt() (*Store, error) {
 	var store Store
 
@@ -94,13 +133,16 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 		if err != nil {
 			return nil, err
 		}
-	case AES_256_ENCRYPTION:
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION:
 		passphrase, err := GetPassphrase()
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
 
-		d := aes.NewAES256Decrypter(passphrase)
+		d := aesenc.NewAES256Decrypter(passphrase)
+		if t.CryptoAlgorithm == AES_256_ENCRYPTION {
+			d.SetMode(1)
+		}
 		pd, err := d.Decrypt(t.Data)
 		if err != nil {
 			return nil, err
@@ -135,7 +177,7 @@ func (t *Trousseau) Encrypt(store *Store) error {
 		if err != nil {
 			return err
 		}
-	case AES_256_ENCRYPTION:
+	case AES_256_ENCRYPTION, AES_256_GCM_ENCRYPTION:
 		pd, err := json.Marshal(*store)
 		if err != nil {
 			return err
@@ -146,9 +188,12 @@ func (t *Trousseau) Encrypt(store *Store) error {
 			ErrorLogger.Fatal(err)
 		}
 
-		d, err := aes.NewAES256Encrypter(passphrase, nil)
+		d, err := aesenc.NewAES256Encrypter(passphrase, nil)
 		if err != nil {
 			return err
+		}
+		if t.CryptoAlgorithm == AES_256_ENCRYPTION {
+			d.SetMode(1)
 		}
 
 		t.Data, err = d.Encrypt(pd)
