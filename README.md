@@ -1,4 +1,4 @@
-![Trousseau, a portable encrypted keyring](https://dl.dropboxusercontent.com/u/2497327/Github/trousseau/trousseau-animation.gif)
+![Trousseau, a portable encrypted keyring](trousseau.gif)
 
 [![Build Status](https://travis-ci.org/oleiade/trousseau.svg?branch=master)](https://travis-ci.org/oleiade/trousseau)
 
@@ -9,7 +9,7 @@
 It stores data in a **single encrypted file**.
 It supports both **asymetric encryption** using OpenPGP, and **symmetric encryption** using AES256.
 It can be easily synced across devices using Dropbox, OneDrive...
-It can be exported and imported to/from multiple remote storages using integrated S3, ssh, and gist support. 
+It can be exported and imported to/from multiple remote storages using integrated S3, ssh, and gist support.
 If used with OpenPGP encryption, it is able to restrict access to the data store to a set of recipients.
 
 Create a *trousseau* data store, add some key-value pairs to it, push it to S3 and re-import it from another device or simply sync it over Dropbox. Safe data sharing had never been that simple!
@@ -29,7 +29,7 @@ However it has proved being useful to anyone who need to store and eventually sh
 
 *Trousseau can be useful to you when it comes to*:
 
-* **Store** sensitive data: No more plain certificates and keys in your repositories and configuration files. Your brand new shiny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite version control system. 
+* **Store** sensitive data: No more plain certificates and keys in your repositories and configuration files. Your brand new shiny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite version control system.
 * **Share** passwords, keys and other critical data with co-workers and servers in your cluster in a safe manner. *Trousseau* can encrypt its content for specific recipients you provide to it (Only the recipient you intend will be able to import and read-write the *Trousseau* store content). *Trousseau* proved itself to be a great way to share some services passwords with your co-workers too! Simply set up a trousseau store with symmetric encryption, sync it over dropbox, et voila!
 * **Deploy** keys to your servers in a safe and normative way. Encrypt the trousseau store for each server selectively.
 
@@ -152,7 +152,7 @@ Trousseau behavior can be controlled through the system environment:
 
 First step with **trousseau** is to create a data store.
 
-To do so, you will need to decide the kind of encryption you wish to use: 
+To do so, you will need to decide the kind of encryption you wish to use:
 + OpenPGP asymmetric encryption: accessing the data store will be restricted to the recipients (gpg) its been encrypted for. This is probably the best choice if you intend to share the data store with multiple servers or gpg capable devices. It can also be a good choice if you inted to share the data store with a team or selected people.
 + AES256 symmetric encryption: the data store will be encrypted using a passphrase you will provide. This is probably the best choice if you intend to store sensitive personal informations (passwords, bank details, bitcoins...) and sync it accross devices.  
 
@@ -166,7 +166,7 @@ As a default:
 ```bash
 # create a trousseau for two gpg recipients
 # both key ids and key email are supported.
-$ trousseau create 4B7D890,foo@bar.com 
+$ trousseau create 4B7D890,foo@bar.com
 trousseau created at $HOME/.trousseau
 
 # Or create a symmetrically encrypted data store
@@ -229,7 +229,7 @@ $ trousseau get abc
 
 # What about renaming abc key, just for fun?
 $ trousseau rename abc 'my friend jackson'
-$ trousseau keys 
+$ trousseau keys
 my friend jackson
 easy as
 myuser.ssh.public_key
@@ -322,7 +322,7 @@ easy as: do re mi
 # the push/pull --ask-password option instead of supplying
 # the password through the dsn.
 $ trousseau push --ask-password scp://user:@host:port/remote_file_path
-Password: 
+Password:
 Trousseau data store succesfully pushed to ssh remote storage
 
 
@@ -357,7 +357,7 @@ easy as: do re mi
 # * Gist remote storage doesn't use the host and port dsn fields,
 #   but you still need to provide their ':' separator
 $ trousseau push gist://user:mysuppedupertoken@:/gist_name
-Password: 
+Password:
 Trousseau data store succesfully pushed to gist remote storage
 
 
@@ -453,4 +453,3 @@ See **Contribute** section.
 ## Changelog
 
 See [CHANGELOG](https://github.com/oleiade/trousseau/blob/master/CHANGELOG.md)
-
