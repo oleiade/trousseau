@@ -517,7 +517,7 @@ func UpgradeAction(yes, noBackup bool) error {
 
 	version := DiscoverVersion(data, VersionDiscoverClosures)
 	if version == "" {
-		fmt.Errorf("Initial store version could not be detected")
+		return fmt.Errorf("Initial store version could not be detected")
 	}
 
 	newStoreFile, err := UpgradeFrom(version, data, UpgradeClosures)

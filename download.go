@@ -24,7 +24,7 @@ func DownloadUsingS3(dsn *dsn.Dsn) error {
 	s3Storage := s3.NewS3Storage(awsAuth, dsn.Host, awsRegion)
 	err := s3Storage.Connect()
 	if err != nil {
-		fmt.Errorf("Unable to connect to S3")
+		return fmt.Errorf("Unable to connect to S3")
 	}
 
 	err = s3Storage.Pull(dsn.Path, GetStorePath())
