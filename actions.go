@@ -473,7 +473,7 @@ func KeysAction() error {
 	return nil
 }
 
-func ShowAction() error {
+func ShowAction(outputFormat string) error {
 	tr, err := OpenTrousseau(InferStorePath())
 	if err != nil {
 		return err
@@ -484,12 +484,7 @@ func ShowAction() error {
 		return err
 	}
 
-	items := store.Data.Items()
-	for k, v := range items {
-		InfoLogger.Println(fmt.Sprintf("%s : %s", k, v.(string)))
-	}
-
-	return nil
+	return ShowOutput(outputFormat, store.Data)
 }
 
 func MetaAction() error {

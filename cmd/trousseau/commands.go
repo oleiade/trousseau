@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/oleiade/trousseau"
 	"github.com/urfave/cli"
@@ -538,16 +539,19 @@ func ShowCommand() cli.Command {
 		Name:  "show",
 		Usage: "Show the encrypted data store key value pairs",
 		Action: func(c *cli.Context) error {
-			if !hasExpectedArgs(c.Args(), 0) {
-				trousseau.ErrorLogger.Fatal("Invalid number of arguments provided to show command")
-			}
-
-			err := trousseau.ShowAction()
+			outputFormat := strings.ToLower(c.String("output"))
+			err := trousseau.ShowAction(outputFormat)
 			if err != nil {
 				trousseau.ErrorLogger.Fatal(err)
 			}
 
 			return nil
+		},
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "output, o",
+				Usage: "output the key value pairs as either json, yml, toml or default format",
+			},
 		},
 	}
 }
