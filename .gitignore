@@ -1,12 +1,3 @@
-# Build artefacts
-build/
-
-# Makefile generated paths
-.gopath
-.sw?
-bin/
-dist/
-
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a
@@ -30,21 +21,3 @@ _testmain.go
 
 *.exe
 *.test
-
-# Vagrant files
-.vagrant/
-.sudo_as_admin_successful
-.bash_history
-.cache
-
-
-# Documentation files
-docs/build/
-
-
-# Intellij
-.idea
-
-# Vim files
-*.swp
-*.swo

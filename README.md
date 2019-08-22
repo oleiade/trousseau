@@ -433,6 +433,15 @@ TrousseauVersion: 0.1.0c
 
 ## Contribute
 
+### Testing
+
+Running the unit tests for the project is done with the following command:
+
+```go
+go test github.com/oleiade/trousseau/...
+```
+
+### Workflow
 For detailed contribution instructions, see the the [CONTRIBUTING](https://github.com/oleiade/trousseau/blob/master/CONTRIBUTING.md) document
 
 However here is a quick summary for all of you in a hurry:
