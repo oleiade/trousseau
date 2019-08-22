@@ -8,6 +8,7 @@ import (
 
 	"github.com/oleiade/serrure/aes"
 	"github.com/oleiade/serrure/openpgp"
+	"github.com/oleiade/trousseau/internal/store"
 )
 
 type Trousseau struct {
@@ -70,8 +71,8 @@ func FromBytes(d []byte) (*Trousseau, error) {
 	return trousseau, err
 }
 
-func (t *Trousseau) Decrypt() (*Store, error) {
-	var store Store
+func (t *Trousseau) Decrypt() (*store.Store, error) {
+	var store store.Store
 
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
@@ -118,7 +119,7 @@ func (t *Trousseau) Decrypt() (*Store, error) {
 	return &store, nil
 }
 
-func (t *Trousseau) Encrypt(store *Store) error {
+func (t *Trousseau) Encrypt(store *store.Store) error {
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
 		pd, err := json.Marshal(*store)

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/oleiade/trousseau"
+	"github.com/oleiade/trousseau/internal/trousseau"
 	"github.com/urfave/cli"
 )
 

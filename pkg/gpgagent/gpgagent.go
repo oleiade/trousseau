@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 // Package gpgagent interacts with the local GPG Agent.
-package trousseau
+package gpgagent
 
 import (
 	"bufio"
