@@ -6,6 +6,7 @@ github.com/google/go-github v0.0.0-20160802180827-56add9d4071b h1:RqHoi09dHniK/7
 github.com/google/go-github v0.0.0-20160802180827-56add9d4071b/go.mod h1:zLgOLi98H3fifZn+44m+umXrS52loVEgC2AApnigrVQ=
 github.com/google/go-querystring v0.0.0-20160401233042-9235644dd9e5 h1:oERTZ1buOUYlpmKaqlO5fYmz8cZ1rYu5DieJzF4ZVmU=
 github.com/google/go-querystring v0.0.0-20160401233042-9235644dd9e5/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
+github.com/guelfey/go.dbus v0.0.0-20131113121618-f6a3a2366cc3 h1:fngCxKbvZdctIsWj2hYijhAt4iK0JXSSA78B36xP0yI=
 github.com/guelfey/go.dbus v0.0.0-20131113121618-f6a3a2366cc3/go.mod h1:0CNX5Cvi77WEH8llpfZ/ieuqyceb1cnO5//b5zzsnF8=
 github.com/howeyc/gopass v0.0.0-20160803164817-b63a7d07e65d h1:QSXZhkCwA1j3WbSVEnxB+9sPsuthBgvpi4BUTaYPc6E=
 github.com/howeyc/gopass v0.0.0-20160803164817-b63a7d07e65d/go.mod h1:lADxMC39cJJqL93Duh1xhAs4I2Zs8mKS89XWXFGp9cs=
