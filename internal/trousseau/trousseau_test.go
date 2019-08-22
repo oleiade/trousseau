@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/oleiade/tempura"
 	"os"
+
+	"github.com/oleiade/tempura"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestOpenTrousseau(t *testing.T) {
@@ -24,9 +26,9 @@ func TestOpenTrousseau(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert(t, tr.CryptoType == ASYMMETRIC_ENCRYPTION, "Wrong encryption type")
-	assert(t, tr.CryptoAlgorithm == GPG_ENCRYPTION, "Wrong encryption algorithm")
-	equals(t, tr.Data, []byte("abc"))
+	assert.True(t, tr.CryptoType == ASYMMETRIC_ENCRYPTION, "Wrong encryption type")
+	assert.True(t, tr.CryptoAlgorithm == GPG_ENCRYPTION, "Wrong encryption algorithm")
+	assert.Equal(t, tr.Data, []byte("abc"))
 }
 
 func TestOpenTrousseau_returns_err_when_file_does_not_exist(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/oleiade/serrure/openpgp"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestIsVersionZeroDotThree(t *testing.T) {
@@ -12,14 +13,14 @@ func TestIsVersionZeroDotThree(t *testing.T) {
 		"12kjd091jd192jd0192jd" +
 		openpgp.PGP_MESSAGE_FOOTER)
 
-	assert(t,
+	assert.True(t,
 		isVersionZeroDotThreeDotZero(data) == true,
 		"Input test data were suppose to match version 0.3.N")
 }
 
 func TestIsVersionZeroDotThree_fails_with_data_shorter_than_pgp_header(t *testing.T) {
 	data := []byte("abc123")
-	assert(t,
+	assert.True(t,
 		isVersionZeroDotThreeDotZero(data) == false,
 		"Input test data weren't suppose to match version 0.3.N")
 }
@@ -36,7 +37,7 @@ func TestIsVersionZeroDotFour(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert(t,
+	assert.True(t,
 		isVersionZeroDotThreeDotOne(data) == true,
 		"Input test data were suppose to match version 0.4.N")
 }
@@ -49,7 +50,7 @@ func TestDiscoverVersion_with_only_one_valid_version_in_mapping(t *testing.T) {
 		"0.3.0": isVersionZeroDotThreeDotZero,
 	}
 
-	assert(t,
+	assert.True(t,
 		DiscoverVersion(data, mapping) == "0.3.0",
 		"Version 0.3.0 was supposed to be discovered")
 }
@@ -70,7 +71,7 @@ func TestDiscoverVersion_with_two_valid_versions_in_mapping(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert(t,
+	assert.True(t,
 		DiscoverVersion(data, mapping) == "0.4.0",
 		"Version 0.4.0 was supposed to be discovered")
 }
@@ -84,7 +85,7 @@ func TestDiscoverVersion_with_two_matching_version_returns_the_lowest(t *testing
 		"0.3.1": isVersionZeroDotThreeDotZero,
 	}
 
-	assert(t,
+	assert.True(t,
 		DiscoverVersion(data, mapping) == "0.3.0",
 		"Version 0.3.0 was supposed to be discovered")
 
@@ -97,5 +98,5 @@ func TestDiscoverVersion_with_no_matching_version(t *testing.T) {
 		"0.4.0": isVersionZeroDotThreeDotOne,
 	}
 
-	equals(t, DiscoverVersion(data, mapping), "")
+	assert.Equal(t, DiscoverVersion(data, mapping), "")
 }
