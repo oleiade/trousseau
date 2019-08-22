@@ -1,4 +1,4 @@
-package trousseau
+package store
 
 import (
 	"errors"

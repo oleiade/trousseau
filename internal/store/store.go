@@ -1,4 +1,4 @@
-package trousseau
+package store
 
 type Store struct {
 	Meta Meta    `json:"meta"`

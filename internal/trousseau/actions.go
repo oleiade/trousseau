@@ -10,17 +10,19 @@ import (
 	"os"
 	"strings"
 
+	"github.com/oleiade/trousseau/internal/store"
+
 	"github.com/oleiade/trousseau/pkg/dsn"
 )
 
 func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error {
-	meta := Meta{
+	meta := store.Meta{
 		CreatedAt:        time.Now().String(),
 		LastModifiedAt:   time.Now().String(),
 		Recipients:       recipients,
 		TrousseauVersion: TROUSSEAU_VERSION,
 	}
-	store := NewStore(meta)
+	store := store.NewStore(meta)
 
 	tr := Trousseau{
 		CryptoType:      ct,
@@ -182,7 +184,7 @@ func ExportAction(destination io.Writer, plain bool) error {
 func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 	var data []byte
 	var err error
-	var importedStore *Store = &Store{}
+	var importedStore *store.Store = &store.Store{}
 	var localFilePath string = InferStorePath()
 
 	localTr, err := OpenTrousseau(localFilePath)
