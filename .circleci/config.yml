@@ -1,11 +1,17 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  go:
     docker:
       - image: circleci/golang:1.12
         environment:
           - GO111MODULE=on
+          - GITHUB_TOKEN=${GITHUB_TOKEN}
     working_directory: /go/src/github.com/oleiade/trousseau
+
+jobs:
+  build:
+    executor: go
     steps:
       - checkout
       - restore_cache:
@@ -19,19 +25,10 @@ jobs:
           paths:
             - "/go/pkg/mod"
   release:
-    docker:
-      - image: circleci/golang:1.12
-        environment:
-          - GO111MODULE=on
-          - GITHUB_TOKEN=${GITHUB_TOKEN}
-    working_directory: /go/src/github.com/oleiade/trousseau
+    executor: go
     steps:
       - checkout
-      - restore_cache:
-        keys:
-          - go-mod-v1-{{ checksum "go.sum" }}
-      - run: go mod download
-      - run: goreleaser
+      - run: curl -sL https://git.io/goreleaser | bash
 workflows:
   version: 2
   build-n-deploy:
@@ -40,11 +37,11 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - deploy:
+      - release:
           requires: 
             - build
           filters:
             tags:
-              only: /^v.*/
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
             branches:
               ignore: /.*/
