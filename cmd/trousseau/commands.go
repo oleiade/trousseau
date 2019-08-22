@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/oleiade/trousseau"
+	"github.com/oleiade/trousseau/internal/trousseau"
 	"github.com/urfave/cli"
 )
 

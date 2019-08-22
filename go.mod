@@ -9,6 +9,7 @@ require (
 	github.com/google/go-querystring v0.0.0-20160401233042-9235644dd9e5
 	github.com/guelfey/go.dbus v0.0.0-20131113121618-f6a3a2366cc3
 	github.com/howeyc/gopass v0.0.0-20160803164817-b63a7d07e65d
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/oleiade/reflections v0.0.0-20131121131850-632977f98cd3
 	github.com/oleiade/serrure v0.0.0-20160812094227-28794589ac9b
 	github.com/oleiade/tempura v0.0.0-20140528162001-1e4f5790d506
@@ -19,4 +20,5 @@ require (
 	golang.org/x/crypto v0.0.0-20160812214243-6c932297e160
 	golang.org/x/net v0.0.0-20160811235142-07b51741c1d6
 	golang.org/x/oauth2 v0.0.0-20160810173516-4784bb855e56
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

@@ -9,6 +9,11 @@ github.com/google/go-querystring v0.0.0-20160401233042-9235644dd9e5/go.mod h1:od
 github.com/guelfey/go.dbus v0.0.0-20131113121618-f6a3a2366cc3/go.mod h1:0CNX5Cvi77WEH8llpfZ/ieuqyceb1cnO5//b5zzsnF8=
 github.com/howeyc/gopass v0.0.0-20160803164817-b63a7d07e65d h1:QSXZhkCwA1j3WbSVEnxB+9sPsuthBgvpi4BUTaYPc6E=
 github.com/howeyc/gopass v0.0.0-20160803164817-b63a7d07e65d/go.mod h1:lADxMC39cJJqL93Duh1xhAs4I2Zs8mKS89XWXFGp9cs=
+github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
+github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
+github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
+github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
+github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/oleiade/reflections v0.0.0-20131121131850-632977f98cd3 h1:shfb0dwW+oUvt8GjdLeitj0PpE4hw9mN6WXZ4OAf9DY=
 github.com/oleiade/reflections v0.0.0-20131121131850-632977f98cd3/go.mod h1:RbATFBbKYkVdqmSFtx13Bb/tVhR0lgOBXunWTZKeL4w=
 github.com/oleiade/serrure v0.0.0-20160812094227-28794589ac9b h1:3D0HyVLogm3spti98Jp9tRAEkgLq0dzLVVNcTD6/DxA=
@@ -29,3 +34,5 @@ golang.org/x/net v0.0.0-20160811235142-07b51741c1d6 h1:A/+8dHDavelB1CB3VF5cdxIxp
 golang.org/x/net v0.0.0-20160811235142-07b51741c1d6/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/oauth2 v0.0.0-20160810173516-4784bb855e56 h1:HiiJye4gG8Fcv2Y07oKLC/LLoWZ2DWq9d/hBK0B+aSY=
 golang.org/x/oauth2 v0.0.0-20160810173516-4784bb855e56/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
+gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
+gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
