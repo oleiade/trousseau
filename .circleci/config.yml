@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.12
+        environment:
+          - GO111MODULE=on
+    working_directory: /go/src/github.com/oleiade/trousseau
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run: go mod download
+      - run: go build github.com/oleiade/trousseau/cmd/...
+      - run: go test github.com/oleiade/trousseau/...
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
