@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/oleiade/trousseau/dsn"
+	"github.com/oleiade/trousseau/pkg/dsn"
 )
 
 func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error {
