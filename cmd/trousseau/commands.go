@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/oleiade/trousseau"
+	"github.com/oleiade/trousseau/internal/trousseau"
 	"github.com/urfave/cli"
 )
 
@@ -148,7 +148,7 @@ func PullCommand() cli.Command {
 				trousseau.ErrorLogger.Fatal(err)
 			}
 
-			trousseau.InfoLogger.Println("Encrypted data store succesfully pulled from remote storage\n")
+			trousseau.InfoLogger.Println("Encrypted data store succesfully pulled from remote storage")
 
 			return nil
 		},
