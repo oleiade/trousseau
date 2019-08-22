@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/oleiade/trousseau/pkg/gpgagent"
 	"github.com/tmc/keyring"
 )
 
@@ -102,12 +103,12 @@ func GetPassphrase() (passphrase string, err error) {
 }
 
 func getGpgPassphrase(gpgId string) (string, error) {
-	conn, err := NewGpgAgentConn()
+	conn, err := gpgagent.NewGpgAgentConn()
 	if err != nil {
 		return "", err
 	}
 
-	passphraseRequest := &PassphraseRequest{CacheKey: gpgId}
+	passphraseRequest := &gpgagent.PassphraseRequest{CacheKey: gpgId}
 	passphrase, err := conn.GetPassphrase(passphraseRequest)
 	if err != nil {
 		return "", err
