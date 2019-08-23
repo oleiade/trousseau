@@ -4,30 +4,51 @@ import (
 	"fmt"
 
 	"github.com/crowdmob/goamz/aws"
-	"github.com/oleiade/trousseau/pkg/dsn"
 	"github.com/oleiade/trousseau/pkg/remote/gist"
 	"github.com/oleiade/trousseau/pkg/remote/s3"
 	"github.com/oleiade/trousseau/pkg/remote/ssh"
 )
 
-// uploadUsingS3 executes the whole process of pushing
-// the trousseau data store file to s3 remote storage
-// using the provided environment.
-func UploadUsingS3(dsn *dsn.Dsn) error {
-	awsAuth := aws.Auth{AccessKey: dsn.Id, SecretKey: dsn.Secret}
+// Uploader is an interface representing the capacity to upload
+// files to remote services or servers.
+type Uploader interface {
+	Upload(path string) error
+}
 
-	awsRegion, ok := aws.Regions[dsn.Port]
+// S3Uploader allows uploading files to Amazon S3 service.
+// It implements the Uploader interface.
+type S3Uploader struct {
+	storage *s3.S3Storage
+}
+
+// NewS3Uploader generates a S3 Uploader
+func NewS3Uploader(region, accessKey, secretKey, bucket string) (*S3Uploader, error) {
+	AWSRegion, ok := aws.Regions[region]
 	if !ok {
-		return fmt.Errorf("Invalid aws region supplied %s", dsn.Port)
+		return nil, fmt.Errorf("Invalid aws region supplied %s", region)
 	}
 
-	s3Storage := s3.NewS3Storage(awsAuth, dsn.Host, awsRegion)
-	err := s3Storage.Connect()
+	uploader := &S3Uploader{
+		storage: s3.NewS3Storage(
+			aws.Auth{AccessKey: accessKey, SecretKey: secretKey},
+			bucket,
+			AWSRegion,
+		),
+	}
+
+	return uploader, nil
+}
+
+// Upload executes the whole process of pushing
+// the trousseau data store file to s3 remote storage
+// using the provided environment.
+func (s *S3Uploader) Upload(path string) error {
+	err := s.storage.Connect()
 	if err != nil {
 		return fmt.Errorf("Unable to connect to S3")
 	}
 
-	err = s3Storage.Push(GetStorePath(), dsn.Path)
+	err = s.storage.Push(GetStorePath(), path)
 	if err != nil {
 		return err
 	}
@@ -35,24 +56,35 @@ func UploadUsingS3(dsn *dsn.Dsn) error {
 	return nil
 }
 
-// uploadUsingScp executes the whole process of pushing
+// SCPUploader allows uploading files to a remote server using SSH.
+// It implements the Uploader interface.
+type SCPUploader struct {
+	storage *ssh.ScpStorage
+}
+
+// NewSCPUploader generates a SCP Uploader
+func NewSCPUploader(host, port, user, password, privateKey string) *SCPUploader {
+	return &SCPUploader{
+		storage: ssh.NewScpStorage(
+			host,
+			port,
+			user,
+			password,
+			privateKey,
+		),
+	}
+}
+
+// Upload executes the whole process of pushing
 // the trousseau data store file to scp remote storage
 // using the provided environment.
-func UploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
-	scpStorage := ssh.NewScpStorage(
-		dsn.Host,
-		dsn.Port,
-		dsn.Id,
-		dsn.Secret,
-		privateKey,
-	)
-
-	err = scpStorage.Connect()
+func (s *SCPUploader) Upload(path string) (err error) {
+	err = s.storage.Connect()
 	if err != nil {
 		return err
 	}
 
-	err = scpStorage.Push(GetStorePath(), dsn.Path)
+	err = s.storage.Push(GetStorePath(), path)
 	if err != nil {
 		return err
 	}
@@ -60,14 +92,26 @@ func UploadUsingScp(dsn *dsn.Dsn, privateKey string) (err error) {
 	return nil
 }
 
-// uploadUsingGist executes the whole process of pushing
+// GistUploader allows uploading files to Github's Gist service.
+// It implements the Uploader interface.
+type GistUploader struct {
+	storage *gist.GistStorage
+}
+
+// NewGistUploader generates a gist uploader
+func NewGistUploader(user, token string) *GistUploader {
+	return &GistUploader{
+		storage: gist.NewGistStorage(user, token),
+	}
+}
+
+// Upload executes the whole process of pushing
 // the trousseau data store file to gist remote storage
 // using the provided dsn informations.
-func UploadUsingGist(dsn *dsn.Dsn) (err error) {
-	gistStorage := gist.NewGistStorage(dsn.Id, dsn.Secret)
-	gistStorage.Connect()
+func (g *GistUploader) Upload(path string) error {
+	g.storage.Connect()
 
-	err = gistStorage.Push(GetStorePath(), dsn.Path)
+	err := g.storage.Push(GetStorePath(), path)
 	if err != nil {
 		return err
 	}

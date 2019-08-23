@@ -55,39 +55,47 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 }
 
 func PushAction(destination string, sshPrivateKey string, askPassword bool) error {
-	endpointDsn, err := dsn.Parse(destination)
+	endpointDSN, err := dsn.Parse(destination)
 	if err != nil {
 		return err
 	}
 
-	switch endpointDsn.Scheme {
+	switch endpointDSN.Scheme {
 	case "s3":
-		err := endpointDsn.SetDefaults(S3Defaults)
+		err := endpointDSN.SetDefaults(S3Defaults)
 		if err != nil {
 			return err
 		}
 
-		err = UploadUsingS3(endpointDsn)
+		uploader, err := NewS3Uploader(endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, endpointDSN.Host)
+		if err != nil {
+			return err
+		}
+
+		err = uploader.Upload(endpointDSN.Path)
 		if err != nil {
 			return err
 		}
 	case "scp":
-		err := endpointDsn.SetDefaults(ScpDefaults)
+		err := endpointDSN.SetDefaults(ScpDefaults)
 		if err != nil {
 			return err
 		}
 
 		if askPassword == true {
 			password := PromptForHiddenInput("Ssh endpoint password: ")
-			endpointDsn.Secret = password
+			endpointDSN.Secret = password
 		}
 
-		err = UploadUsingScp(endpointDsn, sshPrivateKey)
+		uploader := NewSCPUploader(endpointDSN.Host, endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, sshPrivateKey)
+		err = uploader.Upload(endpointDSN.Path)
 		if err != nil {
 			return err
 		}
 	case "gist":
-		err = UploadUsingGist(endpointDsn)
+		uploader := NewGistUploader(endpointDSN.Id, endpointDSN.Secret)
+
+		err = uploader.Upload(endpointDSN.Path)
 		if err != nil {
 			return err
 		}
@@ -97,47 +105,47 @@ func PushAction(destination string, sshPrivateKey string, askPassword bool) erro
 }
 
 func PullAction(source string, sshPrivateKey string, askPassword bool) error {
-	endpointDsn, err := dsn.Parse(source)
+	endpointDSN, err := dsn.Parse(source)
 	if err != nil {
 		return err
 	}
 
-	switch endpointDsn.Scheme {
+	switch endpointDSN.Scheme {
 	case "s3":
-		err := endpointDsn.SetDefaults(S3Defaults)
+		err := endpointDSN.SetDefaults(S3Defaults)
 		if err != nil {
 			return err
 		}
 
-		err = DownloadUsingS3(endpointDsn)
+		err = DownloadUsingS3(endpointDSN)
 		if err != nil {
 			return err
 		}
 	case "scp":
-		err := endpointDsn.SetDefaults(ScpDefaults)
+		err := endpointDSN.SetDefaults(ScpDefaults)
 		if err != nil {
 			return err
 		}
 
 		if askPassword == true {
 			password := PromptForHiddenInput("Ssh endpoint password: ")
-			endpointDsn.Secret = password
+			endpointDSN.Secret = password
 		}
 
-		err = DownloadUsingScp(endpointDsn, sshPrivateKey)
+		err = DownloadUsingScp(endpointDSN, sshPrivateKey)
 		if err != nil {
 			return err
 		}
 	case "gist":
-		err = DownloadUsingGist(endpointDsn)
+		err = DownloadUsingGist(endpointDSN)
 		if err != nil {
 			return err
 		}
 	default:
-		if endpointDsn.Scheme == "" {
+		if endpointDSN.Scheme == "" {
 			ErrorLogger.Fatalf("No dsn scheme supplied")
 		} else {
-			ErrorLogger.Fatalf("Invalid dsn scheme supplied: %s", endpointDsn.Scheme)
+			ErrorLogger.Fatalf("Invalid dsn scheme supplied: %s", endpointDSN.Scheme)
 		}
 	}
 
