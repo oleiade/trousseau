@@ -117,7 +117,12 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) error {
 			return err
 		}
 
-		err = DownloadUsingS3(endpointDSN)
+		downloader, err := NewS3Downloader(endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, endpointDSN.Host)
+		if err != nil {
+			return err
+		}
+
+		err = downloader.Download(endpointDSN.Path)
 		if err != nil {
 			return err
 		}
@@ -132,12 +137,14 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) error {
 			endpointDSN.Secret = password
 		}
 
-		err = DownloadUsingScp(endpointDSN, sshPrivateKey)
+		downloader := NewSCPDownloader(endpointDSN.Host, endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, sshPrivateKey)
+		err = downloader.Download(endpointDSN.Path)
 		if err != nil {
 			return err
 		}
 	case "gist":
-		err = DownloadUsingGist(endpointDSN)
+		downloader := NewGistDownloader(endpointDSN.Id, endpointDSN.Secret)
+		err = downloader.Download(endpointDSN.Path)
 		if err != nil {
 			return err
 		}
