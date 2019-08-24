@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/oleiade/trousseau/pkg/remote"
-	"github.com/oleiade/trousseau/pkg/remote/gist"
 	"github.com/oleiade/trousseau/pkg/remote/ssh"
 )
 
@@ -132,23 +131,26 @@ func (s *SCPRemote) Download(path string) (err error) {
 // GistRemote allows uploading and downloading files to and from Github's Gist service.
 // It implements the UploadDownloader interface.
 type GistRemote struct {
-	storage *gist.GistStorage
+	storage *remote.GistHandler
 }
 
 // NewGistRemote generates a GistRemote
 func NewGistRemote(user, token string) *GistRemote {
 	return &GistRemote{
-		storage: gist.NewGistStorage(user, token),
+		storage: remote.NewGistHandler(user, token),
 	}
 }
 
 // Upload executes the whole process of pushing
 // the trousseau data store file to gist remote storage
 // using the provided dsn informations.
-func (g *GistRemote) Upload(path string) error {
-	g.storage.Connect()
+func (g *GistRemote) Upload(dest string) error {
+	f, err := os.Open(GetStorePath())
+	if err != nil {
+		return fmt.Errorf("unable to open data store file; reason: %s", err.Error())
+	}
 
-	err := g.storage.Push(GetStorePath(), path)
+	err = g.storage.Push(dest, f)
 	if err != nil {
 		return err
 	}
@@ -159,10 +161,13 @@ func (g *GistRemote) Upload(path string) error {
 // Download executes the whole process of downloading
 // the trousseau data store file to gist remote storage
 // using the provided dsn informations.
-func (g *GistRemote) Download(path string) error {
-	g.storage.Connect()
+func (g *GistRemote) Download(src string) error {
+	f, err := os.OpenFile(GetStorePath(), os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		return fmt.Errorf("unable to write downloaded data store to a file; reason: %s", err.Error())
+	}
 
-	err := g.storage.Pull(path, GetStorePath())
+	err = g.storage.Pull(src, f)
 	if err != nil {
 		return err
 	}
