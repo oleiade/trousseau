@@ -2,10 +2,10 @@ package trousseau
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/crowdmob/goamz/aws"
+	"github.com/oleiade/trousseau/pkg/remote"
 	"github.com/oleiade/trousseau/pkg/remote/gist"
-	"github.com/oleiade/trousseau/pkg/remote/s3"
 	"github.com/oleiade/trousseau/pkg/remote/ssh"
 )
 
@@ -29,37 +29,29 @@ type UploadDownloader interface {
 // S3Remote allows uploading and downloading files to and from Amazon S3 service.
 // It implements the UploadDownloader interface.
 type S3Remote struct {
-	storage *s3.S3Storage
+	handler *remote.S3Handler
 }
 
 // NewS3Remote generates a S3Remote
 func NewS3Remote(region, accessKey, secretKey, bucket string) (*S3Remote, error) {
-	AWSRegion, ok := aws.Regions[region]
-	if !ok {
-		return nil, fmt.Errorf("Invalid aws region supplied %s", region)
+	handler, err := remote.NewS3Handler(region, bucket)
+	if err != nil {
+		return nil, fmt.Errorf("unable to start AWS S3 session; reason: %s", err.Error())
 	}
 
-	uploader := &S3Remote{
-		storage: s3.NewS3Storage(
-			aws.Auth{AccessKey: accessKey, SecretKey: secretKey},
-			bucket,
-			AWSRegion,
-		),
-	}
-
-	return uploader, nil
+	return &S3Remote{handler: handler}, nil
 }
 
 // Upload executes the whole process of pushing
 // the trousseau data store file to s3 remote storage
 // using the provided environment.
-func (s *S3Remote) Upload(path string) error {
-	err := s.storage.Connect()
+func (s *S3Remote) Upload(dest string) error {
+	f, err := os.Open(GetStorePath())
 	if err != nil {
-		return fmt.Errorf("Unable to connect to S3")
+		return fmt.Errorf("unable to open data store file; reason: %s", err.Error())
 	}
 
-	err = s.storage.Push(GetStorePath(), path)
+	err = s.handler.Push(dest, f)
 	if err != nil {
 		return err
 	}
@@ -70,13 +62,13 @@ func (s *S3Remote) Upload(path string) error {
 // Download executes the whole process of pulling
 // the trousseau data store file from s3 remote storage
 // using the provided environment.
-func (s *S3Remote) Download(path string) error {
-	err := s.storage.Connect()
+func (s *S3Remote) Download(src string) error {
+	f, err := os.OpenFile(src, os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
-		return fmt.Errorf("Unable to connect to S3")
+		return fmt.Errorf("unable to write downloaded data store to a file; reason: %s", err.Error())
 	}
 
-	err = s.storage.Pull(path, GetStorePath())
+	err = s.handler.Pull(src, f)
 	if err != nil {
 		return err
 	}

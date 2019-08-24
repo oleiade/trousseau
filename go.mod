@@ -3,6 +3,7 @@ module github.com/oleiade/trousseau
 go 1.12
 
 require (
+	github.com/aws/aws-sdk-go v1.23.8
 	github.com/crowdmob/goamz v0.0.0-20150128194925-3a06871fe9fc
 	github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2 // indirect
 	github.com/google/go-github v0.0.0-20160802180827-56add9d4071b
