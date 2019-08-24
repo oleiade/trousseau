@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/oleiade/trousseau/pkg/remote"
-	"github.com/oleiade/trousseau/pkg/remote/ssh"
 )
 
 // Uploader is an interface representing the capacity to upload
@@ -78,13 +77,13 @@ func (s *S3Remote) Download(src string) error {
 // SCPRemote allows uploading and download files to and from a remote server using SSH.
 // It implements the UploadDownloader interface.
 type SCPRemote struct {
-	storage *ssh.ScpStorage
+	storage *remote.SSHHandler
 }
 
 // NewSCPRemote generates a SCPRemote
 func NewSCPRemote(host, port, user, password, privateKey string) *SCPRemote {
 	return &SCPRemote{
-		storage: ssh.NewScpStorage(
+		storage: remote.NewSSHHandler(
 			host,
 			port,
 			user,
@@ -97,13 +96,13 @@ func NewSCPRemote(host, port, user, password, privateKey string) *SCPRemote {
 // Upload executes the whole process of pushing
 // the trousseau data store file to scp remote storage
 // using the provided environment.
-func (s *SCPRemote) Upload(path string) (err error) {
-	err = s.storage.Connect()
+func (s *SCPRemote) Upload(dest string) (err error) {
+	f, err := os.Open(GetStorePath())
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to open data store file; reason: %s", err.Error())
 	}
 
-	err = s.storage.Push(GetStorePath(), path)
+	err = s.storage.Push(dest, f)
 	if err != nil {
 		return err
 	}
@@ -114,13 +113,13 @@ func (s *SCPRemote) Upload(path string) (err error) {
 // Download executes the whole process of downloading
 // the trousseau data store file to scp remote storage
 // using the provided environment.
-func (s *SCPRemote) Download(path string) (err error) {
-	err = s.storage.Connect()
+func (s *SCPRemote) Download(src string) (err error) {
+	f, err := os.OpenFile(GetStorePath(), os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to write downloaded data store to a file; reason: %s", err.Error())
 	}
 
-	err = s.storage.Pull(path, GetStorePath())
+	err = s.storage.Pull(src, f)
 	if err != nil {
 		return err
 	}
