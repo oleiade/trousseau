@@ -60,6 +60,8 @@ func PushAction(destination string, sshPrivateKey string, askPassword bool) erro
 		return err
 	}
 
+	var remote UploadDownloader
+
 	switch endpointDSN.Scheme {
 	case "s3":
 		err := endpointDSN.SetDefaults(S3Defaults)
@@ -67,12 +69,7 @@ func PushAction(destination string, sshPrivateKey string, askPassword bool) erro
 			return err
 		}
 
-		uploader, err := NewS3Uploader(endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, endpointDSN.Host)
-		if err != nil {
-			return err
-		}
-
-		err = uploader.Upload(endpointDSN.Path)
+		remote, err = NewS3Remote(endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, endpointDSN.Host)
 		if err != nil {
 			return err
 		}
@@ -87,18 +84,14 @@ func PushAction(destination string, sshPrivateKey string, askPassword bool) erro
 			endpointDSN.Secret = password
 		}
 
-		uploader := NewSCPUploader(endpointDSN.Host, endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, sshPrivateKey)
-		err = uploader.Upload(endpointDSN.Path)
-		if err != nil {
-			return err
-		}
+		remote = NewSCPRemote(endpointDSN.Host, endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, sshPrivateKey)
 	case "gist":
-		uploader := NewGistUploader(endpointDSN.Id, endpointDSN.Secret)
+		remote = NewGistRemote(endpointDSN.Id, endpointDSN.Secret)
+	}
 
-		err = uploader.Upload(endpointDSN.Path)
-		if err != nil {
-			return err
-		}
+	err = remote.Upload(endpointDSN.Path)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -110,6 +103,8 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) error {
 		return err
 	}
 
+	var remote UploadDownloader
+
 	switch endpointDSN.Scheme {
 	case "s3":
 		err := endpointDSN.SetDefaults(S3Defaults)
@@ -117,12 +112,7 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) error {
 			return err
 		}
 
-		downloader, err := NewS3Downloader(endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, endpointDSN.Host)
-		if err != nil {
-			return err
-		}
-
-		err = downloader.Download(endpointDSN.Path)
+		remote, err = NewS3Remote(endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, endpointDSN.Host)
 		if err != nil {
 			return err
 		}
@@ -137,23 +127,20 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) error {
 			endpointDSN.Secret = password
 		}
 
-		downloader := NewSCPDownloader(endpointDSN.Host, endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, sshPrivateKey)
-		err = downloader.Download(endpointDSN.Path)
-		if err != nil {
-			return err
-		}
+		remote = NewSCPRemote(endpointDSN.Host, endpointDSN.Port, endpointDSN.Id, endpointDSN.Secret, sshPrivateKey)
 	case "gist":
-		downloader := NewGistDownloader(endpointDSN.Id, endpointDSN.Secret)
-		err = downloader.Download(endpointDSN.Path)
-		if err != nil {
-			return err
-		}
+		remote = NewGistRemote(endpointDSN.Id, endpointDSN.Secret)
 	default:
 		if endpointDSN.Scheme == "" {
 			ErrorLogger.Fatalf("No dsn scheme supplied")
 		} else {
 			ErrorLogger.Fatalf("Invalid dsn scheme supplied: %s", endpointDSN.Scheme)
 		}
+	}
+
+	err = remote.Download(endpointDSN.Path)
+	if err != nil {
+		return err
 	}
 
 	return nil
