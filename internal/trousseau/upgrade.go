@@ -6,10 +6,11 @@ import (
 	"sort"
 
 	"github.com/oleiade/serrure/openpgp"
+	"github.com/oleiade/trousseau/internal/config"
 )
 
 type VersionMatcher func([]byte) bool
-type UpgradeClosure func([]byte) ([]byte, error)
+type UpgradeClosure func(*config.Config, []byte) ([]byte, error)
 
 var UpgradeClosures map[string]UpgradeClosure = map[string]UpgradeClosure{
 	"0.3.0": upgradeZeroDotThreeToNext,
@@ -20,7 +21,7 @@ var VersionDiscoverClosures map[string]VersionMatcher = map[string]VersionMatche
 	"0.3.1": isVersionZeroDotThreeDotOne,
 }
 
-func UpgradeFrom(startVersion string, d []byte, mapping map[string]UpgradeClosure) ([]byte, error) {
+func UpgradeFrom(c *config.Config, startVersion string, d []byte, mapping map[string]UpgradeClosure) ([]byte, error) {
 	var versions []string
 	var out []byte = d
 	var err error
@@ -42,7 +43,7 @@ func UpgradeFrom(startVersion string, d []byte, mapping map[string]UpgradeClosur
 		}
 
 		upgradeClosure := mapping[version]
-		out, err = upgradeClosure(out)
+		out, err = upgradeClosure(c, out)
 		if err != nil {
 			return nil, fmt.Errorf("Upgrading trousseau data store to version %s: failure\nReason: %s", versionRepr, err.Error())
 		}
@@ -96,7 +97,7 @@ func isVersionZeroDotThreeDotOne(d []byte) bool {
 	return true
 }
 
-func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
+func upgradeZeroDotThreeToNext(c *config.Config, d []byte) ([]byte, error) {
 	var err error
 
 	// Assert input data are in the expected version format
@@ -116,7 +117,7 @@ func upgradeZeroDotThreeToNext(d []byte) ([]byte, error) {
 	}
 
 	// Decrypt store version 0.3 (aka legacy)
-	passphrase, err := GetPassphrase()
+	passphrase, err := GetPassphrase(c)
 	if err != nil {
 		ErrorLogger.Fatal(err)
 	}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/oleiade/trousseau/internal/config"
 	"github.com/oleiade/trousseau/pkg/gpgagent"
 	"github.com/tmc/keyring"
 )
@@ -31,17 +32,16 @@ func SetStorePath(storePath string) { gStorePath = storePath }
 func GetStorePath() string          { return gStorePath }
 func SetPassphrase(p string)        { gPassphrase = p }
 
-func InferStorePath() string {
-	envPath := os.Getenv(ENV_TROUSSEAU_STORE)
+func InferStorePath(c *config.Config) string {
 	contextPath := GetStorePath()
 
 	if contextPath != "" {
 		return contextPath
-	} else if envPath != "" {
-		return envPath
+	} else if c.StorePath != "" {
+		return c.StorePath
 	}
 
-	return filepath.Join(os.Getenv("HOME"), DEFAULT_STORE_FILENAME)
+	return filepath.Join(os.Getenv("HOME"), c.Filename)
 }
 
 func AskPassphraseFlagCheck() bool {
@@ -68,7 +68,7 @@ func AskPassphrase(confirm bool) {
 // to retrieve it from the environment, then it will try to fetch
 // it from the system keyring manager, ultimately it will try
 // to get it from a running gpg-agent daemon.
-func GetPassphrase() (passphrase string, err error) {
+func GetPassphrase(c *config.Config) (passphrase string, err error) {
 	//var err error
 
 	if gPassphrase != "" {
@@ -76,14 +76,13 @@ func GetPassphrase() (passphrase string, err error) {
 	}
 
 	// try to retrieve passphrase from env
-	passphrase = os.Getenv(ENV_PASSPHRASE_KEY)
-	if len(passphrase) > 0 {
+	if len(c.Passphrase) > 0 {
 		return passphrase, nil
 	}
 
 	// if passphrase wasn't found in env, try to fetch it from
 	// system keyring manager.
-	passphrase, err = keyring.Get(os.Getenv(ENV_KEYRING_SERVICE_KEY), os.Getenv(ENV_KEYRING_USER_KEY))
+	passphrase, err = keyring.Get(c.Keyring.ServiceKey, c.Keyring.UserKey)
 	if len(passphrase) > 0 {
 		return passphrase, nil
 	}
@@ -91,7 +90,7 @@ func GetPassphrase() (passphrase string, err error) {
 	// if passphrase was enither found in the environment nor
 	// system keyring manager try to fetch it from gpg-agent
 	if os.Getenv("GPG_AGENT_INFO") != "" {
-		passphrase, err = getGpgPassphrase(os.Getenv(ENV_MASTER_GPG_ID_KEY))
+		passphrase, err = getGpgPassphrase(c)
 	}
 
 	if err != nil {
@@ -102,13 +101,13 @@ func GetPassphrase() (passphrase string, err error) {
 	return passphrase, nil
 }
 
-func getGpgPassphrase(gpgId string) (string, error) {
+func getGpgPassphrase(c *config.Config) (string, error) {
 	conn, err := gpgagent.NewGpgAgentConn()
 	if err != nil {
 		return "", err
 	}
 
-	passphraseRequest := &gpgagent.PassphraseRequest{CacheKey: gpgId}
+	passphraseRequest := &gpgagent.PassphraseRequest{CacheKey: c.MasterGPGID}
 	passphrase, err := conn.GetPassphrase(passphraseRequest)
 	if err != nil {
 		return "", err

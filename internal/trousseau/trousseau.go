@@ -8,8 +8,11 @@ import (
 
 	"github.com/oleiade/serrure/aes"
 	"github.com/oleiade/serrure/openpgp"
+	"github.com/oleiade/trousseau/internal/config"
 	"github.com/oleiade/trousseau/internal/store"
 )
+
+const TROUSSEAU_VERSION = "0.4.1"
 
 type Trousseau struct {
 	// Crypto public configuration attributes
@@ -71,12 +74,12 @@ func FromBytes(d []byte) (*Trousseau, error) {
 	return trousseau, err
 }
 
-func (t *Trousseau) Decrypt() (*store.Store, error) {
+func (t *Trousseau) Decrypt(c *config.Config) (*store.Store, error) {
 	var store store.Store
 
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
-		passphrase, err := GetPassphrase()
+		passphrase, err := GetPassphrase(c)
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
@@ -96,7 +99,7 @@ func (t *Trousseau) Decrypt() (*store.Store, error) {
 			return nil, err
 		}
 	case AES_256_ENCRYPTION:
-		passphrase, err := GetPassphrase()
+		passphrase, err := GetPassphrase(c)
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
@@ -119,7 +122,7 @@ func (t *Trousseau) Decrypt() (*store.Store, error) {
 	return &store, nil
 }
 
-func (t *Trousseau) Encrypt(store *store.Store) error {
+func (t *Trousseau) Encrypt(c *config.Config, store *store.Store) error {
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
 		pd, err := json.Marshal(*store)
@@ -142,7 +145,7 @@ func (t *Trousseau) Encrypt(store *store.Store) error {
 			return err
 		}
 
-		passphrase, err := GetPassphrase()
+		passphrase, err := GetPassphrase(c)
 		if err != nil {
 			ErrorLogger.Fatal(err)
 		}
