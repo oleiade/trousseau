@@ -6,8 +6,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/oleiade/serrure/aes"
 	"github.com/oleiade/serrure/openpgp"
+	"github.com/oleiade/trousseau/internal/crypto"
 )
 
 type SecretStore struct {
@@ -37,7 +37,7 @@ func (ss *SecretStore) Encrypt(algo CryptoAlgorithm, passphrase string) ([]byte,
 
 		return encrypter.Encrypt(data)
 	case AES_256_ENCRYPTION:
-		encrypter, err := aes.NewAES256Encrypter(passphrase, nil)
+		encrypter, err := crypto.NewAES256Service(passphrase)
 		if err != nil {
 			return nil, err
 		}
@@ -72,10 +72,13 @@ func (ss *SecretStore) Decrypt(r io.Reader, algo CryptoAlgorithm, passphrase str
 			return err
 		}
 	case AES_256_ENCRYPTION:
-		decrypter := aes.NewAES256Decrypter(passphrase)
+		decrypter, err := crypto.NewAES256Service(passphrase)
+		if err != nil {
+			return err
+		}
 
 		var ciphered []byte
-		_, err := r.Read(ciphered)
+		_, err = r.Read(ciphered)
 		if err != nil {
 			return err
 		}
