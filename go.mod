@@ -4,9 +4,9 @@ go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/OpenPeeDeeP/xdg v0.2.0
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/aws/aws-sdk-go v1.23.8
-	github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-github v0.0.0-20160802180827-56add9d4071b
@@ -20,8 +20,7 @@ require (
 	github.com/oleiade/reflections v0.0.0-20131121131850-632977f98cd3
 	github.com/oleiade/serrure v0.0.0-20160812094227-28794589ac9b
 	github.com/oleiade/tempura v0.0.0-20140528162001-1e4f5790d506
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/testify v0.0.0-20160615092844-d77da356e56a
+	github.com/stretchr/testify v1.2.2
 	github.com/tmc/keyring v0.0.0-20160307194037-adec3bef79f7
 	github.com/urfave/cli v0.0.0-20160801031116-168c95418e66
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5

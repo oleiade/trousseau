@@ -1,12 +1,21 @@
 package main
 
 import (
+	"bytes"
+	"io/ioutil"
+	"log"
+	"os"
+	"path"
+
+	"github.com/BurntSushi/toml"
+	"github.com/oleiade/trousseau/internal/config"
 	"github.com/oleiade/trousseau/internal/trousseau"
 	"github.com/urfave/cli"
 )
 
 func Before(c *cli.Context) error {
 	checkHelp(c)
+	checkConfig(c)
 	updateStorePath(c)
 	updateGnupgHome(c)
 	updateCheckPassphrase(c)
@@ -50,6 +59,26 @@ func updateCheckPassphrase(c *cli.Context) {
 			trousseau.AskPassphrase(true)
 		} else {
 			trousseau.AskPassphrase(false)
+		}
+	}
+}
+
+func checkConfig(c *cli.Context) {
+	if _, err := os.Stat(c.String("config")); os.IsNotExist(err) {
+		err := os.MkdirAll(path.Dir(c.String("config")), 0755)
+		if err != nil {
+			log.Fatalf("unable to create directory %s in order to store trousseau's config; reason: %s\n", c.String("config"), err.Error())
+		}
+
+		config := config.Default()
+		buf := new(bytes.Buffer)
+		if err := toml.NewEncoder(buf).Encode(config); err != nil {
+			log.Fatalf("unable to encode trousseau's default configuration to toml; reason: %s\n", err.Error())
+		}
+
+		err = ioutil.WriteFile(c.String("config"), buf.Bytes(), 0755)
+		if err != nil {
+			log.Fatalf("unabla to create trousseaus configuration file at %s; reason: %s\n", c.String("config"), err.Error())
 		}
 	}
 }

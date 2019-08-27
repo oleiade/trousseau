@@ -16,7 +16,7 @@ import (
 // Config holds configuration for crate applications.
 type Config struct {
 	Filename    string `env:"TROUSSEAU_STORE_FILENAME" toml:"filename" default:".trousseau"`
-	StorePath   string `env:"ENV_TROUSSEAU_STORE" toml:"store_path" default:"./"`
+	StorePath   string `env:"ENV_TROUSSEAU_STORE" toml:"store_path" default:".trousseau"`
 	Passphrase  string `env:"ENV_PASSPHRASE_KEY"`
 	MasterGPGID string `env:"ENV_MASTER_GPG_ID_KEY" toml:"master_gpg_id"`
 
