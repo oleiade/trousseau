@@ -56,7 +56,7 @@ func AskPassphrase(confirm bool) {
 	if confirm {
 		SetPassphrase(PromptForHiddenInputConfirm())
 	} else {
-		SetPassphrase(PromptForHiddenInput("Passphrase: "))
+		SetPassphrase(PromptForHiddenInput("\rPassphrase: "))
 	}
 
 	// Set the global AskPassphraseFlag so as to not ask again
