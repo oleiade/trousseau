@@ -30,12 +30,12 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 	}
 	store := store.NewStore(meta)
 
-	tr := Trousseau{
+	vault := Vault{
 		CryptoType:      ct,
 		CryptoAlgorithm: ca,
 	}
 
-	if tr.CryptoType == SYMMETRIC_ENCRYPTION {
+	if vault.CryptoType == SYMMETRIC_ENCRYPTION {
 		passphrase, err := GetPassphrase(config)
 		if err != nil {
 
@@ -47,12 +47,12 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 		}
 	}
 
-	err = tr.Encrypt(config, store)
+	err = vault.Encrypt(config, store)
 	if err != nil {
 		return err
 	}
 
-	err = tr.Write(InferStorePath(config))
+	err = vault.Write(InferStorePath(config))
 	if err != nil {
 		return err
 	}
@@ -159,12 +159,12 @@ func ExportAction(destination io.Writer, plain bool) error {
 	}
 
 	if plain == true {
-		tr, err := OpenTrousseau(InferStorePath(config))
+		vault, err := OpenTrousseau(InferStorePath(config))
 		if err != nil {
 			return err
 		}
 
-		store, err := tr.Decrypt(config)
+		store, err := vault.Decrypt(config)
 		if err != nil {
 			return err
 		}
@@ -267,12 +267,12 @@ func ListRecipientsAction() error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
@@ -291,12 +291,12 @@ func AddRecipientAction(recipient string) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
@@ -306,12 +306,12 @@ func AddRecipientAction(recipient string) error {
 		return err
 	}
 
-	err = tr.Encrypt(config, store)
+	err = vault.Encrypt(config, store)
 	if err != nil {
 		return err
 	}
 
-	err = tr.Write(InferStorePath(config))
+	err = vault.Write(InferStorePath(config))
 	if err != nil {
 		return err
 	}
@@ -325,12 +325,12 @@ func RemoveRecipientAction(recipient string) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
@@ -340,12 +340,12 @@ func RemoveRecipientAction(recipient string) error {
 		return err
 	}
 
-	err = tr.Encrypt(config, store)
+	err = vault.Encrypt(config, store)
 	if err != nil {
 		return err
 	}
 
-	err = tr.Write(InferStorePath(config))
+	err = vault.Write(InferStorePath(config))
 	if err != nil {
 		return err
 	}
@@ -359,12 +359,12 @@ func GetAction(key string, filepath string) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
@@ -420,24 +420,24 @@ func SetAction(key, value, file string) error {
 		}
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
 
 	store.Data.Set(key, value)
 
-	err = tr.Encrypt(config, store)
+	err = vault.Encrypt(config, store)
 	if err != nil {
 		return err
 	}
 
-	err = tr.Write(InferStorePath(config))
+	err = vault.Write(InferStorePath(config))
 	if err != nil {
 		return err
 	}
@@ -451,12 +451,12 @@ func RenameAction(src, dest string, overwrite bool) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
@@ -466,12 +466,12 @@ func RenameAction(src, dest string, overwrite bool) error {
 		return err
 	}
 
-	err = tr.Encrypt(config, store)
+	err = vault.Encrypt(config, store)
 	if err != nil {
 		return err
 	}
 
-	err = tr.Write(InferStorePath(config))
+	err = vault.Write(InferStorePath(config))
 	if err != nil {
 		return err
 	}
@@ -485,24 +485,24 @@ func DelAction(key string) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
 
 	store.Data.Del(key)
 
-	tr.Encrypt(config, store)
+	vault.Encrypt(config, store)
 	if err != nil {
 		return err
 	}
 
-	err = tr.Write(InferStorePath(config))
+	err = vault.Write(InferStorePath(config))
 	if err != nil {
 		return err
 	}
@@ -516,12 +516,12 @@ func KeysAction() error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
@@ -540,12 +540,12 @@ func ShowAction() error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}
@@ -564,12 +564,12 @@ func MetaAction() error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	tr, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenTrousseau(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := tr.Decrypt(config)
+	store, err := vault.Decrypt(config)
 	if err != nil {
 		return err
 	}

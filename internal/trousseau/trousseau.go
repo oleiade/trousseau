@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/mcuadros/go-defaults"
 	"github.com/oleiade/serrure/aes"
 	"github.com/oleiade/serrure/openpgp"
 	"github.com/oleiade/trousseau/internal/config"
@@ -14,10 +15,10 @@ import (
 
 const TROUSSEAU_VERSION = "0.4.1"
 
-type Trousseau struct {
+type Vault struct {
 	// Crypto public configuration attributes
-	CryptoType      CryptoType      `json:"crypto_type"`
-	CryptoAlgorithm CryptoAlgorithm `json:"crypto_algorithm"`
+	CryptoType      CryptoType      `json:"crypto_type" default:"asymmetric"`
+	CryptoAlgorithm CryptoAlgorithm `json:"crypto_algorithm" default:"gpg"`
 
 	// Encrypted data private attribute
 	Data []byte `json:"_data"`
@@ -26,17 +27,25 @@ type Trousseau struct {
 	cryptoMapping map[CryptoAlgorithm]interface{}
 }
 
-func OpenTrousseau(fp string) (*Trousseau, error) {
-	var trousseau *Trousseau
-	var content []byte
-	var err error
+// NewVault initializes a vault with default values
+func NewVault() *Vault {
+	vault := new(Vault)
+	defaults.SetDefaults(vault)
+	return vault
+}
 
-	content, err = ioutil.ReadFile(fp)
+// OpenVault loads a Vault from a from a file.
+// It returns an error if the loaded Vault's version is not compatible
+// with the version of trousseau currently being used
+func OpenVault(fp string) (*Vault, error) {
+	var content []byte
+	content, err := ioutil.ReadFile(fp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(content, &trousseau)
+	var vault *Vault
+	err = json.Unmarshal(content, &vault)
 	if err != nil {
 		// Check if the content of the file matches with a legacy
 		// data store file format. Raise a proper error accordingly.
@@ -50,14 +59,15 @@ func OpenTrousseau(fp string) (*Trousseau, error) {
 		return nil, err
 	}
 
-	return trousseau, nil
+	return vault, nil
 }
 
-func FromBytes(d []byte) (*Trousseau, error) {
-	var trousseau *Trousseau
-	var err error
-
-	err = json.Unmarshal(d, &trousseau)
+// FromBytes loads a Vault from a slice of bytes.
+// It returns an error if the loaded Vault's version is not compatible
+// with the version of trousseau currently being used
+func FromBytes(d []byte) (*Vault, error) {
+	var vault *Vault
+	err := json.Unmarshal(d, &vault)
 	if err != nil {
 		// Check if the content of the file matches with a legacy
 		// data store file format. Raise a proper error accordingly.
@@ -71,10 +81,12 @@ func FromBytes(d []byte) (*Trousseau, error) {
 		return nil, err
 	}
 
-	return trousseau, err
+	return vault, err
 }
 
-func (t *Trousseau) Decrypt(c *config.Config) (*store.Store, error) {
+// Decrypt deciphers the encrypted part of the Vault, and returns the
+// unencrypted Store.
+func (t *Vault) Decrypt(c *config.Config) (*store.Store, error) {
 	var store store.Store
 
 	switch t.CryptoAlgorithm {
@@ -122,7 +134,8 @@ func (t *Trousseau) Decrypt(c *config.Config) (*store.Store, error) {
 	return &store, nil
 }
 
-func (t *Trousseau) Encrypt(c *config.Config, store *store.Store) error {
+// Encrypt encrypts a Store into the Data field of the Vault.
+func (t *Vault) Encrypt(c *config.Config, store *store.Store) error {
 	switch t.CryptoAlgorithm {
 	case GPG_ENCRYPTION:
 		pd, err := json.Marshal(*store)
@@ -166,7 +179,7 @@ func (t *Trousseau) Encrypt(c *config.Config, store *store.Store) error {
 	return nil
 }
 
-func (t *Trousseau) Write(fp string) error {
+func (t *Vault) Write(fp string) error {
 	jsonData, err := json.Marshal(t)
 	if err != nil {
 		return err
