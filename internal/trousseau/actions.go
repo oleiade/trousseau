@@ -1,8 +1,6 @@
 package trousseau
 
 import (
-	"time"
-
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/oleiade/trousseau/internal/config"
-	"github.com/oleiade/trousseau/internal/store"
 
 	"github.com/oleiade/trousseau/pkg/dsn"
 )
@@ -22,14 +19,7 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	meta := store.Meta{
-		CreatedAt:        time.Now().String(),
-		LastModifiedAt:   time.Now().String(),
-		Recipients:       recipients,
-		TrousseauVersion: TROUSSEAU_VERSION,
-	}
-	store := store.NewStore(meta)
-
+	secretStore := NewSecretStore()
 	vault := Vault{
 		CryptoType:      ct,
 		CryptoAlgorithm: ca,
@@ -38,7 +28,6 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 	if vault.CryptoType == SYMMETRIC_ENCRYPTION {
 		passphrase, err := GetPassphrase(config)
 		if err != nil {
-
 			if !AskPassphraseFlagCheck() {
 				AskPassphrase(true)
 			}
@@ -47,12 +36,17 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 		}
 	}
 
-	err = vault.Encrypt(config, store)
+	err = vault.Lock(config, secretStore)
 	if err != nil {
 		return err
 	}
 
-	err = vault.Write(InferStorePath(config))
+	f, err := os.OpenFile(InferStorePath(config), os.O_CREATE|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+
+	err = vault.Dump(f)
 	if err != nil {
 		return err
 	}
@@ -159,17 +153,17 @@ func ExportAction(destination io.Writer, plain bool) error {
 	}
 
 	if plain == true {
-		vault, err := OpenTrousseau(InferStorePath(config))
+		vault, err := OpenVault(InferStorePath(config))
 		if err != nil {
 			return err
 		}
 
-		store, err := vault.Decrypt(config)
+		secretStore, err := vault.Unlock(config)
 		if err != nil {
 			return err
 		}
 
-		storeBytes, err := json.Marshal(store)
+		storeBytes, err := json.Marshal(secretStore)
 		if err != nil {
 			return err
 		}
@@ -203,19 +197,18 @@ func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	var importedStore *store.Store = &store.Store{}
-	var localFilePath string = InferStorePath(config)
-
-	localTr, err := OpenTrousseau(localFilePath)
+	localFilePath := InferStorePath(config)
+	localVault, err := OpenVault(localFilePath)
 	if err != nil {
 		return err
 	}
 
-	localStore, err := localTr.Decrypt(config)
+	localSecretStore, err := localVault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
+	importedStore := NewSecretStore()
 	if plain == true {
 		data, err = ioutil.ReadAll(source)
 		if err != nil {
@@ -227,33 +220,33 @@ func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 			return err
 		}
 	} else {
-		data, err = ioutil.ReadAll(source)
+		importedVault, err := ReadVault(source)
 		if err != nil {
 			return err
 		}
 
-		importedTr, err := FromBytes(data)
-		if err != nil {
-			return err
-		}
-
-		importedStore, err = importedTr.Decrypt(config)
+		importedStore, err = importedVault.Unlock(config)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = ImportStore(importedStore, localStore, strategy)
+	err = ImportStore(importedStore, localSecretStore, strategy)
 	if err != nil {
 		return err
 	}
 
-	err = localTr.Encrypt(config, localStore)
+	err = localVault.Lock(config, localSecretStore)
 	if err != nil {
 		return err
 	}
 
-	err = localTr.Write(localFilePath)
+	f, err := os.Open(localFilePath)
+	if err != nil {
+		return err
+	}
+
+	err = localVault.Dump(f)
 	if err != nil {
 		return err
 	}
@@ -267,18 +260,17 @@ func ListRecipientsAction() error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	recipients := store.Meta.ListRecipients()
-	for _, r := range recipients {
+	for _, r := range secretStore.Metadata.Recipients {
 		InfoLogger.Println(r)
 	}
 
@@ -291,27 +283,34 @@ func AddRecipientAction(recipient string) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	err = store.Meta.AddRecipient(recipient)
+	for _, r := range secretStore.Metadata.Recipients {
+		if r == recipient {
+			return fmt.Errorf("recipient %s already present", recipient)
+		}
+		secretStore.Metadata.Recipients = append(secretStore.Metadata.Recipients, recipient)
+	}
+
+	err = vault.Lock(config, secretStore)
 	if err != nil {
 		return err
 	}
 
-	err = vault.Encrypt(config, store)
+	f, err := os.Open(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	err = vault.Write(InferStorePath(config))
+	err = vault.Dump(f)
 	if err != nil {
 		return err
 	}
@@ -325,27 +324,35 @@ func RemoveRecipientAction(recipient string) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	err = store.Meta.RemoveRecipient(recipient)
+	var filteredRecipients []string
+	for _, r := range secretStore.Metadata.Recipients {
+		if r != recipient {
+			filteredRecipients = append(filteredRecipients, recipient)
+		}
+	}
+	secretStore.Metadata.Recipients = filteredRecipients
+
+	err = vault.Lock(config, secretStore)
 	if err != nil {
 		return err
 	}
 
-	err = vault.Encrypt(config, store)
+	f, err := os.Open(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	err = vault.Write(InferStorePath(config))
+	err = vault.Dump(f)
 	if err != nil {
 		return err
 	}
@@ -359,29 +366,24 @@ func GetAction(key string, filepath string) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	value, err := store.Data.Get(key)
-	if err != nil {
-		return err
+	value, found := secretStore.Data[key]
+	if !found {
+		return fmt.Errorf("key %s not found", key)
 	}
 
 	// If the --file flag is provided
 	if filepath != "" {
-		valueBytes, ok := value.(string)
-		if !ok {
-			ErrorLogger.Fatal(fmt.Sprintf("unable to write %s value to file", key))
-		}
-
-		err := ioutil.WriteFile(filepath, []byte(valueBytes), os.FileMode(0600))
+		err := ioutil.WriteFile(filepath, []byte(value), os.FileMode(0600))
 		if err != nil {
 			return err
 		}
@@ -420,24 +422,28 @@ func SetAction(key, value, file string) error {
 		}
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
+	if err != nil {
+		return err
+	}
+	secretStore.Data[key] = value
+
+	err = vault.Lock(config, secretStore)
 	if err != nil {
 		return err
 	}
 
-	store.Data.Set(key, value)
-
-	err = vault.Encrypt(config, store)
+	f, err := os.Open(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	err = vault.Write(InferStorePath(config))
+	err = vault.Dump(f)
 	if err != nil {
 		return err
 	}
@@ -451,27 +457,42 @@ func RenameAction(src, dest string, overwrite bool) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	err = store.Data.Rename(src, dest, overwrite)
+	srcValue, found := secretStore.Data[src]
+	if !found {
+		return fmt.Errorf("key %s not found", src)
+	}
+
+	// If destination key already exists, and overwrite flag is
+	// set to false, then return an error
+	_, found = secretStore.Data[dest]
+	if found && overwrite == false {
+		return fmt.Errorf("key %s already exists. The overwrite flag was not set", dest)
+	}
+
+	secretStore.Data[dest] = srcValue
+	delete(secretStore.Data, src)
+
+	err = vault.Lock(config, secretStore)
 	if err != nil {
 		return err
 	}
 
-	err = vault.Encrypt(config, store)
+	f, err := os.Open(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	err = vault.Write(InferStorePath(config))
+	err = vault.Dump(f)
 	if err != nil {
 		return err
 	}
@@ -485,24 +506,29 @@ func DelAction(key string) error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	store.Data.Del(key)
+	delete(secretStore.Data, key)
 
-	vault.Encrypt(config, store)
+	vault.Lock(config, secretStore)
 	if err != nil {
 		return err
 	}
 
-	err = vault.Write(InferStorePath(config))
+	f, err := os.Open(InferStorePath(config))
+	if err != nil {
+		return err
+	}
+
+	err = vault.Dump(f)
 	if err != nil {
 		return err
 	}
@@ -516,18 +542,17 @@ func KeysAction() error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	keys := store.Data.Keys()
-	for _, k := range keys {
+	for k := range secretStore.Data {
 		InfoLogger.Println(k)
 	}
 
@@ -540,19 +565,18 @@ func ShowAction() error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	items := store.Data.Items()
-	for k, v := range items {
-		InfoLogger.Println(fmt.Sprintf("%s : %s", k, v.(string)))
+	for k, v := range secretStore.Data {
+		InfoLogger.Println(fmt.Sprintf("%s : %s", k, v))
 	}
 
 	return nil
@@ -564,17 +588,17 @@ func MetaAction() error {
 		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
-	vault, err := OpenTrousseau(InferStorePath(config))
+	vault, err := OpenVault(InferStorePath(config))
 	if err != nil {
 		return err
 	}
 
-	store, err := vault.Decrypt(config)
+	secretStore, err := vault.Unlock(config)
 	if err != nil {
 		return err
 	}
 
-	InfoLogger.Println(store.Meta)
+	InfoLogger.Printf("%+v\n", secretStore.Metadata)
 	return nil
 }
 
