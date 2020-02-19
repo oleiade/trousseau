@@ -81,8 +81,8 @@ $ cp trousseau_X.Y.Z_darwin_amd64/trousseau /usr/local/binary
 1. First, make sure you have a [Go](http://http://golang.org/) language compiler **>= 1.5** (*mandatory*) and [git](http://gitscm.org) installed.
 2. Make sure you have the following go system dependencies in your ``$PATH``: ``bzr, svn, hg, git``
 3. Ensure your [GOPATH](http://golang.org/doc/code.html#GOPATH) is properly set.
-4. Run ``make``
-5. The trousseau binary is now in the `bin/` folder
+4. run `go build github.com/oleiade/trousseau/cmd/trousseau`
+5. The `trousseau` binary is now in your current working directory folder
 
 ### Prerequisites
 
