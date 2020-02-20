@@ -6,6 +6,7 @@ github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a h1:idn718Q4
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
 github.com/aws/aws-sdk-go v1.23.8 h1:G/azJoBN0pnhB3B+0eeC4yyVFYIIad6bbzg6wwtImqk=
 github.com/aws/aws-sdk-go v1.23.8/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-ozzo/ozzo-validation v3.6.0+incompatible h1:msy24VGS42fKO9K1vLz82/GeYW1cILu7Nuuj1N3BBkE=
@@ -43,10 +44,13 @@ github.com/oleiade/tempura v0.0.0-20140528162001-1e4f5790d506 h1:M7Y+MexyOaIR9jh
 github.com/oleiade/tempura v0.0.0-20140528162001-1e4f5790d506/go.mod h1:ntxgn8lHBBO3Id3152amVvKq3HdvNRIOX3IT6AxMHZc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1 h1:2vfRuCMp5sSVIDSqO8oNnWJq7mPa6KVP3iPIwFBuy8A=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
+github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
+github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/tmc/keyring v0.0.0-20160307194037-adec3bef79f7 h1:WhLeVc9Ces9elO8LWkwY4eI8WLE2yc1uDZ2WW2RJsbU=
 github.com/tmc/keyring v0.0.0-20160307194037-adec3bef79f7/go.mod h1:gsa3jftQ3xia55nzIN4lXLYzDcWdxjojdKoz+N0St2Y=
 github.com/urfave/cli v0.0.0-20160801031116-168c95418e66 h1:m/zAWqYuR3XCQ/dBvyPPs+2wEUru3Ndb41zQlr9z8KQ=
