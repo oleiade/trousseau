@@ -20,12 +20,11 @@ require (
 	github.com/oleiade/reflections v0.0.0-20131121131850-632977f98cd3
 	github.com/oleiade/serrure v0.0.0-20160812094227-28794589ac9b
 	github.com/oleiade/tempura v0.0.0-20140528162001-1e4f5790d506
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.0
 	github.com/tmc/keyring v0.0.0-20160307194037-adec3bef79f7
 	github.com/urfave/cli v0.0.0-20160801031116-168c95418e66
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
 	golang.org/x/oauth2 v0.0.0-20160810173516-4784bb855e56
 	google.golang.org/appengine v1.6.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
