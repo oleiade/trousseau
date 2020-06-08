@@ -6,7 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/OpenPeeDeeP/xdg v0.2.0
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
-	github.com/aws/aws-sdk-go v1.29.7
+	github.com/aws/aws-sdk-go v1.31.12
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/google/go-cmp v0.4.0
 	github.com/google/go-github v0.0.0-20160802180827-56add9d4071b
@@ -27,5 +27,4 @@ require (
 	golang.org/x/oauth2 v0.0.0-20160810173516-4784bb855e56
 	google.golang.org/appengine v1.6.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
