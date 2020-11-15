@@ -7,17 +7,17 @@ before:
     # you may remove this if you don't need go generate
     - go generate ./...
 builds:
-- main: ./cmd/trousseau
-  binary: trousseau
-  env:
-    - CGO_ENABLED=0
+  - main: ./cmd/trousseau
+    binary: trousseau
+    env:
+      - CGO_ENABLED=0
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
 # snapcrafts:
 # - name: trousseau
 #   summary: File based encrypted key-value store
@@ -25,29 +25,29 @@ archives:
 #   license: MIT
 #   publish: false
 nfpms:
-- homepage: https://github.com/oleiade/trousseau
-  maintainer: Theo Crevon <theo@crevon.me>
-  description: Trousseau is an encrypted key-value store designed to be a simple, safe and trustworthy place for your data.
-  license: MIT
-  formats:
-    - deb
-brews:
-- name: trousseau
-  github:
-    owner: oleiade
-    name: homebrew-tap
-  folder: Formula
-  homepage: https://github.com/oleiade/trousseau
-  description: File based encrypted key-value store
-  test: |
-      system "#{bin}/trousseau -v"
+  - homepage: https://github.com/oleiade/trousseau
+    maintainer: Theo Crevon <theo@crevon.me>
+    description: Trousseau is an encrypted key-value store designed to be a simple, safe and trustworthy place for your data.
+    license: MIT
+    formats:
+      - deb
+# brews:
+#   - name: trousseau
+#     tap:
+#       owner: oleiade
+#       name: homebrew-tap
+#     folder: Formula
+#     homepage: https://github.com/oleiade/trousseau
+#     description: File based encrypted key-value store
+#     test: |
+#       system "#{bin}/trousseau -v"
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 snapshot:
   name_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
+      - "^docs:"
+      - "^test:"
