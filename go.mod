@@ -16,7 +16,7 @@ require (
 	github.com/imdario/mergo v0.3.8
 	github.com/joeshaw/envdecode v0.0.0-20190604014844-d6d9849fcc2c
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/mcuadros/go-defaults v1.1.0
+	github.com/mcuadros/go-defaults v1.2.0
 	github.com/oleiade/reflections v0.0.0-20131121131850-632977f98cd3
 	github.com/oleiade/serrure v0.0.0-20160812094227-28794589ac9b
 	github.com/oleiade/tempura v0.0.0-20140528162001-1e4f5790d506
