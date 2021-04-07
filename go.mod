@@ -6,7 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/OpenPeeDeeP/xdg v0.2.0
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
-	github.com/aws/aws-sdk-go v1.35.28
+	github.com/aws/aws-sdk-go v1.38.14
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/google/go-cmp v0.5.3
 	github.com/google/go-github v0.0.0-20160802180827-56add9d4071b
@@ -21,7 +21,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/tmc/keyring v0.0.0-20160307194037-adec3bef79f7
 	github.com/urfave/cli v0.0.0-20160801031116-168c95418e66
-	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/oauth2 v0.0.0-20160810173516-4784bb855e56
 	google.golang.org/appengine v1.6.1 // indirect
 )
