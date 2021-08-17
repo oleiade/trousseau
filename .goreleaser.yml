@@ -1,50 +1,167 @@
-# This is an example goreleaser.yaml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
 before:
   hooks:
     # you may remove this if you don't use vgo
     - go mod download
     # you may remove this if you don't need go generate
     - go generate ./...
+
+# The project name is used in the name of the Brew formula, archives, etc. If none is given, it will be inferred from the name of the GitHub, GitLab, or Gitea release.
+project_name: trousseau
+
 builds:
-  - main: ./cmd/trousseau
+  - 
+    # Path to main.go file or main package.
+    main: ./cmd/trousseau
+
+    # Binary name.
+    # Can be a path (e.g. `bin/app`) to wrap the binary in a director
     binary: trousseau
+
+    # Custom environment variables to be set during the builds.
     env:
       - CGO_ENABLED=0
+
+    # GOOS list to build for.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Defaults are darwin and linux.
+    goos:
+      - linux
+      - darwin
+      - windows
+
+    # GOARCH to build for.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    goarch:
+      - amd64
+      - arm
+      - arm64
+
+    # GOARM to build for when GOARCH is arm.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    goarm:
+      - 6
+      - 7
+
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
+  - 
+    # Archive format. Valid options are `tar.gz`, `tar.xz`, `gz`, `zip` and `binary`.
+    # If format is `binary`, no archives are created and the binaries are instead
+    # uploaded directly.
+    format: zip
+
+    # Replacements for GOOS and GOARCH in the archive name.
+    replacements:
+      darwin: macOS
+      amd64: 64-bit
+
+# GoReleaser can create a GitHub/GitLab/Gitea release with the current tag, upload 
+# all the artifacts and generate the changelog based on the new commits since 
+# the previous tag.
+release:
+  # Repo in which the release will be created.
+  # Default is extracted from the origin remote URL or empty if its private hosted.
+  github:
+    owner: oleiade
+    name: trousseau
+
+  # If set to true, will not auto-publish the release.
+  draft: true
+
+  header: |
+    ## Version {{ .Version }}
+
+    Welcome to this new release!
+
+  # You can change the name of the release.
+  # Default is `{{.Tag}}` on OSS and `{{.PrefixedTag}}` on Pro.
+  name_template: "v{{.Version}}"
+
+# The default is configured to create a detached signature for the checksum files with GnuPG and your default key
+signs:
+  - artifacts: checksum
+
 # snapcrafts:
 # - name: trousseau
 #   summary: File based encrypted key-value store
 #   description: Trousseau is an encrypted key-value store designed to be a simple, safe and trustworthy place for your data.
 #   license: MIT
 #   publish: false
+
 nfpms:
-  - homepage: https://github.com/oleiade/trousseau
-    maintainer: Theo Crevon <theo@crevon.me>
+  - 
+    # Name of the package.
+    package_name: trousseau
+
+    # Template to your app's homepage.
+    homepage: https://github.com/oleiade/trousseau
+
+    # Your app's maintainer.
+    maintainer: Théo Crevon <theo@crevon.me>
+
+    # Template to your app's description.
     description: Trousseau is an encrypted key-value store designed to be a simple, safe and trustworthy place for your data.
+
+    # Your app's license.
     license: MIT
+
+    # Formats to be generated.
     formats:
+      - apk
       - deb
-# brews:
-#   - name: trousseau
-#     tap:
-#       owner: oleiade
-#       name: homebrew-tap
-#     folder: Formula
-#     homepage: https://github.com/oleiade/trousseau
-#     description: File based encrypted key-value store
-#     test: |
-#       system "#{bin}/trousseau -v"
+
+    recommends:
+      - openpgp
+
+    # Replacements for GOOS and GOARCH in the package name.
+    # Keys should be valid GOOSs or GOARCHs.
+    # Values are the respective replacements.
+    replacements:
+      darwin: macOS
+      amd64: 64-bit
+
+# After releasing to GitHub or GitLab, GoReleaser can generate and publish a homebrew-tap recipe into a repository that you have access to.
+brews:
+  -
+    # Name template of the recipe
+    name: trousseau
+
+    # GitHub/GitLab repository to push the formula to
+    tap:
+      owner: oleiade
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    
+    # Folder inside the repository to put the formula.
+    folder: Formula
+
+    commit_author:
+      name: oleiade
+      email: theo@crevon.me
+
+    # Your app's homepage.
+    homepage: https://github.com/oleiade/trousseau
+
+    # Template of your app's description.
+    description: File based encrypted key-value store
+
+    # So you can `brew test` your formula.
+    test: |
+      system "#{bin}/trousseau -v"
+
 checksum:
-  name_template: "checksums.txt"
+  # You can change the name of the checksums file.
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+
+  # Algorithm to be used.
+  algorithm: sha256
+
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  # Allows you to change the name of the generated snapshot
+  #
+  # Note that some pipes require this to be semantic version compliant (nfpm,
+  # for example).
+  name_template: "{{ .Tag }}-SNAPSHOT-{{.ShortCommit}}"
+
 changelog:
   sort: asc
   filters:
