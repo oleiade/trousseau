@@ -41,7 +41,7 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 		return err
 	}
 
-	f, err := os.OpenFile(InferStorePath(config), os.O_CREATE|os.O_WRONLY, os.ModeAppend)
+	f, err := os.OpenFile(InferStorePath(config), os.O_CREATE|os.O_WRONLY, 0700)
 	if err != nil {
 		return err
 	}
