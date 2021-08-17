@@ -4,7 +4,7 @@
 
 ## What
 
-*Trousseau* is an encrypted key-value store designed to be a *simple*, *safe* and *trustworthy* place for your data.
+_Trousseau_ is an encrypted key-value store designed to be a _simple_, _safe_ and _trustworthy_ place for your data.
 
 It stores data in a **single encrypted file**.
 It supports both **asymetric encryption** using OpenPGP, and **symmetric encryption** using AES256.
@@ -12,31 +12,31 @@ It can be easily synced across devices using Dropbox, OneDrive...
 It can be exported and imported to/from multiple remote storages using integrated S3, ssh, and gist support.
 If used with OpenPGP encryption, it is able to restrict access to the data store to a set of recipients.
 
-Create a *trousseau* data store, add some key-value pairs to it, push it to S3 and re-import it from another device or simply sync it over Dropbox. Safe data sharing had never been that simple!
+Create a _trousseau_ data store, add some key-value pairs to it, push it to S3 and re-import it from another device or simply sync it over Dropbox. Safe data sharing had never been that simple!
 
-*Secrets are made to be shared, just not with anyone.* Whether you're an admin, a paranoid guy living in a bunker, or a random user who seeks a simple way to store it's critical data in secured manner. *Trousseau* can do something for you.
+_Secrets are made to be shared, just not with anyone._ Whether you're an admin, a paranoid guy living in a bunker, or a random user who seeks a simple way to store it's critical data in secured manner. _Trousseau_ can do something for you.
 
 ## Why
 
 Storing, transporting, and sharing sensitive data can be hard, and much more difficult when it comes to automate it.
 
-*Trousseau* was created with private keys and certificates (such as private keys) sharing across a cluster in mind.
+_Trousseau_ was created with private keys and certificates (such as private keys) sharing across a cluster in mind.
 However it has proved being useful to anyone who need to store and eventually share a passwords store, bank accounts details or even more sensitive data.
 
 ### Use cases
 
 #### For admins and ops
 
-*Trousseau can be useful to you when it comes to*:
+_Trousseau can be useful to you when it comes to_:
 
-* **Store** sensitive data: No more plain certificates and keys in your repositories and configuration files. Your brand new shiny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... *Trousseau* provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite version control system.
-* **Share** passwords, keys and other critical data with co-workers and servers in your cluster in a safe manner. *Trousseau* can encrypt its content for specific recipients you provide to it (Only the recipient you intend will be able to import and read-write the *Trousseau* store content). *Trousseau* proved itself to be a great way to share some services passwords with your co-workers too! Simply set up a trousseau store with symmetric encryption, sync it over dropbox, et voila!
-* **Deploy** keys to your servers in a safe and normative way. Encrypt the trousseau store for each server selectively.
+- **Store** sensitive data: No more plain certificates and keys in your repositories and configuration files. Your brand new shiny infrastructure surely relies on many certificates and private keys of different kinds: ssl, rsa, gpg, ... _Trousseau_ provides a simple and fine-tuned way to store their content in a single file that you can safely version using your favorite version control system.
+- **Share** passwords, keys and other critical data with co-workers and servers in your cluster in a safe manner. _Trousseau_ can encrypt its content for specific recipients you provide to it (Only the recipient you intend will be able to import and read-write the _Trousseau_ store content). _Trousseau_ proved itself to be a great way to share some services passwords with your co-workers too! Simply set up a trousseau store with symmetric encryption, sync it over dropbox, et voila!
+- **Deploy** keys to your servers in a safe and normative way. Encrypt the trousseau store for each server selectively.
 
 #### For the common users
 
-* **Store** your sensitive data such as passwords, bank account details or bitcoin wallets in an encrypted store.
-* **Sync** your sensitive data store to remote services and easily share it between your devices.
+- **Store** your sensitive data such as passwords, bank account details or bitcoin wallets in an encrypted store.
+- **Sync** your sensitive data store to remote services and easily share it between your devices.
 
 ## How
 
@@ -44,7 +44,7 @@ However it has proved being useful to anyone who need to store and eventually sh
 
 #### Debian and ubuntu
 
-A binary debian repository provides *trousseau* packages for *i386*, *x86_64* and *arm* architectures, so you can easily install it.
+A binary debian repository provides _trousseau_ packages for _i386_, _x86_64_ and _arm_ architectures, so you can easily install it.
 Just add the repository to your sources.list:
 
 ```bash
@@ -78,9 +78,9 @@ $ cp trousseau_X.Y.Z_darwin_amd64/trousseau /usr/local/binary
 
 #### Build it
 
-1. First, make sure you have a [Go](http://http://golang.org/) language compiler **>= 1.5** (*mandatory*) and [git](http://gitscm.org) installed.
-2. Make sure you have the following go system dependencies in your ``$PATH``: ``bzr, svn, hg, git``
-3. Ensure your [GOPATH](http://golang.org/doc/code.html#GOPATH) is properly set.
+1. First, make sure you have a [Go](https://golang.org/) language compiler **>= 1.5** (_mandatory_) and [git](https://git-scm.com/) installed.
+2. Make sure you have the following go system dependencies in your `$PATH`: `bzr, svn, hg, git`
+3. Ensure your [GOPATH](https://golang.org/doc/code.html#GOPATH) is properly set.
 4. run `go build github.com/oleiade/trousseau/cmd/trousseau`
 5. The `trousseau` binary is now in your current working directory folder
 
@@ -88,17 +88,18 @@ $ cp trousseau_X.Y.Z_darwin_amd64/trousseau /usr/local/binary
 
 #### If you go for OpenPGP asymmetric encryption
 
-Every decryption operations will require your *gpg* primary key passphrase.
+Every decryption operations will require your _gpg_ primary key passphrase.
 As of today, **trousseau** is able to handle your passphrase through multiple ways:
-* system's keyring manager
-* gpg-agent daemon
-* system environment
-* ``--passphrase`` global option
+
+- system's keyring manager
+- gpg-agent daemon
+- system environment
+- `--passphrase` global option
 
 ##### Keyring manager
 
 Supported system keyring manager are osx keychain access and linux gnome secret-service and gnome-keychain (more might be added in the future on demand).
-To use the keyring manager you will need to set up the ``TROUSSEAU_KEYRING_SERVICE`` environment variable to the name of they keyring manager key holding the trousseau main gpg key passphrase.
+To use the keyring manager you will need to set up the `TROUSSEAU_KEYRING_SERVICE` environment variable to the name of they keyring manager key holding the trousseau main gpg key passphrase.
 
 ```bash
 $ export TROUSSEAU_KEYRING_SERVICE=my_keyring_key
@@ -107,7 +108,7 @@ $ trousseau get abc
 
 ##### Gpg agent
 
-Another authentication method supported is gpg-agent. In order to use it make sure you've started the gpg-agent daemon and exported the ``GPG_AGENT_INFO`` variable, trousseau will do the rest.
+Another authentication method supported is gpg-agent. In order to use it make sure you've started the gpg-agent daemon and exported the `GPG_AGENT_INFO` variable, trousseau will do the rest.
 
 ```bash
 $ export GPG_AGENT_INFO=path_to_the_gpg_agent_info_file
@@ -140,7 +141,7 @@ Passphrase:
 
 Trousseau behavior can be controlled through the system environment:
 
-* *TROUSSEAU_STORE* : if you want to have multiple trousseau data store, set this environment variable to the path of the one you want to use. Default is ``$HOME/.trousseau``
+- _TROUSSEAU_STORE_ : if you want to have multiple trousseau data store, set this environment variable to the path of the one you want to use. Default is `$HOME/.trousseau`
 
 ## Let's get started
 
@@ -153,13 +154,15 @@ Trousseau behavior can be controlled through the system environment:
 First step with **trousseau** is to create a data store.
 
 To do so, you will need to decide the kind of encryption you wish to use:
-+ OpenPGP asymmetric encryption: accessing the data store will be restricted to the recipients (gpg) its been encrypted for. This is probably the best choice if you intend to share the data store with multiple servers or gpg capable devices. It can also be a good choice if you inted to share the data store with a team or selected people.
-+ AES256 symmetric encryption: the data store will be encrypted using a passphrase you will provide. This is probably the best choice if you intend to store sensitive personal informations (passwords, bank details, bitcoins...) and sync it accross devices.  
+
+- OpenPGP asymmetric encryption: accessing the data store will be restricted to the recipients (gpg) its been encrypted for. This is probably the best choice if you intend to share the data store with multiple servers or gpg capable devices. It can also be a good choice if you inted to share the data store with a team or selected people.
+- AES256 symmetric encryption: the data store will be encrypted using a passphrase you will provide. This is probably the best choice if you intend to store sensitive personal informations (passwords, bank details, bitcoins...) and sync it accross devices.
 
 Then, you can proceed and create a data store with the `create` command.
 As a default:
-+ data stores will be created as `$HOME/.trousseau`. However the global option `store` will allow you to select the place on the filesystem where *trousseau* should create/open the data store.
-+ data stores will be created using asymmetric OpenPGP encryption. However `encryption-type` and  `encryption-algorithm` options will allow to select explicitly the encryption mode of your choice.
+
+- data stores will be created as `$HOME/.trousseau`. However the global option `store` will allow you to select the place on the filesystem where _trousseau_ should create/open the data store.
+- data stores will be created using asymmetric OpenPGP encryption. However `encryption-type` and `encryption-algorithm` options will allow to select explicitly the encryption mode of your choice.
 
 ##### HOWTO
 
@@ -176,7 +179,7 @@ Passphrase:
 trousseau created at $HOME/.trousseau
 ```
 
-Trousseau data store consists in a single encrypted file residing in your ``$HOME`` directory. Check by yourself.
+Trousseau data store consists in a single encrypted file residing in your `$HOME` directory. Check by yourself.
 
 ```bash
 $ cat ~/.trousseau
@@ -187,7 +190,7 @@ $ cat ~/.trousseau
 }
 ```
 
-If you've just updated trousseau to a version marked as implying backward incompatibilities, the ``upgrade`` command is here to help
+If you've just updated trousseau to a version marked as implying backward incompatibilities, the `upgrade` command is here to help
 
 ```bash
 $ trousseau upgrade
@@ -251,37 +254,37 @@ $ trousseau del 'my friend jackson' # Now the song lacks something doesn't it?
 
 #### API
 
-* **get** KEY [--file]: Outputs the stored KEY-value pair, whether on *stdout* or in pointed ``--file`` option path.
-* **set** KEY [VALUE | --file] : Sets the provided key-value pair in store using provided value or extracting it from path pointed by ``--file`` option.
-* **rename** KEY_NAME NEW_NAME : Renames a store key
-* **del** KEY : Deletes provided key from the store
-* **keys** : Lists the stored keys
-* **show** : Lists the stored key-value pairs
+- **get** KEY [--file]: Outputs the stored KEY-value pair, whether on _stdout_ or in pointed `--file` option path.
+- **set** KEY [VALUE | --file] : Sets the provided key-value pair in store using provided value or extracting it from path pointed by `--file` option.
+- **rename** KEY_NAME NEW_NAME : Renames a store key
+- **del** KEY : Deletes provided key from the store
+- **keys** : Lists the stored keys
+- **show** : Lists the stored key-value pairs
 
 ### Importing/Exporting to remote storage
 
-Trousseau was built with data remote storage in mind. Therefore it provides *push* and *pull* actions to export and import the trousseau data store to remote destinations.
+Trousseau was built with data remote storage in mind. Therefore it provides _push_ and _pull_ actions to export and import the trousseau data store to remote destinations.
 As of today S3, SSH and gist storages are available (more are to come).
 
 #### API
 
-* **push** : Pushes the trousseau data store to remote storage
-* **pull** : Pulls the trousseau data store from remote storage
+- **push** : Pushes the trousseau data store to remote storage
+- **pull** : Pulls the trousseau data store from remote storage
 
 #### DSN
 
-In order to make your life easier trousseau allows you to select your export and import sources using a *DSN*.
+In order to make your life easier trousseau allows you to select your export and import sources using a _DSN_.
 
 ```
     {protocol}://{identifier}:{secret}@{host}:{port}/{path}
 ```
 
-* **protocol**: The remote service target type. Can be one of: *s3* or *scp*
-* **identifier**: The login/key/whatever to authenticate **trousseau** to the remote service. Provide your *aws_access_key* if you're targeting *s3*, or your remote login if you're targeting *scp*.
-* **secret**: The secret to authenticate **trousseau** to the remote service. Provide your *aws_secret_key* if you're targeting *s3*, or your remote password if you're targeting *scp*.
-* **host**: Your bucket name is you're targeting *s3*. The host to login to using *scp* otherwise.
-* **port**: The *aws_region* if you're targeting *s3*. The port to login to using *scp* otherwise.
-* **path**: The remote path to push to or retrieve from the trousseau file on a ``push`` or ``pull`` action.
+- **protocol**: The remote service target type. Can be one of: _s3_ or _scp_
+- **identifier**: The login/key/whatever to authenticate **trousseau** to the remote service. Provide your _aws_access_key_ if you're targeting _s3_, or your remote login if you're targeting _scp_.
+- **secret**: The secret to authenticate **trousseau** to the remote service. Provide your _aws_secret_key_ if you're targeting _s3_, or your remote password if you're targeting _scp_.
+- **host**: Your bucket name is you're targeting _s3_. The host to login to using _scp_ otherwise.
+- **port**: The _aws_region_ if you're targeting _s3_. The port to login to using _scp_ otherwise.
+- **path**: The remote path to push to or retrieve from the trousseau file on a `push` or `pull` action.
 
 #### S3 Example
 
@@ -345,7 +348,7 @@ easy as: do re mi
 #### Gist example
 
 To use the gist remote storage support, you will need to generate a Github [personal access token](https://github.com/settings/applications#personal-access-tokens).
-Once you've generated one, use it as the dsn *password* field as in the following example:
+Once you've generated one, use it as the dsn _password_ field as in the following example:
 
 ```bash
 # We start with a non-empty trousseau data store
@@ -381,8 +384,8 @@ easy as: do re mi
 
 #### API
 
-* **import** FILENAME: will import a trousseau data store from the local filesystem. The operation **erases** the current trousseau store content.
-* **export** FILENAME: will export the current trousseau data store as `FILENAME` on the local fs.
+- **import** FILENAME: will import a trousseau data store from the local filesystem. The operation **erases** the current trousseau store content.
+- **export** FILENAME: will export the current trousseau data store as `FILENAME` on the local fs.
 
 #### Real world example
 
@@ -399,7 +402,7 @@ adams_family:rests in peace, for sure
 
 ### Metadata
 
-Trousseau keeps track and exposes all sort of metadata about your store that you can access through the ``meta`` command.
+Trousseau keeps track and exposes all sort of metadata about your store that you can access through the `meta` command.
 
 ```bash
 $ trousseau meta
@@ -412,7 +415,7 @@ TrousseauVersion: 0.1.0c
 ### (OpenPGP encryption) Adding and removing recipients
 
 Okay, so you've created a trousseau data store with two recipients allowed to manipulate it. Now suppose you'd like to add another recipient to be able to open and update the trousseau store; or to remove one.
-``add-recipient`` and ``remove-recipient`` commands can help you with that.
+`add-recipient` and `remove-recipient` commands can help you with that.
 
 ```bash
 $ trousseau add-recipient 75FE3AB
@@ -442,20 +445,22 @@ go test github.com/oleiade/trousseau/...
 ```
 
 ### Workflow
+
 For detailed contribution instructions, see the the [CONTRIBUTING](https://github.com/oleiade/trousseau/blob/master/CONTRIBUTING.md) document
 
 However here is a quick summary for all of you in a hurry:
-* Check for open issues or open a fresh issue to start a discussion around a feature idea or a bug.
-* Fork the repository on GitHub.
-* Start a branch from **develop** dedicated to your changes.
-* If relevant: write tests showing the bug was fixed or the feature implemented works as expected.
-* Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS.
+
+- Check for open issues or open a fresh issue to start a discussion around a feature idea or a bug.
+- Fork the repository on GitHub.
+- Start a branch from **develop** dedicated to your changes.
+- If relevant: write tests showing the bug was fixed or the feature implemented works as expected.
+- Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS.
 
 ## It's open-source
 
-*Trousseau* is open source software under the MIT license.
+_Trousseau_ is open source software under the MIT license.
 Any hackers are welcome to supply ideas, features requests, patches, pull requests and so on.
-Let's make *Trousseau* awesome!
+Let's make _Trousseau_ awesome!
 
 See **Contribute** section.
 
