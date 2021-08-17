@@ -119,16 +119,34 @@ nfpms:
       darwin: macOS
       amd64: 64-bit
 
-# brews:
-#   - name: trousseau
-#     tap:
-#       owner: oleiade
-#       name: homebrew-tap
-#     folder: Formula
-#     homepage: https://github.com/oleiade/trousseau
-#     description: File based encrypted key-value store
-#     test: |
-#       system "#{bin}/trousseau -v"
+# After releasing to GitHub or GitLab, GoReleaser can generate and publish a homebrew-tap recipe into a repository that you have access to.
+brews:
+  -
+    # Name template of the recipe
+    name: trousseau
+
+    # GitHub/GitLab repository to push the formula to
+    tap:
+      owner: oleiade
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    
+    # Folder inside the repository to put the formula.
+    folder: Formula
+
+    commit_author:
+      name: oleiade
+      email: theo@crevon.me
+
+    # Your app's homepage.
+    homepage: https://github.com/oleiade/trousseau
+
+    # Template of your app's description.
+    description: File based encrypted key-value store
+
+    # So you can `brew test` your formula.
+    test: |
+      system "#{bin}/trousseau -v"
 
 checksum:
   # You can change the name of the checksums file.
