@@ -42,20 +42,9 @@ _Trousseau can be useful to you when it comes to_:
 
 ### Installation
 
-#### Debian and ubuntu
+#### Linux
 
-A binary debian repository provides _trousseau_ packages for _i386_, _x86_64_ and _arm_ architectures, so you can easily install it.
-Just add the repository to your sources.list:
-
-```bash
-$ echo "deb https://dl.bintray.com/oleiade/deb /" | sudo tee /etc/apt/sources.list.d/trousseau.list
-```
-
-And you're ready to go:
-
-```bash
-$ sudo apt-get update && sudo apt-get install trousseau
-```
+With each release >= 0.4.1, we distribute builds for the Linux OS, in the form of packaged binaries, as well as `.deb` and `.apk` packages that you can install following the standard procedures (`dpkg -i` on debian).
 
 #### OSX
 
@@ -69,11 +58,11 @@ brew install oleiade/tap/trousseau
 
 ##### Binaries
 
-Get the latest darwin release zip archive from the repository. Unzip it, and place the trousseau executable wherever it suits you.
+Get the latest macOS release zip archive from the repository. Unzip it, and place the trousseau executable wherever it suits you.
 
 ```bash
-$ unizp trousseau_X.Y.Z_darwin_amd64.zip
-$ cp trousseau_X.Y.Z_darwin_amd64/trousseau /usr/local/binary
+$ unizp trousseau_X.Y.Z_macOS_amd64.zip
+$ cp trousseau_X.Y.Z_macOS_amd64/trousseau /usr/local/binary
 ```
 
 #### Build it
