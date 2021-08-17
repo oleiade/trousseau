@@ -16,7 +16,7 @@ import (
 func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	secretStore := NewSecretStore()
@@ -149,7 +149,7 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) error {
 func ExportAction(destination io.Writer, plain bool) error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	if plain == true {
@@ -194,7 +194,7 @@ func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	localFilePath := InferStorePath(config)
@@ -257,7 +257,7 @@ func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 func ListRecipientsAction() error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -280,7 +280,7 @@ func ListRecipientsAction() error {
 func AddRecipientAction(recipient string) error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -321,7 +321,7 @@ func AddRecipientAction(recipient string) error {
 func RemoveRecipientAction(recipient string) error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -363,7 +363,7 @@ func RemoveRecipientAction(recipient string) error {
 func GetAction(key string, filepath string) error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -403,7 +403,7 @@ func GetAction(key string, filepath string) error {
 func SetAction(key, value, file string) error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	// If the --file flag is provided
@@ -454,7 +454,7 @@ func SetAction(key, value, file string) error {
 func RenameAction(src, dest string, overwrite bool) error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -503,7 +503,7 @@ func RenameAction(src, dest string, overwrite bool) error {
 func DelAction(key string) error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -539,7 +539,7 @@ func DelAction(key string) error {
 func KeysAction() error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -562,7 +562,7 @@ func KeysAction() error {
 func ShowAction() error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -585,7 +585,7 @@ func ShowAction() error {
 func MetaAction() error {
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	vault, err := OpenVault(InferStorePath(config))
@@ -607,7 +607,7 @@ func UpgradeAction(yes, noBackup bool) error {
 
 	config, err := config.Load("")
 	if err != nil {
-		fmt.Errorf("unable to load configuration; reason: %s", err.Error())
+		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
 
 	data, err := ioutil.ReadFile(InferStorePath(config))
@@ -617,7 +617,7 @@ func UpgradeAction(yes, noBackup bool) error {
 
 	version := DiscoverVersion(data, VersionDiscoverClosures)
 	if version == "" {
-		fmt.Errorf("Initial store version could not be detected")
+		return fmt.Errorf("Initial store version could not be detected")
 	}
 
 	newStoreFile, err := UpgradeFrom(config, version, data, UpgradeClosures)

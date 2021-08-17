@@ -26,7 +26,7 @@ func UpgradeFrom(c *config.Config, startVersion string, d []byte, mapping map[st
 	var out []byte = d
 	var err error
 
-	for version, _ := range mapping {
+	for version := range mapping {
 		if version >= startVersion {
 			versions = append(versions, version)
 		}
@@ -55,7 +55,7 @@ func UpgradeFrom(c *config.Config, startVersion string, d []byte, mapping map[st
 func DiscoverVersion(d []byte, mapping map[string]VersionMatcher) string {
 	var versions []string
 
-	for version, _ := range mapping {
+	for version := range mapping {
 		versions = append(versions, version)
 	}
 	sort.Strings(versions)
