@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.4.1
-	github.com/OpenPeeDeeP/xdg v0.2.0
+	github.com/OpenPeeDeeP/xdg v1.0.0
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/aws/aws-sdk-go v1.38.38
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
