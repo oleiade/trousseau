@@ -18,7 +18,7 @@ require (
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/oleiade/reflections v0.0.0-20131121131850-632977f98cd3
 	github.com/oleiade/serrure v0.0.0-20160812094227-28794589ac9b
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/tmc/keyring v0.0.0-20160307194037-adec3bef79f7
 	github.com/urfave/cli v0.0.0-20160801031116-168c95418e66
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
