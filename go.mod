@@ -13,7 +13,7 @@ require (
 	github.com/google/go-querystring v0.0.0-20160401233042-9235644dd9e5 // indirect
 	github.com/guelfey/go.dbus v0.0.0-20131113121618-f6a3a2366cc3 // indirect
 	github.com/howeyc/gopass v0.0.0-20160803164817-b63a7d07e65d
-	github.com/imdario/mergo v0.3.12
+	github.com/imdario/mergo v0.3.13
 	github.com/joeshaw/envdecode v0.0.0-20190604014844-d6d9849fcc2c
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/oleiade/reflections v0.0.0-20131121131850-632977f98cd3
@@ -24,4 +24,5 @@ require (
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/oauth2 v0.0.0-20160810173516-4784bb855e56
 	google.golang.org/appengine v1.6.1 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
