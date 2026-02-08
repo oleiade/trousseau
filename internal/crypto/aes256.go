@@ -123,17 +123,7 @@ func GenerateSalt(size int) ([]byte, error) {
 	return salt, nil
 }
 
-// PrependSalt prepends salt to the ciphertext
+// prependSalt prepends salt to the ciphertext
 func prependSalt(salt, ciphertext []byte) []byte {
-	msg := make([]byte, len(salt)+len(ciphertext))
-
-	for i := 0; i < len(salt)+len(ciphertext); i++ {
-		if i >= len(salt) {
-			msg[i] = ciphertext[i-len(salt)]
-		} else {
-			msg[i] = salt[i]
-		}
-	}
-
-	return msg
+	return append(append([]byte{}, salt...), ciphertext...)
 }
