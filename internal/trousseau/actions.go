@@ -297,8 +297,8 @@ func AddRecipientAction(recipient string) error {
 		if r == recipient {
 			return fmt.Errorf("recipient %s already present", recipient)
 		}
-		secretStore.Metadata.Recipients = append(secretStore.Metadata.Recipients, recipient)
 	}
+	secretStore.Metadata.Recipients = append(secretStore.Metadata.Recipients, recipient)
 
 	err = vault.Lock(config, secretStore)
 	if err != nil {
