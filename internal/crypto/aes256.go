@@ -12,7 +12,8 @@ import (
 )
 
 type AES256Service struct {
-	Cipher *AES256Cipher
+	Cipher     *AES256Cipher
+	Passphrase string
 }
 
 // NewAES256Service instantiates a new AES256Service
@@ -27,7 +28,7 @@ func NewAES256Service(passphrase string) (*AES256Service, error) {
 		return nil, err
 	}
 
-	return &AES256Service{Cipher: cipher}, nil
+	return &AES256Service{Cipher: cipher, Passphrase: passphrase}, nil
 }
 
 // Encrypt reads up plain from the Reader, encrypts
@@ -55,14 +56,27 @@ func (a *AES256Service) Decrypt(encrypted []byte) ([]byte, error) {
 		return nil, fmt.Errorf("ciphertext is too short")
 	}
 
+	// Extract the salt that was prepended during encryption and
+	// re-derive the key from it, rather than using the service's
+	// randomly generated salt which differs from the original.
+	salt := encrypted[:SaltSize]
 	ciphertext := encrypted[SaltSize:]
 	if len(ciphertext) < aes.BlockSize {
 		return nil, fmt.Errorf("ciphertext is too short")
 	}
 
+	key, err := scrypt.Key([]byte(a.Passphrase), salt, KeyCost, aes.BlockSize, 1, 32)
+	if err != nil {
+		return nil, err
+	}
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
-	stream := cipher.NewCFBDecrypter(a.Cipher.Block, iv)
+	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(ciphertext, ciphertext)
 
 	return ciphertext, nil

@@ -54,7 +54,7 @@ func (suite *AES256ServiceTestSuite) TestAES256Service_Encrypt() {
 		suite.T().Errorf("NewAES256Cipher() err = %v\n", err)
 	}
 
-	service := &AES256Service{Cipher: cipher}
+	service := &AES256Service{Cipher: cipher, Passphrase: suite.Passphrase}
 	encrypted, err := service.Encrypt([]byte(suite.Input))
 	if err != nil {
 		suite.T().Errorf("AES256Cipher.Encrypt() err = %v\n", err)
@@ -70,7 +70,7 @@ func (suite *AES256ServiceTestSuite) TestAES256Service_Decrypt() {
 		suite.T().Errorf("NewAES256Cipher() err = %v\n", err)
 	}
 
-	service := &AES256Service{Cipher: cipher}
+	service := &AES256Service{Cipher: cipher, Passphrase: suite.Passphrase}
 	encrypted, err := service.Encrypt([]byte(suite.Input))
 	if err != nil {
 		suite.T().Errorf("AES256Cipher.Encrypt() err = %v\n", err)
