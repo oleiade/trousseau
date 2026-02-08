@@ -77,7 +77,7 @@ func GetPassphrase(c *config.Config) (passphrase string, err error) {
 
 	// try to retrieve passphrase from env
 	if len(c.Passphrase) > 0 {
-		return passphrase, nil
+		return c.Passphrase, nil
 	}
 
 	// if passphrase wasn't found in env, try to fetch it from
