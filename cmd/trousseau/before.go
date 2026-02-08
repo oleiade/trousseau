@@ -15,6 +15,9 @@ import (
 
 func Before(c *cli.Context) error {
 	checkHelp(c)
+	if c.GlobalBool("h") || c.GlobalBool("help") {
+		return nil
+	}
 	checkConfig(c)
 	updateStorePath(c)
 	updateGnupgHome(c)
