@@ -518,7 +518,7 @@ func DelAction(key string) error {
 
 	delete(secretStore.Data, key)
 
-	vault.Lock(config, secretStore)
+	err = vault.Lock(config, secretStore)
 	if err != nil {
 		return err
 	}
