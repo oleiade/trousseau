@@ -41,7 +41,7 @@ func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error 
 		return err
 	}
 
-	f, err := os.OpenFile(InferStorePath(config), os.O_CREATE|os.O_WRONLY, 0700)
+	f, err := os.OpenFile(InferStorePath(config), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -241,7 +241,7 @@ func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 		return err
 	}
 
-	f, err := os.Open(localFilePath)
+	f, err := os.OpenFile(localFilePath, os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -305,7 +305,7 @@ func AddRecipientAction(recipient string) error {
 		return err
 	}
 
-	f, err := os.Open(InferStorePath(config))
+	f, err := os.OpenFile(InferStorePath(config), os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -347,7 +347,7 @@ func RemoveRecipientAction(recipient string) error {
 		return err
 	}
 
-	f, err := os.Open(InferStorePath(config))
+	f, err := os.OpenFile(InferStorePath(config), os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -438,7 +438,7 @@ func SetAction(key, value, file string) error {
 		return err
 	}
 
-	f, err := os.Open(InferStorePath(config))
+	f, err := os.OpenFile(InferStorePath(config), os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -487,7 +487,7 @@ func RenameAction(src, dest string, overwrite bool) error {
 		return err
 	}
 
-	f, err := os.Open(InferStorePath(config))
+	f, err := os.OpenFile(InferStorePath(config), os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -523,7 +523,7 @@ func DelAction(key string) error {
 		return err
 	}
 
-	f, err := os.Open(InferStorePath(config))
+	f, err := os.OpenFile(InferStorePath(config), os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
