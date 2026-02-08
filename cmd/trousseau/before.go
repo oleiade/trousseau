@@ -19,6 +19,7 @@ func Before(c *cli.Context) error {
 		return nil
 	}
 	checkConfig(c)
+	trousseau.SetConfigPath(c.String("config"))
 	updateStorePath(c)
 	updateGnupgHome(c)
 	updateCheckPassphrase(c)

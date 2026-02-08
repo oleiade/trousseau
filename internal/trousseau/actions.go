@@ -14,7 +14,7 @@ import (
 )
 
 func CreateAction(ct CryptoType, ca CryptoAlgorithm, recipients []string) error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -147,7 +147,7 @@ func PullAction(source string, sshPrivateKey string, askPassword bool) error {
 }
 
 func ExportAction(destination io.Writer, plain bool) error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -192,7 +192,7 @@ func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 	var data []byte
 	var err error
 
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -255,7 +255,7 @@ func ImportAction(source io.Reader, strategy ImportStrategy, plain bool) error {
 }
 
 func ListRecipientsAction() error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -278,7 +278,7 @@ func ListRecipientsAction() error {
 }
 
 func AddRecipientAction(recipient string) error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -319,7 +319,7 @@ func AddRecipientAction(recipient string) error {
 }
 
 func RemoveRecipientAction(recipient string) error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -361,7 +361,7 @@ func RemoveRecipientAction(recipient string) error {
 }
 
 func GetAction(key string, filepath string) error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -401,7 +401,7 @@ func GetAction(key string, filepath string) error {
 }
 
 func SetAction(key, value, file string) error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -452,7 +452,7 @@ func SetAction(key, value, file string) error {
 }
 
 func RenameAction(src, dest string, overwrite bool) error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -501,7 +501,7 @@ func RenameAction(src, dest string, overwrite bool) error {
 }
 
 func DelAction(key string) error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -537,7 +537,7 @@ func DelAction(key string) error {
 }
 
 func KeysAction() error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -560,7 +560,7 @@ func KeysAction() error {
 }
 
 func ShowAction() error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -583,7 +583,7 @@ func ShowAction() error {
 }
 
 func MetaAction() error {
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}
@@ -605,7 +605,7 @@ func MetaAction() error {
 func UpgradeAction(yes, noBackup bool) error {
 	var proceed string = "n"
 
-	config, err := config.Load("")
+	config, err := config.Load(GetConfigPath())
 	if err != nil {
 		return fmt.Errorf("unable to load configuration; reason: %s", err.Error())
 	}

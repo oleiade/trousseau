@@ -27,6 +27,10 @@ var (
 var gStorePath string
 var gPassphrase string
 var gPassphraseAskFlag bool
+var gConfigPath string
+
+func SetConfigPath(p string) { gConfigPath = p }
+func GetConfigPath() string  { return gConfigPath }
 
 func SetStorePath(storePath string) { gStorePath = storePath }
 func GetStorePath() string          { return gStorePath }
