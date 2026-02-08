@@ -1,40 +1,35 @@
 package remote
 
 import (
+	"context"
 	"fmt"
 	"io"
-	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 // S3Handler holds a session to the Amazon S3 webservice.
 // It implements the Handler interface.
 type S3Handler struct {
-	Session *session.Session
-	Bucket  string
+	Client *s3.Client
+	Bucket string
 }
 
 // NewS3Handler generates a S3Handler.
 func NewS3Handler(region, bucket string) (*S3Handler, error) {
-	if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
-		return nil, fmt.Errorf("environment variable AWS_ACCESS_KEY_ID is not set")
-	}
-
-	if os.Getenv("AWS_SECRET_ACCESS_KEY") == "" {
-		return nil, fmt.Errorf("environment variable AWS_SECRET_ACCESS_KEY is not set")
-	}
-
-	session, err := session.NewSession(&aws.Config{Region: aws.String(region)})
+	cfg, err := config.LoadDefaultConfig(context.Background(),
+		config.WithRegion(region),
+	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to load AWS config: %w", err)
 	}
 
 	return &S3Handler{
-		Session: session,
-		Bucket:  bucket,
+		Client: s3.NewFromConfig(cfg),
+		Bucket: bucket,
 	}, nil
 }
 
@@ -46,13 +41,13 @@ func (h *S3Handler) Connect() error {
 // Push reads the provided io.ReadSeeker and puts its content into an
 // Amazon S3 object.
 func (h *S3Handler) Push(key string, r io.ReadSeeker) error {
-	_, err := s3.New(h.Session).PutObject(&s3.PutObjectInput{
+	_, err := h.Client.PutObject(context.Background(), &s3.PutObjectInput{
 		Bucket:               aws.String(h.Bucket),
 		Key:                  aws.String(key),
-		ACL:                  aws.String("private"),
+		ACL:                  types.ObjectCannedACLPrivate,
 		Body:                 r,
 		ContentDisposition:   aws.String("attachment"),
-		ServerSideEncryption: aws.String("AES256"),
+		ServerSideEncryption: types.ServerSideEncryptionAes256,
 	})
 
 	return err
@@ -61,7 +56,7 @@ func (h *S3Handler) Push(key string, r io.ReadSeeker) error {
 // Pull gets the content of an Amazon S3 object, and writes it
 // to the provided io.Writer.
 func (h *S3Handler) Pull(key string, w io.Writer) error {
-	results, err := s3.New(h.Session).GetObject(&s3.GetObjectInput{
+	results, err := h.Client.GetObject(context.Background(), &s3.GetObjectInput{
 		Bucket: aws.String(h.Bucket),
 		Key:    aws.String(key),
 	})

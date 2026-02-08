@@ -3,12 +3,12 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
-	validation "github.com/go-ozzo/ozzo-validation"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 
+	"dario.cat/mergo"
 	"github.com/BurntSushi/toml"
-	"github.com/imdario/mergo"
 	"github.com/joeshaw/envdecode"
 	defaults "github.com/mcuadros/go-defaults"
 )
@@ -41,7 +41,7 @@ func Load(path string) (*Config, error) {
 	defaults.SetDefaults(config)
 
 	if path != "" {
-		d, err := ioutil.ReadFile(path)
+		d, err := os.ReadFile(path)
 		if err != nil {
 			return nil, err
 		}

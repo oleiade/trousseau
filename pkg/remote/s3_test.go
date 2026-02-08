@@ -1,7 +1,6 @@
 package remote
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -14,20 +13,17 @@ func TestNewS3Handler(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *S3Handler
 		wantErr bool
 	}{
 		{
-			name:    "it should fail when AWS_ACCESS_KEY_ID is not present in the environment",
-			args:    args{region: "foo", bucket: "bar"},
-			want:    nil,
-			wantErr: true,
+			name:    "it should succeed even without AWS credentials (resolved lazily in SDK v2)",
+			args:    args{region: "us-east-1", bucket: "bar"},
+			wantErr: false,
 		},
 		{
-			name:    "it should fail when AWS_SECRET_ACCESS_KEY is not present in the environment",
-			args:    args{region: "foo", bucket: "bar"},
-			want:    nil,
-			wantErr: true,
+			name:    "it should succeed with a valid region and bucket",
+			args:    args{region: "eu-west-1", bucket: "my-bucket"},
+			wantErr: false,
 		},
 	}
 
@@ -38,8 +34,11 @@ func TestNewS3Handler(t *testing.T) {
 				t.Errorf("NewS3Handler() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewS3Handler() = %v, want %v", got, tt.want)
+			if !tt.wantErr && got == nil {
+				t.Errorf("NewS3Handler() returned nil, want non-nil handler")
+			}
+			if !tt.wantErr && got != nil && got.Bucket != tt.args.bucket {
+				t.Errorf("NewS3Handler().Bucket = %v, want %v", got.Bucket, tt.args.bucket)
 			}
 		})
 	}

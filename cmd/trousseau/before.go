@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
+	"context"
 	"log"
 	"os"
 	"path"
@@ -10,56 +10,56 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/oleiade/trousseau/internal/config"
 	"github.com/oleiade/trousseau/internal/trousseau"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func Before(c *cli.Context) error {
-	checkHelp(c)
-	if c.GlobalBool("h") || c.GlobalBool("help") {
-		return nil
+func Before(ctx context.Context, cmd *cli.Command) (context.Context, error) {
+	checkHelp(cmd)
+	if cmd.Bool("help") {
+		return ctx, nil
 	}
-	checkConfig(c)
-	trousseau.SetConfigPath(c.String("config"))
-	updateStorePath(c)
-	updateGnupgHome(c)
-	updateCheckPassphrase(c)
+	checkConfig(cmd)
+	trousseau.SetConfigPath(cmd.String("config"))
+	updateStorePath(cmd)
+	updateGnupgHome(cmd)
+	updateCheckPassphrase(cmd)
 
-	return nil
+	return ctx, nil
 }
 
 // checkHelp will print command or app help according to the
 // provided context. It is used to bypass the gpg key check
 // before the application runs. So users can print the help
 // without selecting their master key.
-func checkHelp(c *cli.Context) {
-	if c.GlobalBool("h") || c.GlobalBool("help") {
-		if len(c.Args()) >= 1 {
-			cli.ShowCommandHelp(c, c.Args().First())
-		} else {
-			cli.ShowAppHelp(c)
+func checkHelp(cmd *cli.Command) {
+	if cmd.Bool("help") {
+		if cmd.Args().Len() >= 1 {
+			// In v3, we can't easily show subcommand help from Before.
+			// The framework handles help display automatically.
+			return
 		}
 	}
 }
 
 // updateStorePath selects the default trousseau data store if
 // none were provided on the command line
-func updateStorePath(c *cli.Context) {
-	if c.String("store") != "" {
-		trousseau.SetStorePath(c.String("store"))
+func updateStorePath(cmd *cli.Command) {
+	if cmd.String("store") != "" {
+		trousseau.SetStorePath(cmd.String("store"))
 	}
 }
 
-func updateGnupgHome(c *cli.Context) {
-	if c.String("gnupg-home") != "" {
-		trousseau.GnupgHome = c.String("gnupg-home")
+func updateGnupgHome(cmd *cli.Command) {
+	if cmd.String("gnupg-home") != "" {
+		trousseau.GnupgHome = cmd.String("gnupg-home")
 	}
 }
 
-func updateCheckPassphrase(c *cli.Context) {
-	if c.GlobalBool("ask-passphrase") && !trousseau.AskPassphraseFlagCheck() {
+func updateCheckPassphrase(cmd *cli.Command) {
+	if cmd.Bool("ask-passphrase") && !trousseau.AskPassphraseFlagCheck() {
 		// This checks if the user is creating a store by
-		// looking in c.Args()
-		if c.Args().Get(0) == "create" {
+		// looking at the first argument
+		if cmd.Args().Get(0) == "create" {
 			trousseau.AskPassphrase(true)
 		} else {
 			trousseau.AskPassphrase(false)
@@ -67,22 +67,22 @@ func updateCheckPassphrase(c *cli.Context) {
 	}
 }
 
-func checkConfig(c *cli.Context) {
-	if _, err := os.Stat(c.String("config")); os.IsNotExist(err) {
-		err := os.MkdirAll(path.Dir(c.String("config")), 0755)
+func checkConfig(cmd *cli.Command) {
+	if _, err := os.Stat(cmd.String("config")); os.IsNotExist(err) {
+		err := os.MkdirAll(path.Dir(cmd.String("config")), 0755)
 		if err != nil {
-			log.Fatalf("unable to create directory %s in order to store trousseau's config; reason: %s\n", c.String("config"), err.Error())
+			log.Fatalf("unable to create directory %s in order to store trousseau's config; reason: %s\n", cmd.String("config"), err.Error())
 		}
 
-		config := config.Default()
+		cfg := config.Default()
 		buf := new(bytes.Buffer)
-		if err := toml.NewEncoder(buf).Encode(config); err != nil {
+		if err := toml.NewEncoder(buf).Encode(cfg); err != nil {
 			log.Fatalf("unable to encode trousseau's default configuration to toml; reason: %s\n", err.Error())
 		}
 
-		err = ioutil.WriteFile(c.String("config"), buf.Bytes(), 0600)
+		err = os.WriteFile(cmd.String("config"), buf.Bytes(), 0600)
 		if err != nil {
-			log.Fatalf("unable to create trousseau's configuration file at %s; reason: %s\n", c.String("config"), err.Error())
+			log.Fatalf("unable to create trousseau's configuration file at %s; reason: %s\n", cmd.String("config"), err.Error())
 		}
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/howeyc/gopass"
+	"golang.org/x/term"
 )
 
 const passPhraseMsg string = "\rPassphrase: "
@@ -15,8 +15,8 @@ const errorMsg string = "\rPassphrase error occurred. Exiting..."
 // message and will hide the user input. This is intended to be used
 // to ask the user for password or passphrase
 func PromptForHiddenInput(msg string) string {
-	fmt.Printf(msg)
-	pass, _ := gopass.GetPasswd()
+	fmt.Print(msg)
+	pass, _ := term.ReadPassword(int(os.Stdin.Fd()))
 
 	return string(pass)
 }
@@ -29,8 +29,8 @@ func PromptForHiddenInputConfirm() string {
 			os.Exit(1)
 		}
 
-		fmt.Printf(passPhraseMsg)
-		inputPass, _ := gopass.GetPasswd()
+		fmt.Print(passPhraseMsg)
+		inputPass, _ := term.ReadPassword(int(os.Stdin.Fd()))
 
 		if string(inputPass) == "" {
 			fmt.Printf("Empty passphrase not allowed\n\n")
@@ -38,9 +38,9 @@ func PromptForHiddenInputConfirm() string {
 			continue
 		}
 
-		fmt.Printf(confirmMsg)
+		fmt.Print(confirmMsg)
 
-		confirmPass, _ := gopass.GetPasswd()
+		confirmPass, _ := term.ReadPassword(int(os.Stdin.Fd()))
 		if string(inputPass) == string(confirmPass) {
 			return string(inputPass)
 		} else {
