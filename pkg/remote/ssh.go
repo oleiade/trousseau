@@ -120,6 +120,8 @@ func (h *SSHHandler) connect() error {
 			ssh.Password(h.Password),
 			publicKeyAuth,
 		},
+		// TODO: replace with knownhosts.New() for proper host key verification
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	h.client, err = ssh.Dial("tcp", h.Endpoint, clientConfig)
