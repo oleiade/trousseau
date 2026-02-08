@@ -3,7 +3,7 @@ package remote
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 	"sync"
 
@@ -59,8 +59,7 @@ func (h *SSHHandler) Push(remotePath string, r io.ReadSeeker) error {
 		w, _ := session.StdinPipe()
 		defer w.Close()
 
-		var data []byte
-		_, err := r.Read(data)
+		data, err := io.ReadAll(r)
 		if err != nil {
 			ue <- fmt.Errorf("unable to read data intended for upload; reason: %s", err.Error())
 		}
@@ -132,7 +131,7 @@ func (h *SSHHandler) connect() error {
 }
 
 func (h *SSHHandler) getPublicKeyAuthFrom(path string) (ssh.AuthMethod, error) {
-	key, err := ioutil.ReadFile(path)
+	key, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read private key: %v", err)
 	}

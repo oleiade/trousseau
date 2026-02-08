@@ -37,9 +37,7 @@ func (h *GistHandler) Connect() error {
 // Push reads the provided io.ReadSeeker and puts its content into a
 // Github gist.
 func (h *GistHandler) Push(filename string, r io.ReadSeeker) error {
-	var data []byte
-
-	_, err := r.Read(data)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return fmt.Errorf("unable to read data store content; reason: %s", err.Error())
 	}
@@ -51,7 +49,7 @@ func (h *GistHandler) Push(filename string, r io.ReadSeeker) error {
 	gist := &github.Gist{
 		Public: &public,
 		Files: map[github.GistFilename]github.GistFile{
-			github.GistFilename(filename): github.GistFile{Content: &dataStr},
+			github.GistFilename(filename): {Content: &dataStr},
 		},
 	}
 

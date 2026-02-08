@@ -56,8 +56,7 @@ func (ss *SecretStore) Decrypt(r io.Reader, algo CryptoAlgorithm, passphrase str
 			return err
 		}
 
-		var ciphered []byte
-		_, err = r.Read(ciphered)
+		ciphered, err := io.ReadAll(r)
 		if err != nil {
 			return err
 		}
@@ -77,8 +76,7 @@ func (ss *SecretStore) Decrypt(r io.Reader, algo CryptoAlgorithm, passphrase str
 			return err
 		}
 
-		var ciphered []byte
-		_, err = r.Read(ciphered)
+		ciphered, err := io.ReadAll(r)
 		if err != nil {
 			return err
 		}
