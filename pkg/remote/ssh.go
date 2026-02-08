@@ -99,7 +99,10 @@ func (h *SSHHandler) Pull(remotePath string, w io.Writer) error {
 	defer session.Close()
 
 	session.Stdout = w
-	if err := session.Run(fmt.Sprintf("cat %s", remotePath)); err != nil {
+	if strings.ContainsAny(remotePath, ";|&`$(){}[]!#~") {
+		return fmt.Errorf("remote path contains invalid characters: %s", remotePath)
+	}
+	if err := session.Run(fmt.Sprintf("cat -- %q", remotePath)); err != nil {
 		return fmt.Errorf("Failed to run: %s", err.Error())
 	}
 
