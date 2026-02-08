@@ -79,9 +79,9 @@ func checkConfig(c *cli.Context) {
 			log.Fatalf("unable to encode trousseau's default configuration to toml; reason: %s\n", err.Error())
 		}
 
-		err = ioutil.WriteFile(c.String("config"), buf.Bytes(), 0755)
+		err = ioutil.WriteFile(c.String("config"), buf.Bytes(), 0600)
 		if err != nil {
-			log.Fatalf("unabla to create trousseaus configuration file at %s; reason: %s\n", c.String("config"), err.Error())
+			log.Fatalf("unable to create trousseau's configuration file at %s; reason: %s\n", c.String("config"), err.Error())
 		}
 	}
 }
