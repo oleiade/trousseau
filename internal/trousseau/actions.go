@@ -337,7 +337,7 @@ func RemoveRecipientAction(recipient string) error {
 	var filteredRecipients []string
 	for _, r := range secretStore.Metadata.Recipients {
 		if r != recipient {
-			filteredRecipients = append(filteredRecipients, recipient)
+			filteredRecipients = append(filteredRecipients, r)
 		}
 	}
 	secretStore.Metadata.Recipients = filteredRecipients
