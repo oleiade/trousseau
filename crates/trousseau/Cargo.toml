@@ -34,6 +34,9 @@ secrecy = { workspace = true }
 zeroize = { workspace = true }
 time = { workspace = true }
 base64 = { workspace = true }
+tempfile = { workspace = true }
+fd-lock = { workspace = true }
+sha2 = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }

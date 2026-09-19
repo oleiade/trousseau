@@ -24,3 +24,9 @@ pub mod envelope;
 /// recipients and identity sources described in section 3.3 of
 /// `docs/IMPLEMENTATION_PLAN.md`.
 pub mod identity;
+
+/// Store discovery, locking, and atomic on-disk I/O.
+///
+/// Everything in section 3.2 of `docs/IMPLEMENTATION_PLAN.md`, plus
+/// reading, opening, and saving a store's bytes.
+pub mod store;
