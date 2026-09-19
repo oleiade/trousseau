@@ -1,6 +1,18 @@
 [advisories]
 version = 2
-ignore = []
+ignore = [
+    # RUSTSEC-2026-0009: stack exhaustion parsing the RFC 2822 date
+    # format. trousseau only enables `time`'s `formatting`, `parsing`,
+    # `serde-well-known` and `macros` features to read and write RFC
+    # 3339 timestamps (`time::serde::rfc3339`); it never parses RFC 2822
+    # input, so the affected code path is unreachable here. The fixed
+    # release (>=0.3.46) requires rustc 1.88, above the workspace's
+    # declared `rust-version = "1.85"` (section 2.4 of the implementation
+    # plan); bumping the workspace MSRV is out of scope for step 2.1.
+    # Revisit when the workspace MSRV moves, or `time` backports a fix
+    # to an 1.85-compatible line.
+    "RUSTSEC-2026-0009",
+]
 
 [licenses]
 version = 2

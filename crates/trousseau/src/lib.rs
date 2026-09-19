@@ -11,3 +11,7 @@
 
 /// Typed errors returned by every fallible operation in this crate.
 pub mod error;
+
+/// The store format: schema 1 payload, keys, encodings, and the
+/// environment variable mapping. See `docs/format.md`.
+pub mod schema;
