@@ -13,10 +13,7 @@ use std::io::{ErrorKind, Write as _};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-use base64::Engine as _;
-use base64::engine::general_purpose::STANDARD;
 use secrecy::SecretString;
-use serde_json::Value as JsonValue;
 use sha2::{Digest, Sha256};
 
 use crate::envelope;
@@ -335,24 +332,12 @@ pub fn read_raw(path: &Path) -> Result<RawStore, Error> {
     })
 }
 
-/// Conservative legacy v0.4 envelope detection (3.7.1): `true` if `bytes`
-/// parses as a JSON object with `crypto_type`, `crypto_algorithm`, and
-/// `_data` all present, and `_data` is a string that decodes as standard
-/// base64. Nothing about the envelope's actual content (the algorithm
-/// value, the decrypted payload) is checked here.
-///
-/// Step 2.5 owns the full legacy parser and may replace this with
-/// `legacy::parse_envelope(bytes).is_ok()`.
+/// Legacy v0.4 envelope detection (3.7.1), delegated to
+/// [`crate::legacy::parse_envelope`]: `true` if `bytes` is a JSON object
+/// with `crypto_type`, `crypto_algorithm` and base64 `_data`. Nothing
+/// about the decrypted payload is checked here.
 fn looks_like_legacy(bytes: &[u8]) -> bool {
-    let Ok(JsonValue::Object(map)) = serde_json::from_slice::<JsonValue>(bytes) else {
-        return false;
-    };
-    if !map.contains_key("crypto_type") || !map.contains_key("crypto_algorithm") {
-        return false;
-    }
-    map.get("_data")
-        .and_then(JsonValue::as_str)
-        .is_some_and(|data| STANDARD.decode(data).is_ok())
+    crate::legacy::parse_envelope(bytes).is_ok()
 }
 
 /// How to unlock a store when [`open`]ing it.
