@@ -1,0 +1,41 @@
+---
+source: crates/trousseau-cli/tests/help.rs
+expression: stdout
+---
+Command-line interface for the trousseau encrypted keyring.
+
+Usage: trousseau [OPTIONS] <COMMAND>
+
+Commands:
+  init         Create a new store
+  info         Show information about the resolved store
+  set          Set a key's value
+  get          Get a key's value
+  ls           List keys
+  rm           Remove one or more keys
+  mv           Rename a key
+  recipients   Manage a recipients store's recipient list
+  rekey        Re-encrypt the store, optionally changing its kind or recipients
+  export       Export the store's entries
+  import       Import entries into the store
+  run          Run a command with the store's entries injected as environment variables
+  env          Print the store's entries as environment variable assignments
+  edit         Edit the store in `$VISUAL` or `$EDITOR`
+  migrate      Migrate a legacy v0.4 store into a new store
+  completions  Print a shell completion script
+  man          Print a roff man page
+  help         Print this message or the help of the given subcommand(s)
+
+Options:
+      --store <PATH>            The store to operate on. Overrides every other resolution rule (3.2)
+                                [env: TROUSSEAU_STORE=]
+      --global                  Use the personal store instead of the nearest project store (3.2)
+      --identity <PATH>         An identity file to try when unlocking a recipients store.
+                                Repeatable (3.3.2)
+      --passphrase-file <PATH>  A file holding the passphrase for a passphrase store (3.3.3)
+      --json                    Emit machine-readable JSON instead of human-readable text (3.5.1)
+      --quiet                   Suppress informational stderr lines. Errors still print (3.5.1)
+      --no-input                Never prompt. Anything that would have prompted fails instead
+                                (3.5.1)
+  -h, --help                    Print help
+  -V, --version                 Print version
