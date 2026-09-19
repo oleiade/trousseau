@@ -184,3 +184,18 @@ impl Default for Env {
         Self::new()
     }
 }
+
+// step 3.4
+
+/// A second fixture identity, distinct from [`SSH_PUB`]: used by the
+/// `recipients`/`rekey` tests that need a store sealed to one identity
+/// while proving that a *different* one becomes able to open it only
+/// after `recipients add` (or not at all, before that).
+pub const RSA_PUB: &str = include_str!("../../../trousseau/tests/fixtures/ssh/id_rsa.pub");
+
+/// The matching private key file's path, passed directly to
+/// `--identity`.
+#[must_use]
+pub fn rsa_identity_path() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../trousseau/tests/fixtures/ssh/id_rsa")
+}

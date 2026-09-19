@@ -8,9 +8,10 @@ mod common;
 #[test]
 fn json_mode_unimplemented_subcommand_prints_json_error_only() {
     let env = common::Env::new();
-    // `rekey` is still unimplemented (step 3.4): `set` served this role
-    // until step 3.3 implemented it.
-    let assert = env.command().args(["--json", "rekey"]).assert().failure();
+    // `export` is still unimplemented (step 3.5): `rekey` served this
+    // role until step 3.4 implemented it, and `set` before that (step
+    // 3.3).
+    let assert = env.command().args(["--json", "export"]).assert().failure();
     let output = assert.get_output();
     assert!(
         output.stdout.is_empty(),

@@ -479,3 +479,16 @@ fn resolve_identity_paths(
         .filter(|path| std::fs::metadata(path).is_ok_and(|metadata| metadata.is_file()))
         .collect()
 }
+
+// step 3.4
+impl Context {
+    /// The resolved 3.3.2 identity path list (existing files only).
+    ///
+    /// Used by `recipients rm` to check whether a recipient being
+    /// removed is one of the caller's own, through
+    /// [`trousseau::identity::own_recipients`] (3.5.9).
+    #[must_use]
+    pub fn identity_paths(&self) -> &[PathBuf] {
+        &self.identity_paths
+    }
+}
