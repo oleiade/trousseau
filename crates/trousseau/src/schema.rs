@@ -553,21 +553,19 @@ impl Store {
     }
 
     fn validate_entry(key: &Key, entry: &Entry) -> Result<(), Error> {
-        if let Some(env) = &entry.env {
-            if !is_valid_env_name(env) {
-                return Err(Error::InvalidStore {
-                    reason: format!("entry {key} has an invalid env override {env:?}"),
-                });
-            }
+        if let Some(env) = &entry.env
+            && !is_valid_env_name(env)
+        {
+            return Err(Error::InvalidStore {
+                reason: format!("entry {key} has an invalid env override {env:?}"),
+            });
         }
-        if let Some(description) = &entry.description {
-            if description.len() > MAX_DESCRIPTION_BYTES {
-                return Err(Error::InvalidStore {
-                    reason: format!(
-                        "entry {key} description exceeds {MAX_DESCRIPTION_BYTES} bytes"
-                    ),
-                });
-            }
+        if let Some(description) = &entry.description
+            && description.len() > MAX_DESCRIPTION_BYTES
+        {
+            return Err(Error::InvalidStore {
+                reason: format!("entry {key} description exceeds {MAX_DESCRIPTION_BYTES} bytes"),
+            });
         }
         let bytes = entry.value.expose();
         if bytes.len() > MAX_VALUE_BYTES {
