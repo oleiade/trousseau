@@ -5,8 +5,7 @@
 //! error whose message names the offending file and key.
 //!
 //! `timeout_seconds`, `env_prefix`, and `gpg` are not yet read by any
-//! command in step 3.1 (see `context.rs`'s note on the same
-//! `#![allow(dead_code)]`); `get --clip`, `run`/`env`, and `migrate`
+//! command as of step 3.2; `get --clip`, `run`/`env`, and `migrate`
 //! start reading them in later steps.
 #![allow(dead_code)]
 

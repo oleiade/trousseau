@@ -5,11 +5,9 @@
 //! functions. That is why the crate-level `print_stdout`/`print_stderr`
 //! lints are set to `warn` and `#[allow]`ed only in this file (see
 //! `src/main.rs`'s crate attributes).
-
 //!
-//! Step 3.1 gives every command's `run` a `Context` but leaves the
-//! command itself a stub, so not every function here has a caller yet;
-//! see `context.rs`'s note on the same `#![allow(dead_code)]`.
+//! [`raw`] and [`table`] have no caller yet: `get`'s default output and
+//! `ls --long` start using them in step 3.3.
 #![allow(clippy::print_stdout, clippy::print_stderr)]
 #![allow(dead_code)]
 
@@ -85,6 +83,14 @@ pub fn error_json(code: &str, message: &str) {
     if let Ok(text) = serde_json::to_string(&envelope) {
         eprintln!("{text}");
     }
+}
+
+/// Print `msg` and a trailing newline to stdout, unconditionally (not
+/// suppressed by `--quiet`, unlike [`info`]): used for a command's own
+/// primary human-readable result line, such as one of `info`'s aligned
+/// label lines, as opposed to an incidental progress note.
+pub fn line(msg: &str) {
+    println!("{msg}");
 }
 
 /// Write `bytes` to stdout verbatim: no added newline, no encoding.

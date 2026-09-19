@@ -7,14 +7,6 @@
 //! file); every other method here maps a library
 //! [`trousseau::error::Error`] or a prompt failure into an [`anyhow::Error`]
 //! for `main.rs` to report through `exit.rs`.
-//!
-//! This step (3.1) wires the whole surface up but every command is
-//! still a stub (`crate::commands`), so most of it has no caller yet in
-//! this binary crate (unlike a library crate, a binary gets no
-//! "public API" exemption from `dead_code`). `#![allow(dead_code)]`
-//! covers that until steps 3.2 onward give each piece a real caller;
-//! it is not a license to leave genuinely unused code behind afterward.
-#![allow(dead_code)]
 
 use std::cell::{Cell, RefCell};
 use std::io::IsTerminal as _;
@@ -74,7 +66,15 @@ impl SealMaterial {
 // `quiet`, `no_input`, `is_stdin_tty`, and `is_stdout_tty` are four
 // independent, separately documented flags mirroring 3.5.1; collapsing
 // them into an enum would not describe the run context they capture.
+//
+// `config`, `is_stdout_tty`, and `data_dir` have no reader yet: `run`,
+// `env`, and `migrate` start reading `config`'s `[run]`/`[migrate]`
+// tables in later steps, `get`'s default output starts reading
+// `is_stdout_tty` in step 3.3, and a command that needs the bare data
+// directory (as opposed to `personal_store`, already derived from it)
+// has not landed yet.
 #[allow(clippy::struct_excessive_bools)]
+#[allow(dead_code)]
 pub struct Context {
     /// The parsed configuration file.
     pub config: Config,
@@ -169,6 +169,19 @@ impl Context {
             passphrase_cache: RefCell::new(None),
             env_passphrase_warned: Cell::new(false),
         })
+    }
+
+    /// The home directory this context resolved (3.2, 3.3.2).
+    #[must_use]
+    pub fn home_dir(&self) -> &Path {
+        &self.home
+    }
+
+    /// The default identity path: `<config_dir>/trousseau/identity.txt`
+    /// (3.2, 3.5.2).
+    #[must_use]
+    pub fn default_identity_path(&self) -> PathBuf {
+        self.config_dir.join("identity.txt")
     }
 
     /// Build a [`Locator`] borrowing this context's resolved inputs
@@ -303,6 +316,27 @@ impl Context {
         prompt::hidden_confirm("New passphrase: ")
     }
 
+    /// The passphrase for a brand-new passphrase store (`init
+    /// --passphrase`, 3.5.2): `--passphrase-file` if given, otherwise
+    /// the interactive double prompt from
+    /// [`Context::passphrase_for_new_store`].
+    ///
+    /// Unlike [`Context::passphrase`], this never falls back to
+    /// `TROUSSEAU_PASSPHRASE` or a single prompt: a brand-new store's
+    /// passphrase is either handed over explicitly through a file, or
+    /// confirmed interactively (3.3.3).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `--passphrase-file` was given but cannot be
+    /// read, or whatever [`Context::passphrase_for_new_store`] returns.
+    pub fn new_store_passphrase(&self) -> anyhow::Result<SecretString> {
+        if let Some(path) = &self.passphrase_file {
+            return read_passphrase_file(path);
+        }
+        self.passphrase_for_new_store()
+    }
+
     /// Obtain the store's passphrase, per 3.3.3, caching it for the
     /// rest of the command's duration.
     fn passphrase(&self) -> anyhow::Result<SecretString> {
@@ -317,13 +351,7 @@ impl Context {
     /// The 3.3.3 passphrase source order, not consulting the cache.
     fn resolve_passphrase(&self) -> anyhow::Result<SecretString> {
         if let Some(path) = &self.passphrase_file {
-            let contents = std::fs::read_to_string(path)
-                .with_context(|| format!("reading passphrase file {}", path.display()))?;
-            let trimmed = contents
-                .strip_suffix("\r\n")
-                .or_else(|| contents.strip_suffix('\n'))
-                .unwrap_or(&contents);
-            return Ok(SecretString::from(trimmed.to_owned()));
+            return read_passphrase_file(path);
         }
         if let Ok(value) = std::env::var(TROUSSEAU_PASSPHRASE) {
             if self.is_stdin_tty && !self.env_passphrase_warned.replace(true) {
@@ -411,6 +439,19 @@ impl Context {
         }
         Ok(())
     }
+}
+
+/// Read a passphrase file's content, stripping exactly one trailing
+/// `\r\n` or `\n` (3.3.3). Shared by [`Context::resolve_passphrase`] and
+/// [`Context::new_store_passphrase`].
+fn read_passphrase_file(path: &Path) -> anyhow::Result<SecretString> {
+    let contents = std::fs::read_to_string(path)
+        .with_context(|| format!("reading passphrase file {}", path.display()))?;
+    let trimmed = contents
+        .strip_suffix("\r\n")
+        .or_else(|| contents.strip_suffix('\n'))
+        .unwrap_or(&contents);
+    Ok(SecretString::from(trimmed.to_owned()))
 }
 
 /// Build the 3.3.2 identity path list, in order, filtered to paths that

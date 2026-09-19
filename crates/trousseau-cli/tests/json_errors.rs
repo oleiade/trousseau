@@ -8,7 +8,11 @@ mod common;
 #[test]
 fn json_mode_unimplemented_subcommand_prints_json_error_only() {
     let env = common::Env::new();
-    let assert = env.command().args(["--json", "info"]).assert().failure();
+    let assert = env
+        .command()
+        .args(["--json", "set", "some/key"])
+        .assert()
+        .failure();
     let output = assert.get_output();
     assert!(
         output.stdout.is_empty(),

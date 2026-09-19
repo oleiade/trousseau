@@ -7,20 +7,25 @@
 //! [`clap::Error::exit`] handle them directly, keeping clap's exit code
 //! (2) and its own message, per 3.5.1.
 
+use std::path::PathBuf;
+
 use trousseau::error::Error;
 
 use crate::output::{self, OutputMode};
 
-/// A CLI-level error that does not originate in the `trousseau` library:
-/// a refused confirmation, or (from `run`, a later step) the shape of a
-/// child process failure. These are the `refused` and `child_failed`
-/// codes from appendix 5.1's error code list; the third code in that
-/// list, `usage`, is never constructed here because clap's own usage
-/// errors are handled before this module sees them (3.5.1).
-// Neither variant is constructed until the commands that need it land
-// in a later step (`recipients rm`'s confirmation for `Refused`, `run`
-// for `ChildFailed`); `code_for` and `json_code_for` already handle
-// both so those steps need no changes here.
+/// A CLI-level error that does not originate in the `trousseau` library.
+///
+/// [`Error::KeyExists`] is about a store *entry*'s key, not the store
+/// file itself, so `init`'s "the target store already exists" condition
+/// (3.5.2) is not a library error at all: it is caught by the CLI before
+/// any store is opened, and reported here as [`CliError::StoreExists`].
+/// [`CliError::Usage`] covers a command-line combination clap's own
+/// grammar cannot express as invalid, such as `init --no-self` with no
+/// recipients (3.5.2). [`CliError::Refused`] and [`CliError::ChildFailed`]
+/// are not constructed until the commands that need them land in a later
+/// step (`recipients rm`'s confirmation, and `run`'s child-process
+/// handling); `code_for` and `json_code_for` already handle both so
+/// those steps need no changes here.
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum CliError {
@@ -32,6 +37,14 @@ pub enum CliError {
     /// Windows) reported an unrepresentable exit status. Does not cover
     /// the child's own exit code, which `run` passes through directly.
     ChildFailed,
+    /// `init`'s target store already exists (3.5.2).
+    StoreExists {
+        /// The store path that already exists.
+        path: PathBuf,
+    },
+    /// A usage error this crate's own validation caught, rather than
+    /// clap's grammar (3.5.2: `--no-self` with no recipients).
+    Usage(String),
 }
 
 impl std::fmt::Display for CliError {
@@ -39,6 +52,10 @@ impl std::fmt::Display for CliError {
         match self {
             Self::Refused => f.write_str("refused"),
             Self::ChildFailed => f.write_str("child process failed"),
+            Self::StoreExists { path } => {
+                write!(f, "store already exists at {}", path.display())
+            }
+            Self::Usage(message) => f.write_str(message),
         }
     }
 }
@@ -57,8 +74,9 @@ pub fn code_for(err: &anyhow::Error) -> i32 {
     }
     if let Some(cli_err) = err.downcast_ref::<CliError>() {
         return match cli_err {
-            CliError::Refused => 2,
+            CliError::Refused | CliError::Usage(_) => 2,
             CliError::ChildFailed => 1,
+            CliError::StoreExists { .. } => 8,
         };
     }
     1
@@ -99,6 +117,8 @@ pub fn json_code_for(err: &anyhow::Error) -> &'static str {
         return match cli_err {
             CliError::Refused => "refused",
             CliError::ChildFailed => "child_failed",
+            CliError::StoreExists { .. } => "store_exists",
+            CliError::Usage(_) => "usage",
         };
     }
     "error"
@@ -241,5 +261,13 @@ mod tests {
         let child_failed: anyhow::Error = super::CliError::ChildFailed.into();
         assert_eq!(code_for(&child_failed), 1);
         assert_eq!(super::json_code_for(&child_failed), "child_failed");
+
+        let store_exists: anyhow::Error = super::CliError::StoreExists { path: "x".into() }.into();
+        assert_eq!(code_for(&store_exists), 8);
+        assert_eq!(super::json_code_for(&store_exists), "store_exists");
+
+        let usage: anyhow::Error = super::CliError::Usage("x".to_owned()).into();
+        assert_eq!(code_for(&usage), 2);
+        assert_eq!(super::json_code_for(&usage), "usage");
     }
 }

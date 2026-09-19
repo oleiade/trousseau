@@ -6,11 +6,6 @@
 //! attempt to read from the terminal when called, since some callers
 //! (`age`'s own plugin protocol, through [`CliCallbacks`]) need to make
 //! that decision per call rather than once up front.
-//!
-//! Not yet called from any command in step 3.1 (see `context.rs`'s note
-//! on the same `#![allow(dead_code)]`); `context.rs` starts using it in
-//! step 3.2.
-#![allow(dead_code)]
 
 use secrecy::SecretString;
 
