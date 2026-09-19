@@ -67,12 +67,11 @@ impl SealMaterial {
 // independent, separately documented flags mirroring 3.5.1; collapsing
 // them into an enum would not describe the run context they capture.
 //
-// `config`, `is_stdout_tty`, and `data_dir` have no reader yet: `run`,
-// `env`, and `migrate` start reading `config`'s `[run]`/`[migrate]`
-// tables in later steps, `get`'s default output starts reading
-// `is_stdout_tty` in step 3.3, and a command that needs the bare data
-// directory (as opposed to `personal_store`, already derived from it)
-// has not landed yet.
+// `config` and `data_dir` have no reader yet: `run`, `env`, and
+// `migrate` start reading `config`'s `[run]`/`[migrate]` tables in
+// later steps, and a command that needs the bare data directory (as
+// opposed to `personal_store`, already derived from it) has not landed
+// yet.
 #[allow(clippy::struct_excessive_bools)]
 #[allow(dead_code)]
 pub struct Context {

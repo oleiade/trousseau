@@ -6,6 +6,11 @@
 //! it. `main.rs` maps that generic error to exit code 1 through
 //! `exit.rs`, same as any other unexpected failure.
 
+use anyhow::Context as _;
+use time::OffsetDateTime;
+use time::format_description::well_known::Rfc3339;
+use trousseau::schema::Encoding;
+
 use crate::cli::{Cli, Command, RecipientsAction};
 use crate::context::Context;
 
@@ -76,4 +81,19 @@ pub fn dispatch(cli: &Cli, ctx: &Context) -> anyhow::Result<()> {
 #[allow(clippy::panic)]
 fn panic_test() -> anyhow::Result<()> {
     panic!("panic test")
+}
+
+/// The `encoding` string shared by `set`, `get`, and `ls` (3.1.2, appendix
+/// 5.1).
+pub const fn encoding_label(encoding: Encoding) -> &'static str {
+    match encoding {
+        Encoding::Utf8 => "utf8",
+        Encoding::Base64 => "base64",
+    }
+}
+
+/// Format a timestamp as RFC 3339, shared by every command that reports an
+/// entry's `created_at` or `updated_at` (3.1.2).
+pub fn format_rfc3339(at: OffsetDateTime) -> anyhow::Result<String> {
+    at.format(&Rfc3339).context("formatting a timestamp")
 }

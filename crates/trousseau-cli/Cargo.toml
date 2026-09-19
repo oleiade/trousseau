@@ -39,6 +39,7 @@ print_stderr = "warn"
 
 [dependencies]
 trousseau = { path = "../trousseau" }
+base64 = { workspace = true }
 clap = { workspace = true }
 clap_complete = { workspace = true }
 clap_mangen = { workspace = true }

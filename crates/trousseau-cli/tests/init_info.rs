@@ -2,24 +2,9 @@
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use std::path::{Path, PathBuf};
-
 mod common;
 
-/// The fixture SSH `ed25519` public key used by `crates/trousseau`'s own
-/// tests, reused here (per the task) instead of generating a new one.
-const SSH_PUB: &str = include_str!("../../trousseau/tests/fixtures/ssh/id_ed25519.pub");
-
-/// The matching private key file's path, passed directly to
-/// `--identity`.
-fn ssh_identity_path() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../trousseau/tests/fixtures/ssh/id_ed25519")
-}
-
-/// Parse a `trousseau ... --json` command's stdout as JSON.
-fn json_stdout(output: &std::process::Output) -> serde_json::Value {
-    serde_json::from_slice(&output.stdout).expect("stdout is JSON")
-}
+use common::{SSH_PUB, json_stdout, ssh_identity_path};
 
 #[test]
 fn init_creates_store_and_default_identity() {

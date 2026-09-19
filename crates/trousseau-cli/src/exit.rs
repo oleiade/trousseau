@@ -42,6 +42,12 @@ pub enum CliError {
         /// The store path that already exists.
         path: PathBuf,
     },
+    /// `get --out`'s target file already exists and `--force` was not
+    /// given (3.5.5).
+    OutputExists {
+        /// The output path that already exists.
+        path: PathBuf,
+    },
     /// A usage error this crate's own validation caught, rather than
     /// clap's grammar (3.5.2: `--no-self` with no recipients).
     Usage(String),
@@ -54,6 +60,9 @@ impl std::fmt::Display for CliError {
             Self::ChildFailed => f.write_str("child process failed"),
             Self::StoreExists { path } => {
                 write!(f, "store already exists at {}", path.display())
+            }
+            Self::OutputExists { path } => {
+                write!(f, "file already exists at {}", path.display())
             }
             Self::Usage(message) => f.write_str(message),
         }
@@ -76,7 +85,7 @@ pub fn code_for(err: &anyhow::Error) -> i32 {
         return match cli_err {
             CliError::Refused | CliError::Usage(_) => 2,
             CliError::ChildFailed => 1,
-            CliError::StoreExists { .. } => 8,
+            CliError::StoreExists { .. } | CliError::OutputExists { .. } => 8,
         };
     }
     1
@@ -118,6 +127,7 @@ pub fn json_code_for(err: &anyhow::Error) -> &'static str {
             CliError::Refused => "refused",
             CliError::ChildFailed => "child_failed",
             CliError::StoreExists { .. } => "store_exists",
+            CliError::OutputExists { .. } => "output_exists",
             CliError::Usage(_) => "usage",
         };
     }
@@ -265,6 +275,11 @@ mod tests {
         let store_exists: anyhow::Error = super::CliError::StoreExists { path: "x".into() }.into();
         assert_eq!(code_for(&store_exists), 8);
         assert_eq!(super::json_code_for(&store_exists), "store_exists");
+
+        let output_exists: anyhow::Error =
+            super::CliError::OutputExists { path: "x".into() }.into();
+        assert_eq!(code_for(&output_exists), 8);
+        assert_eq!(super::json_code_for(&output_exists), "output_exists");
 
         let usage: anyhow::Error = super::CliError::Usage("x".to_owned()).into();
         assert_eq!(code_for(&usage), 2);

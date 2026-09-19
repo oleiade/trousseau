@@ -2558,6 +2558,7 @@ dependencies = [
  "anyhow",
  "arboard",
  "assert_cmd",
+ "base64 0.23.1",
  "clap",
  "clap_complete",
  "clap_mangen",

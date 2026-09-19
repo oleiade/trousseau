@@ -6,10 +6,8 @@
 //! lints are set to `warn` and `#[allow]`ed only in this file (see
 //! `src/main.rs`'s crate attributes).
 //!
-//! [`raw`] and [`table`] have no caller yet: `get`'s default output and
-//! `ls --long` start using them in step 3.3.
+//! [`table`] has no caller yet: `ls --long` starts using it in step 3.3b.
 #![allow(clippy::print_stdout, clippy::print_stderr)]
-#![allow(dead_code)]
 
 use std::io::Write as _;
 
@@ -109,6 +107,7 @@ pub fn raw(bytes: &[u8]) -> anyhow::Result<()> {
 /// Print a simple, dependency-free aligned table to stdout: `headers`
 /// as the first row, then `rows`, each column padded to the widest
 /// entry in that column (including the header).
+#[allow(dead_code)]
 pub fn table(headers: &[&str], rows: &[Vec<String>]) {
     let mut widths: Vec<usize> = headers.iter().map(|h| h.len()).collect();
     for row in rows {
