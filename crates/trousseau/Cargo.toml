@@ -26,6 +26,7 @@ print_stdout = "deny"
 print_stderr = "deny"
 
 [dependencies]
+age = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -37,3 +38,4 @@ base64 = { workspace = true }
 [dev-dependencies]
 proptest = { workspace = true }
 serde_json = { workspace = true }
+tempfile = { workspace = true }

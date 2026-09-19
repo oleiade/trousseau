@@ -15,3 +15,7 @@ pub mod error;
 /// The store format: schema 1 payload, keys, encodings, and the
 /// environment variable mapping. See `docs/format.md`.
 pub mod schema;
+
+/// The age envelope: sealing and opening store bytes. See
+/// `docs/format.md` section on the envelope.
+pub mod envelope;
