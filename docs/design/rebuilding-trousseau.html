@@ -1,0 +1,630 @@
+<title>Rebuilding Trousseau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #F6F7F5;
+    --bg-raised: #FFFFFF;
+    --bg-sunken: #ECEFEB;
+    --ink: #1B2226;
+    --ink-2: #4A555B;
+    --ink-3: #7A868C;
+    --rule: #D5DBD6;
+    --rule-strong: #B9C2BB;
+    --accent: #2C7A69;
+    --accent-ink: #1F5C4F;
+    --accent-soft: #DCEBE6;
+    --crit: #A83A33;
+    --crit-soft: #F6E1DF;
+    --warn: #9A6A16;
+    --warn-soft: #F5EBD4;
+    --good: #2E6E44;
+    --good-soft: #DDEBE0;
+    --code-bg: #EEF1EE;
+    --shadow: 0 1px 2px rgba(27,34,38,.06), 0 6px 20px rgba(27,34,38,.05);
+    --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151A1C;
+      --bg-raised: #1C2225;
+      --bg-sunken: #101416;
+      --ink: #E4E9E5;
+      --ink-2: #AAB5B0;
+      --ink-3: #79857F;
+      --rule: #2C3538;
+      --rule-strong: #3E4A4E;
+      --accent: #63BFA8;
+      --accent-ink: #8AD3C0;
+      --accent-soft: #1E3B35;
+      --crit: #E4877F;
+      --crit-soft: #3D2321;
+      --warn: #D9A94E;
+      --warn-soft: #3A2E17;
+      --good: #7DC393;
+      --good-soft: #1F3527;
+      --code-bg: #10161A;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151A1C;
+    --bg-raised: #1C2225;
+    --bg-sunken: #101416;
+    --ink: #E4E9E5;
+    --ink-2: #AAB5B0;
+    --ink-3: #79857F;
+    --rule: #2C3538;
+    --rule-strong: #3E4A4E;
+    --accent: #63BFA8;
+    --accent-ink: #8AD3C0;
+    --accent-soft: #1E3B35;
+    --crit: #E4877F;
+    --crit-soft: #3D2321;
+    --warn: #D9A94E;
+    --warn-soft: #3A2E17;
+    --good: #7DC393;
+    --good-soft: #1F3527;
+    --code-bg: #10161A;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px 96px;
+  }
+  @media (min-width: 1040px) {
+    .page { grid-template-columns: 220px minmax(0, 1fr); column-gap: 56px; }
+  }
+
+  nav.toc {
+    display: none;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    padding-top: 84px;
+    font-size: 13px;
+  }
+  @media (min-width: 1040px) { nav.toc { display: block; } }
+  nav.toc .label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  nav.toc a { color: var(--ink-2); text-decoration: none; display: block; padding-left: 10px; border-left: 2px solid transparent; }
+  nav.toc a:hover { color: var(--ink); border-left-color: var(--rule-strong); }
+
+  main { min-width: 0; }
+
+  header.masthead {
+    padding: 64px 0 36px;
+    border-bottom: 1px solid var(--rule-strong);
+    margin-bottom: 40px;
+  }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(40px, 6vw, 60px);
+    line-height: 1.02;
+    letter-spacing: -.01em;
+    margin: 12px 0 18px;
+    text-wrap: balance;
+  }
+  .thesis { font-family: var(--serif); font-size: 21px; line-height: 1.4; color: var(--ink-2); max-width: 34em; margin: 0 0 22px; text-wrap: pretty; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 28px; font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); }
+  .meta b { color: var(--ink-2); font-weight: 500; }
+
+  section { margin: 0 0 56px; scroll-margin-top: 24px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.15;
+    letter-spacing: -.005em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  h2 + .lede { margin-top: 0; }
+  h3 { font-family: var(--sans); font-weight: 600; font-size: 17px; margin: 30px 0 8px; }
+  h4 { font-family: var(--sans); font-weight: 600; font-size: 14.5px; margin: 20px 0 6px; color: var(--ink-2); }
+  p, ul, ol { max-width: 68ch; }
+  p { margin: 0 0 14px; text-wrap: pretty; }
+  .lede { font-size: 17.5px; color: var(--ink-2); }
+  ul, ol { padding-left: 22px; margin: 0 0 14px; }
+  li { margin: 0 0 6px; }
+  li::marker { color: var(--ink-3); }
+  strong { font-weight: 600; }
+  code, kbd {
+    font-family: var(--mono);
+    font-size: .88em;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.55;
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    padding: 14px 16px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+    max-width: 78ch;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 14px 18px;
+    margin: 18px 0 22px;
+    max-width: 72ch;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.crit { border-left-color: var(--crit); background: var(--crit-soft); }
+  .callout .k { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); display: block; margin-bottom: 4px; }
+
+  .summary { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; max-width: none; }
+  .summary li { display: grid; grid-template-columns: 22px 1fr; gap: 12px; margin: 0; padding: 12px 14px; background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 4px; }
+  .summary li b { font-weight: 600; }
+  .summary .n { font-family: var(--mono); font-size: 12px; color: var(--accent-ink); padding-top: 3px; }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 18px 0 24px; }
+  .facts div { background: var(--bg-raised); padding: 12px 14px; }
+  .facts .v { font-family: var(--serif); font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .facts .l { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 14px 0 22px; }
+  .tablewrap { overflow-x: auto; margin: 0 0 8px; }
+  th { text-align: left; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule-strong); vertical-align: bottom; }
+  td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td:last-child, th:last-child { padding-right: 0; }
+  td.mono, .mono { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+  td.wrap { white-space: normal; }
+  tr:hover td { background: transparent; }
+
+  .chip { display: inline-block; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; line-height: 1.5; white-space: nowrap; }
+  .chip.crit { background: var(--crit-soft); color: var(--crit); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.good { background: var(--good-soft); color: var(--good); }
+  .chip.neutral { background: var(--bg-sunken); color: var(--ink-2); }
+  .chip.rec { background: var(--accent-soft); color: var(--accent-ink); }
+
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin: 16px 0 8px; }
+  .col { background: var(--bg-raised); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; }
+  .col h4 { margin: 0 0 8px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
+  .col.keep h4 { color: var(--good); }
+  .col.cut h4 { color: var(--crit); }
+  .col.add h4 { color: var(--accent-ink); }
+  .col.change h4 { color: var(--warn); }
+  .col ul { padding-left: 18px; margin: 0; font-size: 14.5px; }
+  .col li { margin-bottom: 5px; }
+
+  .decision { border: 1px solid var(--rule); border-radius: 4px; background: var(--bg-raised); margin: 0 0 14px; }
+  .decision .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+  .decision .id { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+  .decision .q { font-weight: 600; }
+  .decision .body { padding: 12px 16px; display: grid; gap: 8px; font-size: 14.5px; }
+  .decision .body p { margin: 0; max-width: none; }
+  .decision .lbl { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-right: 6px; }
+
+  .timeline { list-style: none; padding: 0; margin: 18px 0 0; max-width: none; }
+  .timeline li { display: grid; grid-template-columns: 110px 1fr; gap: 18px; padding: 14px 0; border-top: 1px solid var(--rule); margin: 0; }
+  .timeline li:last-child { border-bottom: 1px solid var(--rule); }
+  .timeline .when { font-family: var(--mono); font-size: 12.5px; color: var(--accent-ink); padding-top: 3px; }
+  .timeline .what b { display: block; font-weight: 600; margin-bottom: 4px; }
+  .timeline .what p { margin: 0 0 4px; font-size: 14.5px; max-width: none; }
+  .timeline .gate { font-size: 13px; color: var(--ink-2); }
+  .timeline .gate::before { content: "Exit gate: "; font-family: var(--mono); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+
+  footer { border-top: 1px solid var(--rule-strong); padding-top: 18px; font-size: 13px; color: var(--ink-3); }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  @media (max-width: 600px) {
+    .timeline li { grid-template-columns: 1fr; gap: 4px; }
+    .facts .v { font-size: 22px; }
+  }
+</style>
+
+<div class="page">
+  <nav class="toc" aria-label="Contents">
+    <div class="label">Contents</div>
+    <ol>
+      <li><a href="#summary">Recommendation</a></li>
+      <li><a href="#today">Where it stands</a></li>
+      <li><a href="#positioning">Positioning</a></li>
+      <li><a href="#product">Keep, cut, add, change</a></li>
+      <li><a href="#crypto">Cryptography</a></li>
+      <li><a href="#format">Store format</a></li>
+      <li><a href="#cli">Command line</a></li>
+      <li><a href="#threat">Threat model</a></li>
+      <li><a href="#stack">Rust stack</a></li>
+      <li><a href="#migration">Migration</a></li>
+      <li><a href="#release">Release engineering</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+      <li><a href="#decisions">Decisions for you</a></li>
+      <li><a href="#risks">Risks</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="masthead">
+      <div class="eyebrow">Engineering plan</div>
+      <h1>Rebuilding Trousseau</h1>
+      <p class="thesis">Keep the idea, an encrypted key-value file you can hand to someone. Replace everything under it: age instead of OpenPGP and unauthenticated AES, Rust instead of Go, and a product aimed at developers who want secrets next to their code without running a server.</p>
+      <div class="meta">
+        <span><b>Prepared for</b> Théo Crevon, owner</span>
+        <span><b>Basis</b> oleiade/trousseau at master (2026-02-08), motus conventions</span>
+        <span><b>Date</b> 2026-09-12</span>
+      </div>
+    </header>
+
+    <section id="summary">
+      <h2>Recommendation in one screen</h2>
+      <p class="lede">Rebuild from scratch. Do not port. The Go code is 4,146 lines of 2013-era architecture with global state and exits inside library code, and its two encryption paths are both unfit: one is unauthenticated, the other no longer works with any GnuPG shipped in the last decade.</p>
+      <ol class="summary">
+        <li><span class="n">1</span><span><b>Adopt the age format as the envelope.</b> It gives multi-recipient encryption, a passphrase mode, SSH keys as recipients, and hardware keys through plugins. It also means a store can be recovered with the <code>age</code> tool alone if trousseau ever disappears.</span></li>
+        <li><span class="n">2</span><span><b>Reposition as a git-friendly secrets file for developers and small teams.</b> The unit becomes a project-local <code>.trousseau</code> file committed to the repo, plus one personal store. The headline feature is <code>trousseau run</code>, which injects secrets as environment variables into a child process.</span></li>
+        <li><span class="n">3</span><span><b>Cut OpenPGP, the S3/scp/gist remotes, and the "bank details and bitcoin wallets" audience.</b> Password managers won that market. Remotes are auth surface and dependency weight for a problem git and rsync already solve.</span></li>
+        <li><span class="n">4</span><span><b>Ship a read-only migrator for v0.4 stores</b> so the 956-star user base can move in one command, then never carry the legacy code forward.</span></li>
+        <li><span class="n">5</span><span><b>Reuse the motus toolchain</b>: Cargo workspace, edition 2024, pedantic clippy, forbid unsafe, cargo-deny, GoReleaser with cargo-zigbuild, Homebrew tap and the oleiade apt repository. Add build provenance attestations and a paid crypto review before 1.0.</span></li>
+        <li><span class="n">6</span><span><b>Budget roughly 10 to 12 weeks of focused work to 1.0</b>, in four milestones with exit gates. The scope discipline matters more than the schedule. Breadth is what killed the first version.</span></li>
+      </ol>
+    </section>
+
+    <section id="today">
+      <h2>Where it stands today</h2>
+      <p class="lede">The February 2026 sweep updated dependencies to Go 1.24, urfave/cli v3 and aws-sdk-go-v2, and fixed a command injection in the scp pull path. Dependencies are therefore not the problem. The problems are design-level and cannot be patched away.</p>
+
+      <div class="facts">
+        <div><div class="v">956</div><div class="l">GitHub stars, 45 forks</div></div>
+        <div><div class="v">2019</div><div class="l">last published release, v0.4.1</div></div>
+        <div><div class="v">4,146</div><div class="l">lines of Go, 16 commands</div></div>
+        <div><div class="v">20</div><div class="l">open issues and PRs, oldest 2017</div></div>
+      </div>
+      <p>A <code>v0.5.0</code> tag exists with no corresponding release. The GoReleaser config still uses <code>--rm-dist</code>, <code>replacements</code> and <code>tap</code>, all removed in GoReleaser v2, and the workflow pins <code>version: latest</code>. The next tagged release fails until that config is migrated. The README still carries a Travis CI badge.</p>
+
+      <h3>Findings, by severity</h3>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>Severity</th><th>Finding</th><th>Where</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td><span class="chip crit">Critical</span></td><td class="wrap">Symmetric mode is AES-256-CFB with no authentication tag. Ciphertext is malleable.</td><td class="mono">internal/crypto/aes256.go</td><td class="wrap">Anyone who can write the file (a synced folder, a shared bucket) can flip bits in the JSON payload without the passphrase and without detection. Modern practice is AEAD only.</td></tr>
+          <tr><td><span class="chip crit">Critical</span></td><td class="wrap">Asymmetric mode reads <code>~/.gnupg/pubring.gpg</code> and <code>secring.gpg</code> through the deprecated <code>golang.org/x/crypto/openpgp</code> package.</td><td class="mono">serrure/openpgp, trousseau/crypto.go</td><td class="wrap">GnuPG 2.1 (November 2014) stopped writing <code>secring.gpg</code> and defaults to <code>pubring.kbx</code>. The default encryption mode has been broken for new users for about ten years. Issues #188 and #522 are this.</td></tr>
+          <tr><td><span class="chip crit">Critical</span></td><td class="wrap">Remote credentials travel in the DSN on the command line: <code>s3://access:secret@bucket</code>, <code>gist://user:token@</code>.</td><td class="mono">cmd/trousseau/commands.go</td><td class="wrap">Secrets land in shell history and are visible in <code>ps</code> to every local user.</td></tr>
+          <tr><td><span class="chip crit">Critical</span></td><td class="wrap">scp transport uses <code>ssh.InsecureIgnoreHostKey()</code>.</td><td class="mono">pkg/remote/ssh.go:127</td><td class="wrap">No protection against a man-in-the-middle server. The file is encrypted, but the ssh password in the DSN is handed to whoever answers.</td></tr>
+          <tr><td><span class="chip warn">High</span></td><td class="wrap">KDF parameters are hard-coded and unversioned: scrypt with N=65536, r=16 (r is literally <code>aes.BlockSize</code>), p=1, 128 MiB.</td><td class="mono">aes256.go</td><td class="wrap">Cost cannot be raised without breaking every existing store. The file carries no format version at all outside the payload.</td></tr>
+          <tr><td><span class="chip warn">High</span></td><td class="wrap">Every write truncates the store in place. No temp file, no rename, no fsync, no lock.</td><td class="mono">actions.go</td><td class="wrap">A crash or two concurrent commands corrupt the only copy of the secrets.</td></tr>
+          <tr><td><span class="chip warn">High</span></td><td class="wrap">S3 pull writes the download to the remote path string, not the local store, with mode 0755. scp pull also creates the store as 0755.</td><td class="mono">remote.go</td><td class="wrap">Pull from S3 does not restore the store, and pulled files are world-readable and executable.</td></tr>
+          <tr><td><span class="chip warn">High</span></td><td class="wrap"><code>TROUSSEAU_PASSPHRASE</code> as a first-class input, and gpg-agent support through <code>GPG_AGENT_INFO</code>.</td><td class="mono">context.go, gpgagent.go</td><td class="wrap">Environment variables leak through <code>/proc</code> and crash reports. <code>GPG_AGENT_INFO</code> was dropped in GnuPG 2.1, so the agent path is dead code.</td></tr>
+          <tr><td><span class="chip neutral">Medium</span></td><td class="wrap">Flat <code>map[string]string</code>. No namespaces, no binary values, no per-entry metadata.</td><td class="mono">secret_store.go</td><td class="wrap">Issues #192 and #193 have asked for sections and metadata since 2018. Certificates and keys, the original use case, are files, not strings.</td></tr>
+          <tr><td><span class="chip neutral">Medium</span></td><td class="wrap">Library code calls <code>Fatal</code> and mutates package globals for store path and passphrase.</td><td class="mono">vault.go, context.go</td><td class="wrap">Issue #185 (expose an API) cannot be delivered on this codebase. This is the architectural reason to rewrite rather than port.</td></tr>
+          <tr><td><span class="chip neutral">Medium</span></td><td class="wrap">CI on <code>actions/checkout@v2</code> and <code>setup-go@v2</code>, no vulnerability scan, no fuzzing, release signing via GnuPG on the checksum file only.</td><td class="mono">.github/workflows</td><td class="wrap">Well below what a security tool is expected to ship with in 2026.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>What the backlog is asking for</h3>
+      <p>The open issues from 2018 form a coherent product request. All of them are in scope for the rebuild, and most fall out of the new design for free:</p>
+      <ul>
+        <li>#191 simplify the CLI, #195 JSON output, #194 copy to clipboard</li>
+        <li>#192 sections in the store, #193 metadata on entries, #189 a real schema</li>
+        <li>#188 work with GPG 2, #187 YubiKey support, #185 a library API</li>
+        <li>#506 and #508 passphrase handling and short-ciphertext errors, #509 fix the release pipeline</li>
+      </ul>
+    </section>
+
+    <section id="positioning">
+      <h2>Positioning and audience</h2>
+      <p class="lede">The 2013 README pitched three audiences at once: ops sharing certificates across a cluster, teams sharing service passwords, and individuals storing bank details. Pick one. The other two are served by products with far more resources.</p>
+
+      <h3>Who it is for</h3>
+      <p><strong>Primary:</strong> individual developers and teams of two to twenty who keep a project's secrets in the repository, next to the code, with no server to run and no subscription to buy. The concrete job is "replace the <code>.env</code> file I am not supposed to commit."</p>
+      <p><strong>Secondary:</strong> operators who bootstrap machines. With age, an SSH public key is a valid recipient, so "encrypt this store for these three servers" needs no key ceremony. That is the original cluster use case, finally without GnuPG.</p>
+      <p><strong>Not for:</strong> humans storing personal passwords (1Password, Bitwarden, KeePassXC), organizations needing audit logs, dynamic secrets, or access policies (Vault, Infisical, Doppler, cloud secret managers), or anyone who wants a GUI.</p>
+
+      <h3>The field in 2026</h3>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>Tool</th><th>Model</th><th>Gap trousseau fills</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">sops (CNCF)</td><td class="wrap">Encrypts values inside YAML/JSON/env files; keys from age, PGP, cloud KMS, Vault.</td><td class="wrap">Powerful and unfriendly. Key policy lives in <code>.sops.yaml</code>, the CLI is file-oriented, and there is no key-value or "run this with my secrets" ergonomics beyond <code>exec-env</code>.</td></tr>
+          <tr><td class="mono">age / rage</td><td class="wrap">File encryption to recipients. The format we should build on.</td><td class="wrap">No key-value layer, no edit round trip, no env injection, no recipient list management. It is the primitive, not the product.</td></tr>
+          <tr><td class="mono">pass, gopass, passage</td><td class="wrap">One encrypted file per secret in a git repo. GnuPG by default, age for passage.</td><td class="wrap">Directory-of-files model is awkward for a project's secret set and for CI. passage is the closest cousin and validates the age choice.</td></tr>
+          <tr><td class="mono">dotenvx</td><td class="wrap">Encrypts <code>.env</code> values with one keypair per environment.</td><td class="wrap">Node ecosystem, its own key format, single recipient per environment. Proves the demand for "commit your encrypted env."</td></tr>
+          <tr><td class="mono">1Password CLI, Doppler, Infisical</td><td class="wrap"><code>op run</code>, <code>doppler run</code>, <code>infisical run</code> inject secrets from a hosted vault.</td><td class="wrap">The UX to copy. All three need an account and a network round trip. Trousseau offers the same verb against a file.</td></tr>
+          <tr><td class="mono">git-crypt</td><td class="wrap">Transparent per-file encryption in git.</td><td class="wrap">Whole-file, GnuPG or symmetric key, C++. No structured access, no injection.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="callout">
+        <span class="k">One-line position</span>
+        <p>An encrypted key-value file you can commit, share with people and machines, and run your program with. No server, no account, recoverable with <code>age</code> alone.</p>
+      </div>
+    </section>
+
+    <section id="product">
+      <h2>Keep, cut, add, change</h2>
+      <div class="cols">
+        <div class="col keep"><h4>Keep</h4><ul>
+          <li>Single encrypted file as the unit of storage and sharing</li>
+          <li>Key-value model, get/set/list/remove</li>
+          <li>Two access modes: recipients, or a passphrase</li>
+          <li>Recipient management on the store itself</li>
+          <li>Plain export and import with a merge strategy</li>
+          <li>The name and the repository</li>
+        </ul></div>
+        <div class="col cut"><h4>Cut</h4><ul>
+          <li>OpenPGP and every GnuPG integration</li>
+          <li>S3, scp and gist push and pull</li>
+          <li>DSN syntax with embedded credentials</li>
+          <li>Secret values on the command line</li>
+          <li>OS keyring lookup of the passphrase</li>
+          <li>The personal password manager pitch</li>
+          <li>The in-place upgrade chain for 0.3.x formats</li>
+        </ul></div>
+        <div class="col add"><h4>Add</h4><ul>
+          <li><code>run</code>: inject secrets as env vars into a child process</li>
+          <li><code>env</code>: print in shell, dotenv or JSON form for direnv and CI</li>
+          <li><code>edit</code>: full round trip in <code>$EDITOR</code></li>
+          <li>Project-local stores discovered like <code>.git</code></li>
+          <li>SSH keys and hardware keys as recipients via age</li>
+          <li>Hierarchical keys, binary values, per-entry metadata</li>
+          <li><code>--json</code> on every read command</li>
+          <li>Clipboard copy with timed clear</li>
+          <li>A stable library crate</li>
+        </ul></div>
+        <div class="col change"><h4>Change</h4><ul>
+          <li>Envelope: age instead of bespoke AES and PGP</li>
+          <li>Payload: versioned JSON schema instead of a bare map</li>
+          <li>Writes: temp file, fsync, rename, advisory lock</li>
+          <li>Identity: age identity or SSH key file, never an env var passphrase by default</li>
+          <li>Verbs: <code>del</code> becomes <code>rm</code>, <code>keys</code> becomes <code>ls</code>, <code>create</code> becomes <code>init</code></li>
+          <li>Config and data under XDG paths</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <section id="crypto">
+      <h2>Cryptography: build on age</h2>
+      <p class="lede">The single largest decision. Three options were on the table. The recommendation is the age format through the Rust <code>age</code> crate, the library behind rage.</p>
+
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>Option</th><th>For</th><th>Against</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td class="wrap"><strong>age format</strong> via the <code>age</code> crate</td><td class="wrap">Reviewed public spec since 2019. Multi-recipient X25519, scrypt passphrase mode, ssh-ed25519 and ssh-rsa recipients, plugin protocol for YubiKey, Secure Enclave, TPM and FIDO2. Payload is ChaCha20-Poly1305 in authenticated 64 KiB chunks, header is MAC'd. KDF cost is stored in the header. Emergency recovery with <code>age -d</code>. Interoperates with sops and passage users' existing identities.</td><td class="wrap">The crate is pre-1.0 (0.11.x). No sender authentication: any recipient can produce a valid file. A passphrase recipient cannot be mixed with other recipients in the same file. No public third-party audit of either implementation that I can point to.</td><td><span class="chip rec">Recommended</span></td></tr>
+          <tr><td class="wrap"><strong>Bespoke envelope</strong>: Argon2id, XChaCha20-Poly1305, X25519 key wrapping</td><td class="wrap">Full control. Could add signatures and mixed recipient sets from day one.</td><td class="wrap">Every reviewer's first question will be "why not age". Own spec, own test vectors, own audit, own plugin story for hardware keys. Zero interoperability. This is the path the 2013 version took and it aged badly.</td><td><span class="chip neutral">Reject</span></td></tr>
+          <tr><td class="wrap"><strong>OpenPGP</strong> via <code>sequoia-openpgp</code></td><td class="wrap">Continuity with existing recipients. Sequoia is a serious, audited Rust implementation. Signatures come built in.</td><td class="wrap">GnuPG key management was the reason the old asymmetric mode rotted. The PGP UX problem is the product problem. Large dependency surface.</td><td><span class="chip neutral">Reject for v1</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Consequences you should know before saying yes</h3>
+      <ul>
+        <li><strong>Passphrase stores and recipient stores stay separate kinds</strong>, exactly as today's symmetric and asymmetric split. Converting between them is a <code>rekey</code>, which is cheap because the payload is small.</li>
+        <li><strong>Every save re-encrypts under a fresh file key.</strong> Removing a recipient therefore takes effect on the next write. They keep whatever git history they already have, which is true of every scheme.</li>
+        <li><strong>No signatures in v1.</strong> Within a team of recipients, tampering is not detectable by cryptography, only by git history. Document it. An optional ed25519 detached signature is a v1.x candidate.</li>
+        <li><strong>SSH keys as identities work from the private key file</strong>, with a passphrase prompt if it is encrypted. Keys that live only in an agent (1Password's SSH agent, FIDO security keys) cannot decrypt. The fallback is a generated age identity, which <code>init</code> creates in one step.</li>
+        <li><strong>Hardware keys arrive through the plugin protocol</strong>, not through code in trousseau. That closes #187 with documentation instead of an integration to maintain.</li>
+      </ul>
+      <div class="callout">
+        <span class="k">Audit</span>
+        <p>Budget a short external review of the format bindings and the CLI's handling of secrets (argv, env, temp files, clipboard) before 1.0, the same way motus has an <code>audit/</code> directory. The primitives are not where a tool like this fails. The plumbing around them is.</p>
+      </div>
+    </section>
+
+    <section id="format">
+      <h2>Store format</h2>
+      <p class="lede">One ASCII-armored age file. Inside it, one versioned JSON document. Nothing else on disk belongs to the store.</p>
+      <ul>
+        <li><strong>Armored</strong>, so the file diffs as text in git and survives copy-paste. Detection is trivial: the file starts with the age armor header, the way 0.3.0 stores were detected by the PGP header.</li>
+        <li><strong>Recipient list lives inside the encrypted payload.</strong> Any recipient can re-encrypt on write. The age header does not reveal X25519 recipient identities, so the file leaks only the recipient count.</li>
+        <li><strong>Keys are paths.</strong> <code>database/password</code>, <code>stripe/webhook-secret</code>. <code>ls</code> takes a prefix. This is the answer to #192 without a nested document model.</li>
+        <li><strong>Values are bytes with an encoding tag</strong>, so a certificate or a binary key file round-trips through <code>set --from-file</code> and <code>get --out</code>.</li>
+        <li><strong>Per-entry metadata</strong>: description, timestamps, and an explicit environment variable name that overrides the default mapping. This is #193, scoped to what <code>run</code> needs.</li>
+        <li><strong>Schema version</strong> in the payload. Readers refuse newer majors with a clear message instead of guessing.</li>
+      </ul>
+<pre><code>{
+  "schema": 1,
+  "created_at": "2026-09-12T09:41:00Z",
+  "updated_at": "2026-09-12T10:02:13Z",
+  "recipients": [
+    "age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p",
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL... deploy@web-01"
+  ],
+  "entries": {
+    "database/password": {
+      "value": "s3cr3t", "encoding": "utf8",
+      "env": "DATABASE_PASSWORD",
+      "description": "Postgres app role",
+      "created_at": "...", "updated_at": "..."
+    },
+    "tls/server.key": { "value": "LS0tLS1CRUdJTi...", "encoding": "base64" }
+  }
+}</code></pre>
+      <p>Default environment mapping: uppercase, with <code>/</code> and <code>-</code> replaced by <code>_</code>. <code>database/password</code> becomes <code>DATABASE_PASSWORD</code> without anyone configuring anything.</p>
+
+      <h3>Where files live</h3>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>Thing</th><th>Location</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="wrap">Project store</td><td class="mono">./.trousseau</td><td class="wrap">Found by walking up from the working directory, like <code>.git</code>. Committed to the repository.</td></tr>
+          <tr><td class="wrap">Personal store</td><td class="mono">$XDG_DATA_HOME/trousseau/default.trousseau</td><td class="wrap">Used when no project store is found, or with <code>--global</code>.</td></tr>
+          <tr><td class="wrap">Identity</td><td class="mono">$XDG_CONFIG_HOME/trousseau/identity.txt</td><td class="wrap">Mode 0600. Optionally passphrase-encrypted with age itself. Or an SSH private key path from config.</td></tr>
+          <tr><td class="wrap">Config</td><td class="mono">$XDG_CONFIG_HOME/trousseau/config.toml</td><td class="wrap">Identity paths, clipboard timeout, default env prefix. Never secrets.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Selection order for the store: <code>--store</code>, then <code>TROUSSEAU_STORE</code>, then the nearest project store, then the personal store. The same precedence, stated once in the docs, is what stops the "which store did I just write to" class of bug that #112 was.</p>
+    </section>
+
+    <section id="cli">
+      <h2>Command line</h2>
+      <p class="lede">Four rules, then the verbs. Secret values never appear on the command line. Every read has <code>--json</code>. One store per invocation, chosen by one precedence rule. Nothing is interactive when stdin is not a terminal.</p>
+
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>v0.4</th><th>v1</th><th>Behavior</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">create</td><td class="mono">init [--recipient R]... [--passphrase]</td><td class="wrap">Creates the store and, if no identity exists, an age identity. With no flags: uses your identity as sole recipient. Offers your SSH public key if one is found.</td></tr>
+          <tr><td class="mono">set KEY VALUE</td><td class="mono">set KEY [--from-file F | --from-env NAME]</td><td class="wrap">Prompts hidden when stdin is a terminal, otherwise reads stdin. No positional value. Optional <code>--description</code>, <code>--env NAME</code>.</td></tr>
+          <tr><td class="mono">get KEY [--file]</td><td class="mono">get KEY [--out F] [--clip] [--json]</td><td class="wrap">Raw value to stdout with no trailing newline when piped. <code>--clip</code> clears after 45 seconds.</td></tr>
+          <tr><td class="mono">keys, show</td><td class="mono">ls [PREFIX] [--long] [--json]</td><td class="wrap">Keys only by default. <code>--long</code> adds metadata, never values. Values come from <code>get</code>, <code>export</code> or <code>edit</code>.</td></tr>
+          <tr><td class="mono">del, rename</td><td class="mono">rm KEY, mv OLD NEW</td><td class="wrap">Familiar verbs. <code>del</code> and <code>keys</code> stay as hidden aliases for one major version.</td></tr>
+          <tr><td class="mono">export, import</td><td class="mono">export --format json|dotenv|toml, import --format ... --strategy overwrite|keep|fail</td><td class="wrap">Plaintext interchange. The encrypted file itself needs no export command, it is a file.</td></tr>
+          <tr><td class="mono">push, pull</td><td class="mono">removed</td><td class="wrap">Use git, rsync, scp, a synced folder. The docs show each in three lines.</td></tr>
+          <tr><td class="mono">add-recipient, remove-recipient, list-recipients</td><td class="mono">recipients add|rm|ls, rekey</td><td class="wrap"><code>rekey</code> re-encrypts under the current list, and converts between passphrase and recipient stores.</td></tr>
+          <tr><td class="mono">meta</td><td class="mono">info</td><td class="wrap">Path, schema version, kind, recipient count, entry count, last modified. Never secrets.</td></tr>
+          <tr><td class="mono">upgrade</td><td class="mono">migrate [PATH]</td><td class="wrap">One-shot import of a v0.4 store. See migration.</td></tr>
+          <tr><td class="mono">new</td><td class="mono">run [--prefix P] -- CMD ARGS...</td><td class="wrap">Decrypts, injects entries as environment variables, execs the command. Exit code passes through. Nothing touches disk.</td></tr>
+          <tr><td class="mono">new</td><td class="mono">env [--format shell|dotenv|json]</td><td class="wrap">For <code>eval</code>, direnv's <code>.envrc</code>, and CI steps.</td></tr>
+          <tr><td class="mono">new</td><td class="mono">edit</td><td class="wrap">Opens the whole store as TOML in <code>$VISUAL</code> or <code>$EDITOR</code> through a 0600 temp file, validates, re-encrypts. The workflow people know from sops and pass.</td></tr>
+          <tr><td class="mono">new</td><td class="mono">completions, man</td><td class="wrap">Generated from clap, shipped in the packages. Replaces the hand-written completion scripts.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Identity and passphrase resolution</h3>
+      <p>In order: <code>--identity PATH</code>, <code>TROUSSEAU_IDENTITY_FILE</code>, identities listed in config, the default identity file, then <code>~/.ssh/id_ed25519</code> and <code>~/.ssh/id_rsa</code>. For passphrase stores: prompt, or <code>--passphrase-file</code>. <code>TROUSSEAU_PASSPHRASE</code> survives only for CI, prints a warning on a terminal, and is documented as the wrong tool. CI should use an identity file written from a CI secret, which is how sops and age users already work.</p>
+
+      <h3>Global flags</h3>
+      <p><code>--store</code>, <code>--global</code>, <code>--identity</code>, <code>--json</code>, <code>--quiet</code>, <code>--no-input</code>. That is the whole list. <code>--ask-passphrase</code>, <code>--gnupg-home</code> and <code>--verbose</code> go away.</p>
+    </section>
+
+    <section id="threat">
+      <h2>Threat model, stated plainly</h2>
+      <p class="lede">The old README never said what the tool defends against. The new one does, in the first screen. This is the version to sign off on.</p>
+      <div class="cols">
+        <div class="col keep"><h4>Defends against</h4><ul>
+          <li>Disclosure of the store at rest: stolen laptop, leaked bucket, public repository, synced folder</li>
+          <li>Undetected modification of the store by a non-recipient</li>
+          <li>Secrets in shell history, process lists, and crash logs via argv</li>
+          <li>Downgrade of KDF cost, because cost is bound in the header</li>
+          <li>Partial writes and concurrent writers corrupting the store</li>
+        </ul></div>
+        <div class="col cut"><h4>Does not defend against</h4><ul>
+          <li>A compromised host while an identity is usable there</li>
+          <li>A malicious recipient rewriting the store (no signatures in v1)</li>
+          <li>The child process of <code>run</code> leaking its own environment</li>
+          <li>Secrets paged to swap: v1 zeroizes on drop but does not lock memory</li>
+          <li>Editors that leave backup or swap files during <code>edit</code>: documented, with the right flags for vim and VS Code</li>
+          <li>Clipboard managers that keep history</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2>Rust stack</h2>
+      <p class="lede">Mirror motus wherever it already made the choice. New choices are listed with the reason, and every one is a mainstream crate with a maintainer you can name.</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>Concern</th><th>Choice</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td class="wrap">Workspace</td><td class="mono">crates/trousseau, crates/trousseau-cli</td><td class="wrap">Library first, CLI as a thin client. Same layout as motus. A <code>trousseau-wasm</code> crate later is possible but not planned.</td></tr>
+          <tr><td class="wrap">Toolchain policy</td><td class="mono">edition 2024, MSRV pinned, Cargo.lock committed</td><td class="wrap"><code>unsafe_code = "forbid"</code>, clippy pedantic and nursery denied, <code>unwrap_used</code> denied. Copy the motus lint block verbatim.</td></tr>
+          <tr><td class="wrap">Envelope</td><td class="mono">age (armor, ssh, plugin features)</td><td class="wrap">See cryptography. Pin a minor version and track the crate's changelog; it is 0.x.</td></tr>
+          <tr><td class="wrap">Secret hygiene</td><td class="mono">secrecy, zeroize</td><td class="wrap">Values are <code>SecretBox</code> types end to end; <code>Debug</code> never prints them. Zeroized on drop.</td></tr>
+          <tr><td class="wrap">CLI</td><td class="mono">clap 4 derive, clap_complete, clap_mangen</td><td class="wrap">Same as motus, plus generated completions and man pages.</td></tr>
+          <tr><td class="wrap">Payload</td><td class="mono">serde, serde_json, toml (edit only)</td><td class="wrap">JSON is the storage schema, TOML is the human edit surface.</td></tr>
+          <tr><td class="wrap">Prompts</td><td class="mono">rpassword, dialoguer</td><td class="wrap">Hidden input, confirmations. Both refuse when stdin is not a TTY and <code>--no-input</code> is honored.</td></tr>
+          <tr><td class="wrap">Clipboard</td><td class="mono">arboard, optional feature</td><td class="wrap">Already in motus. Timed clear via a detached process on Linux and macOS.</td></tr>
+          <tr><td class="wrap">Files</td><td class="mono">tempfile, fd-lock, etcetera</td><td class="wrap">Write to a sibling temp file, fsync, rename over the store. Advisory lock for the whole command. XDG and platform directories.</td></tr>
+          <tr><td class="wrap">Errors</td><td class="mono">thiserror in the library, anyhow in the CLI, human-panic</td><td class="wrap">Typed errors for library users, readable ones for people. No <code>exit</code> below the CLI layer.</td></tr>
+          <tr><td class="wrap">Tests</td><td class="mono">assert_cmd, proptest, cargo-fuzz, insta</td><td class="wrap">Round-trip properties on the schema, fuzzing on the payload and TOML parsers, snapshot tests on <code>--json</code> output. Golden v0.4 fixtures for the migrator.</td></tr>
+          <tr><td class="wrap">Supply chain</td><td class="mono">cargo-deny, renovate, cargo-auditable</td><td class="wrap">Same as motus, plus an embedded dependency list in the binary so scanners can read it.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="migration">
+      <h2>Migration from v0.4</h2>
+      <p class="lede">A rebuild with a new file format is only acceptable if existing users move in one command. The migrator is read-only, lives in its own module, and is deleted at 2.0.</p>
+      <ul>
+        <li><strong>Detection:</strong> a JSON object with <code>crypto_type</code>, <code>crypto_algorithm</code> and <code>_data</code> keys. That is exactly today's version discovery.</li>
+        <li><strong>Symmetric stores:</strong> reimplement the legacy decrypt only: scrypt with the fixed parameters, then AES-256-CFB. About forty lines, with a fixture generated by the current Go binary so it is tested against reality.</li>
+        <li><strong>OpenPGP stores:</strong> shell out to <code>gpg --decrypt</code> on the armored payload. Never parse a keyring again. If the user's GnuPG cannot decrypt it, trousseau could not have either.</li>
+        <li><strong>Output:</strong> a v1 store encrypted to the identities the user names on the command line. Recipients from the old store are shown but not carried, since PGP key ids are not age recipients.</li>
+        <li><strong>Keep the old file.</strong> The migrator never deletes or overwrites the source.</li>
+      </ul>
+    </section>
+
+    <section id="release">
+      <h2>Release engineering</h2>
+      <p>Reuse the motus pipeline as is: GoReleaser with cargo-zigbuild for Linux x86_64 and aarch64 and macOS, Homebrew tap, the oleiade apt repository, cargo-deny on a daily schedule, Renovate. Windows builds are worth shipping since nothing in the stack blocks them, with the clipboard and plugin caveats noted in the docs.</p>
+      <p>Add three things motus does not have yet, all cheap:</p>
+      <ul>
+        <li><strong>Build provenance</strong> through GitHub artifact attestations on every release asset, so a downloaded binary can be traced to a workflow run and commit.</li>
+        <li><strong>An SBOM</strong> per release, generated from <code>Cargo.lock</code>.</li>
+        <li><strong>A security policy</strong> file with a disclosure contact and a stated support window.</li>
+      </ul>
+      <p>Retire the hand-written completion scripts and the Vagrant provisioning script. Keep MIT unless you want AGPL like motus; that is a decision for you below, not for me.</p>
+    </section>
+
+    <section id="roadmap">
+      <h2>Roadmap</h2>
+      <p class="lede">Four milestones, each with a gate you can check. Durations assume one engineer at roughly full focus. Sequence matters more than the dates.</p>
+      <ol class="timeline">
+        <li><span class="when">Weeks 1 to 2</span><div class="what"><b>M0. Decide and specify</b><p>Sign off on the decisions below. Write the format spec, the CLI reference, and the threat model as documents in the repo before code. Build a throwaway age round-trip to confirm plugin and SSH identity behavior on macOS and Linux.</p><p class="gate">The three documents are merged, and a spike decrypts a file with an SSH key, an age identity, and a YubiKey plugin.</p></div></li>
+        <li><span class="when">Weeks 3 to 8</span><div class="what"><b>M1. Core library and CLI</b><p>Library crate with the schema, store I/O, locking and the age bindings. CLI with init, set, get, ls, rm, mv, recipients, rekey, run, env, edit, export, import, info. JSON output everywhere. Property tests and fuzz targets in CI from the first week.</p><p class="gate">A project store round-trips through every command on the three platforms, and <code>age -d</code> alone recovers it.</p></div></li>
+        <li><span class="when">Weeks 9 to 10</span><div class="what"><b>M2. Migration, packaging, docs</b><p>The v0.4 migrator with fixtures from the Go binary. Release pipeline, attestations, SBOM, Homebrew and apt. A README that leads with <code>run</code>, states the threat model, and shows the git workflow.</p><p class="gate">A 2019-era store migrates on a clean machine, and a tagged release publishes to all channels without manual steps.</p></div></li>
+        <li><span class="when">Weeks 11 to 12</span><div class="what"><b>M3. Review and 1.0</b><p>External review of secret handling and format bindings. Fix what it finds. Publish 1.0 with a migration guide and an announcement aimed at sops, dotenvx and pass users.</p><p class="gate">Review findings closed or accepted in writing. 1.0 tagged.</p></div></li>
+        <li><span class="when">After 1.0</span><div class="what"><b>Candidates, not commitments</b><p>Optional detached signatures for tamper evidence between recipients. A short-lived identity cache backed by the OS keychain. A published, semver-stable library API. Nothing with a server in it.</p></div></li>
+      </ol>
+    </section>
+
+    <section id="decisions">
+      <h2>Decisions that are yours</h2>
+      <p class="lede">Each one has a recommendation. Where you disagree, the plan still holds; the affected milestone just changes shape.</p>
+
+      <div class="decision"><div class="head"><span class="id">D1</span><span class="q">Envelope format</span><span class="chip rec">age</span></div><div class="body"><p><span class="lbl">Trade</span>Interoperability, hardware keys and a reviewed spec, against a 0.x crate and no signatures. Choosing bespoke costs an extra milestone and an audit with a much wider scope.</p></div></div>
+      <div class="decision"><div class="head"><span class="id">D2</span><span class="q">Store scope</span><span class="chip rec">Project-local plus one personal store</span></div><div class="body"><p><span class="lbl">Trade</span>This is the positioning change. The alternative, one home store as today, keeps the old audience and forfeits the "commit it" story that differentiates the tool.</p></div></div>
+      <div class="decision"><div class="head"><span class="id">D3</span><span class="q">Remote storage</span><span class="chip rec">Remove entirely</span></div><div class="body"><p><span class="lbl">Trade</span>A few users will miss <code>push s3://</code>. The AWS SDK alone was more than half of the old dependency tree, and the remotes produced the two worst security findings. If demand shows up, an S3 target can return as an optional feature in 1.x.</p></div></div>
+      <div class="decision"><div class="head"><span class="id">D4</span><span class="q">Passphrase and identity caching</span><span class="chip rec">None in 1.0</span></div><div class="body"><p><span class="lbl">Trade</span>Users with a passphrase-protected identity type it per command, like ssh without an agent. An agent or keychain cache is a well-understood 1.x addition and a poor thing to design under 1.0 pressure.</p></div></div>
+      <div class="decision"><div class="head"><span class="id">D5</span><span class="q">Payload model</span><span class="chip rec">Flat path keys with per-entry metadata</span></div><div class="body"><p><span class="lbl">Trade</span>A nested document model (what sops does) would make trousseau a config encryptor. Path keys deliver sections and stay a key-value store.</p></div></div>
+      <div class="decision"><div class="head"><span class="id">D6</span><span class="q">Legacy support</span><span class="chip rec">Read-only migrator, deleted at 2.0</span></div><div class="body"><p><span class="lbl">Trade</span>No dual-format support, ever. Carrying two formats is how the 0.3 upgrade closures ended up in the tree.</p></div></div>
+      <div class="decision"><div class="head"><span class="id">D7</span><span class="q">License</span><span class="chip neutral">Your call</span></div><div class="body"><p><span class="lbl">Trade</span>MIT keeps continuity with 13 years of contributors and eases adoption in company repos. AGPL matches motus and your current stance. A rewrite is the one moment a change costs nothing legally, since no old code is carried over.</p></div></div>
+      <div class="decision"><div class="head"><span class="id">D8</span><span class="q">Versioning and name</span><span class="chip rec">Same repository, 1.0.0, new format</span></div><div class="body"><p><span class="lbl">Trade</span>The name and stars are the asset. A new name starts from zero. The Go tree moves to a <code>legacy</code> branch with a final tag.</p></div></div>
+      <div class="decision"><div class="head"><span class="id">D9</span><span class="q">External review</span><span class="chip rec">Yes, scoped, before 1.0</span></div><div class="body"><p><span class="lbl">Trade</span>A few days of a specialist's time. Skipping it is defensible for a hobby release and not for a tool whose README says "secure".</p></div></div>
+    </section>
+
+    <section id="risks">
+      <h2>Risks</h2>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>Risk</th><th>Likelihood</th><th>Mitigation</th></tr></thead>
+        <tbody>
+          <tr><td class="wrap">Crowded category; nobody notices a 1.0.</td><td><span class="chip warn">High</span></td><td class="wrap">Lead with <code>run</code> and the git workflow, not with encryption. Target the sops-is-too-much and dotenvx-is-node crowds by name in the announcement.</td></tr>
+          <tr><td class="wrap">Scope creep repeats the 2013 failure mode.</td><td><span class="chip warn">High</span></td><td class="wrap">The cut list above is a contract. Anything with a server, a GUI, or a remote is a 2.x conversation.</td></tr>
+          <tr><td class="wrap">The <code>age</code> crate breaks API across 0.x minors.</td><td><span class="chip neutral">Medium</span></td><td class="wrap">Isolate it behind one module. The file format is stable even where the crate API is not.</td></tr>
+          <tr><td class="wrap">Users lose data during migration.</td><td><span class="chip neutral">Medium</span></td><td class="wrap">Read-only migrator, fixtures from the real Go binary, source file never touched.</td></tr>
+          <tr><td class="wrap">Plugin and clipboard behavior on Windows and Wayland disappoints.</td><td><span class="chip neutral">Medium</span></td><td class="wrap">Document as best-effort tier. Core commands are tested on all platforms; clipboard and plugins are not gates.</td></tr>
+          <tr><td class="wrap">Any recipient can silently rewrite the store.</td><td><span class="chip neutral">Medium</span></td><td class="wrap">Stated in the threat model. git history is the audit trail. Signatures are the first post-1.0 candidate.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <footer>Sources: oleiade/trousseau master as of 2026-02-08, its open issues and releases, oleiade/serrure, oleiade/motus main. Claims about age come from the age-encryption.org v1 specification and the rage project.</footer>
+  </main>
+</div>
