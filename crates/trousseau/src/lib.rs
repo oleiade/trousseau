@@ -30,3 +30,7 @@ pub mod identity;
 /// Everything in section 3.2 of `docs/IMPLEMENTATION_PLAN.md`, plus
 /// reading, opening, and saving a store's bytes.
 pub mod store;
+/// The legacy v0.4 store reader: envelope parsing, AES and OpenPGP
+/// decryption, and conversion into a current store. See section 3.7 of
+/// `docs/IMPLEMENTATION_PLAN.md`.
+pub mod legacy;

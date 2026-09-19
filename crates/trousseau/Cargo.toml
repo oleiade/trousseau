@@ -37,6 +37,9 @@ base64 = { workspace = true }
 tempfile = { workspace = true }
 fd-lock = { workspace = true }
 sha2 = { workspace = true }
+scrypt = { workspace = true }
+aes = { workspace = true }
+cfb-mode = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
