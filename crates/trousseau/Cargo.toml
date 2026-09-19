@@ -1,0 +1,29 @@
+[package]
+name = "trousseau"
+version = "1.0.0-alpha.1"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish = false
+description = "Portable, encrypted keyring: store format, age envelope cryptography, and legacy reader."
+keywords = ["secrets", "encryption", "age", "keyring"]
+categories = ["cryptography"]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+enum_glob_use = "deny"
+pedantic = "deny"
+nursery = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+
+[dependencies]
+thiserror = { workspace = true }

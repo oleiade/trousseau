@@ -1,0 +1,41 @@
+[package]
+name = "trousseau-cli"
+version = "1.0.0-alpha.1"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish = false
+description = "Command-line interface for the trousseau encrypted keyring."
+keywords = ["secrets", "encryption", "cli", "keyring"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "trousseau"
+path = "src/main.rs"
+
+[features]
+default = ["clipboard"]
+clipboard = ["dep:arboard"]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+enum_glob_use = "deny"
+pedantic = "deny"
+nursery = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+print_stdout = "warn"
+print_stderr = "warn"
+
+[dependencies]
+clap = { workspace = true }
+arboard = { workspace = true, optional = true }
+
+[dev-dependencies]
+assert_cmd = { workspace = true }
