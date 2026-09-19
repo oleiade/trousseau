@@ -19,3 +19,8 @@ pub mod schema;
 /// The age envelope: sealing and opening store bytes. See
 /// `docs/format.md` section on the envelope.
 pub mod envelope;
+
+/// Recipients and identities: parsing, normalizing, and loading the age
+/// recipients and identity sources described in section 3.3 of
+/// `docs/IMPLEMENTATION_PLAN.md`.
+pub mod identity;
