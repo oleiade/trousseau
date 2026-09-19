@@ -8,10 +8,17 @@ mod common;
 #[test]
 fn json_mode_unimplemented_subcommand_prints_json_error_only() {
     let env = common::Env::new();
-    // `export` is still unimplemented (step 3.5): `rekey` served this
-    // role until step 3.4 implemented it, and `set` before that (step
-    // 3.3).
-    let assert = env.command().args(["--json", "export"]).assert().failure();
+    // `run` is still unimplemented (step 3.6): `export` served this role
+    // until step 3.5 implemented it, `rekey` until step 3.4, and `set`
+    // before that (step 3.3). `run`'s `CMD` is `required = true`, so a
+    // trailing `-- true` is needed for clap to accept the invocation and
+    // hand off to `run::run`, whose own "not implemented yet" error is
+    // what this test exercises.
+    let assert = env
+        .command()
+        .args(["--json", "run", "--", "true"])
+        .assert()
+        .failure();
     let output = assert.get_output();
     assert!(
         output.stdout.is_empty(),

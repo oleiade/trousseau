@@ -13,6 +13,7 @@ mod cli;
 mod commands;
 mod config;
 mod context;
+mod document;
 mod exit;
 mod output;
 mod prompt;
