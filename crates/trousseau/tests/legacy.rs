@@ -4,14 +4,15 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::collections::BTreeMap;
+#[cfg(unix)]
 use std::process::Command;
 
 use secrecy::SecretString;
 use time::macros::datetime;
 use trousseau::error::Error;
-use trousseau::legacy::{
-    GpgOptions, LegacyAlgorithm, LegacyStore, convert, decrypt_aes, decrypt_gpg, parse_envelope,
-};
+#[cfg(unix)]
+use trousseau::legacy::{GpgOptions, decrypt_gpg};
+use trousseau::legacy::{LegacyAlgorithm, LegacyStore, convert, decrypt_aes, parse_envelope};
 use trousseau::schema::{StoreKind, Value};
 
 const SYMMETRIC_FIXTURE: &[u8] = include_bytes!("fixtures/legacy/symmetric-v0.4.json");
