@@ -82,3 +82,50 @@ jobs:
             dist/*.deb
             dist/*.apk
             dist/checksums.txt
+
+  # TODO(reviewer): publish the .deb built above to an apt repository, the
+  # way motus publishes to https://oleiade.github.io/deb (its README's
+  # install section references a keyring at
+  # https://oleiade.github.io/deb/oleiade-archive-keyring.gpg and a
+  # sources.list entry `deb [signed-by=...] https://oleiade.github.io/deb
+  # stable main`, so that repository is live). The mechanism that populates
+  # it is NOT visible in any public motus source checked for step 4.3:
+  #   - .goreleaser.yaml has no `publishers`, `blob`, or `uploads` section.
+  #   - .github/workflows/release.yml, ci.yml, and security.yml (fetched
+  #     from oleiade/motus@main) contain no apt/deb/oleiade.github.io step.
+  #   - The legacy Makefile has a `cargo-deb` build target but no publish
+  #     step.
+  #   - `oleiade/oleiade.github.io` returns 404 to unauthenticated GitHub
+  #     API requests (`GET /repos/oleiade/oleiade.github.io`), consistent
+  #     with it being a private repository, so its own workflow (if one
+  #     populates /deb) is not visible either.
+  #
+  # To make this job real, please supply:
+  #   1. The tool that maintains the apt repo index (reprepro, aptly,
+  #      deb-s3, or a hand-rolled script) and its invocation.
+  #   2. Where that tool's state/config lives: inside oleiade.github.io, a
+  #      separate private repo, or regenerated fresh each release.
+  #   3. The GPG private key that signs the repo's Release file (the public
+  #      side is the `oleiade-archive-keyring.gpg` the README references),
+  #      added as a repository secret, and its secret name.
+  #   4. A push credential for oleiade.github.io (deploy key or PAT), added
+  #      as a repository secret, and its secret name.
+  #   5. Whether this should be a job in this workflow (checking out
+  #      oleiade.github.io as a second working copy, running the tool,
+  #      committing, pushing) or a call to a separate reusable workflow,
+  #      the way motus's ci.yml calls oleiade/ci.
+  #
+  # Left disabled (`if: false`) until the above is filled in, so it never
+  # runs and never blocks a release.
+  publish-apt:
+    name: Publish to apt repository
+    needs: release
+    runs-on: ubuntu-latest
+    if: false
+    permissions:
+      contents: read
+    steps:
+      - name: Not implemented
+        run: |
+          echo "publish-apt is a TODO -- see the comment on this job in .github/workflows/release.yml" >&2
+          exit 1
