@@ -39,7 +39,7 @@ if /I "%action%"=="remove" (
 )
 
 if /I "%action%"=="change" (
-    powershell -NoProfile -Command "$c = Get-Content -Raw -Path '%scratch%'; $c = [regex]::Replace($c, '(?ms)(^\[\"a/changeme\"\].*?^value = ).*$', '${1}\"changed\"', 1); Set-Content -NoNewline -Path '%scratch%' -Value $c"
+    powershell -NoProfile -Command "$c = Get-Content -Raw -Path '%scratch%'; $c = [regex]::Replace($c, '(?ms)(^\[\"a/changeme\"\].*?^value = )[^\r\n]*', '${1}\"changed\"', 1); Set-Content -NoNewline -Path '%scratch%' -Value $c"
     goto :eof
 )
 
