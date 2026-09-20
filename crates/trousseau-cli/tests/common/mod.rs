@@ -72,10 +72,19 @@ impl Env {
         &self.config
     }
 
-    /// The fake `XDG_DATA_HOME`.
+    /// The directory the CLI resolves as its data root: the fake
+    /// `XDG_DATA_HOME` on Unix, and the fake `APPDATA` (which etcetera
+    /// uses for both config and data) on Windows.
     #[must_use]
     pub fn data_home(&self) -> &Path {
-        &self.data
+        #[cfg(windows)]
+        {
+            &self.config
+        }
+        #[cfg(not(windows))]
+        {
+            &self.data
+        }
     }
 
     /// The fake `XDG_CACHE_HOME`.
@@ -107,8 +116,10 @@ impl Env {
         cmd.env("XDG_CACHE_HOME", &self.cache);
         #[cfg(windows)]
         {
+            // etcetera's Windows strategy reads config AND data from
+            // `APPDATA` and the cache from `LOCALAPPDATA`.
             cmd.env("APPDATA", &self.config);
-            cmd.env("LOCALAPPDATA", &self.data);
+            cmd.env("LOCALAPPDATA", &self.cache);
             cmd.env("USERPROFILE", &self.home);
         }
         cmd
