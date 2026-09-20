@@ -13,6 +13,7 @@
 mod common;
 
 use std::path::{Path, PathBuf};
+#[cfg(unix)]
 use std::process::Command;
 
 use common::{SSH_PUB, json_stdout};
@@ -24,12 +25,14 @@ fn symmetric_fixture() -> PathBuf {
 }
 
 /// The `OpenPGP` legacy fixture's path.
+#[cfg(unix)]
 fn asymmetric_fixture() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../trousseau/tests/fixtures/legacy/asymmetric-v0.4.json")
 }
 
 /// The throwaway `OpenPGP` secret key used to decrypt [`asymmetric_fixture`].
+#[cfg(unix)]
 fn test_key_sec() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../trousseau/tests/fixtures/legacy/test-key.sec.asc")
