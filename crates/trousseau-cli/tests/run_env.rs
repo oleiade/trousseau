@@ -116,6 +116,41 @@ fn run_env_prefix_prefixes_every_injected_name() {
     assert_eq!(String::from_utf8_lossy(&output.stdout).trim_end(), "s3cr3t");
 }
 
+/// `[run].env_prefix` in the configuration file (3.4) is the default
+/// prefix when `--env-prefix` is absent (fix carried into step 5.1).
+#[test]
+fn run_honors_env_prefix_from_config_when_flag_is_absent() {
+    let env = common::Env::new();
+    env.init_store();
+    env.command_with_identity()
+        .args(["set", "database/password"])
+        .write_stdin("s3cr3t\n")
+        .assert()
+        .success();
+
+    let config_dir = env.config_home().join("trousseau");
+    std::fs::create_dir_all(&config_dir).expect("create config dir");
+    std::fs::write(
+        config_dir.join("config.toml"),
+        "[run]\nenv_prefix = \"APP_\"\n",
+    )
+    .expect("write config.toml");
+
+    let mut cmd = env.command_with_identity();
+    cmd.arg("run").arg("--");
+    cmd.args(shell_args(
+        "printf %s \"$APP_DATABASE_PASSWORD\"",
+        "echo %APP_DATABASE_PASSWORD%",
+    ));
+    let output = cmd.output().expect("run `run`");
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(String::from_utf8_lossy(&output.stdout).trim_end(), "s3cr3t");
+}
+
 #[test]
 fn run_only_selects_entries_under_the_path_prefix() {
     let env = common::Env::new();
@@ -237,6 +272,41 @@ fn env_skips_a_binary_entry_with_a_warning() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("DATABASE_PASSWORD"), "stdout: {stdout}");
     assert!(!stdout.contains("TLS_KEY"), "stdout: {stdout}");
+}
+
+/// `[run].env_prefix` in the configuration file (3.4) is the default
+/// prefix for `env` too, when `--env-prefix` is absent (fix carried
+/// into step 5.1).
+#[test]
+fn env_honors_env_prefix_from_config_when_flag_is_absent() {
+    let env = common::Env::new();
+    env.init_store();
+    env.command_with_identity()
+        .args(["set", "database/password"])
+        .write_stdin("s3cr3t\n")
+        .assert()
+        .success();
+
+    let config_dir = env.config_home().join("trousseau");
+    std::fs::create_dir_all(&config_dir).expect("create config dir");
+    std::fs::write(
+        config_dir.join("config.toml"),
+        "[run]\nenv_prefix = \"APP_\"\n",
+    )
+    .expect("write config.toml");
+
+    let output = env
+        .command_with_identity()
+        .arg("env")
+        .output()
+        .expect("run `env`");
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("APP_DATABASE_PASSWORD"), "stdout: {stdout}");
 }
 
 #[test]

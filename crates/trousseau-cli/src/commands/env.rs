@@ -20,7 +20,10 @@ use crate::output::{self, OutputMode};
 /// [`trousseau::error::Error::EnvConflict`] if two selected entries
 /// resolve to the same environment variable name.
 pub fn run(ctx: &Context, args: &EnvArgs) -> anyhow::Result<()> {
-    let prefix = args.env_prefix.as_deref().unwrap_or("");
+    let prefix = args
+        .env_prefix
+        .as_deref()
+        .unwrap_or(&ctx.config.run.env_prefix);
 
     let resolved = ctx.resolve_store();
     let path = resolved.path();

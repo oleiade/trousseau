@@ -364,6 +364,8 @@ pub struct ImportArgs {
 #[derive(Debug, Args)]
 pub struct RunArgs {
     /// A prefix prepended to every injected environment variable name.
+    /// Defaults to `[run].env_prefix` from the configuration file (3.4)
+    /// when absent.
     #[arg(long = "env-prefix", value_name = "P")]
     pub env_prefix: Option<String>,
 
@@ -401,7 +403,9 @@ pub struct EnvArgs {
     #[arg(long, value_enum, default_value_t = EnvFormat::Shell)]
     pub format: EnvFormat,
 
-    /// A prefix prepended to every environment variable name.
+    /// A prefix prepended to every environment variable name. Defaults
+    /// to `[run].env_prefix` from the configuration file (3.4) when
+    /// absent.
     #[arg(long = "env-prefix", value_name = "P")]
     pub env_prefix: Option<String>,
 

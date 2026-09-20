@@ -33,7 +33,10 @@ pub fn run(ctx: &Context, args: &RunArgs) -> anyhow::Result<()> {
         return Err(CliError::Usage("--json is not supported by run".to_owned()).into());
     }
 
-    let prefix = args.env_prefix.as_deref().unwrap_or("");
+    let prefix = args
+        .env_prefix
+        .as_deref()
+        .unwrap_or(&ctx.config.run.env_prefix);
 
     let resolved = ctx.resolve_store();
     let path = resolved.path();
