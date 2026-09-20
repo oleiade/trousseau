@@ -35,3 +35,14 @@ generate-artifacts:
 # the GoReleaser configuration (step 4.1).
 release-dry-run:
     goreleaser release --snapshot --clean
+
+# Generate a CycloneDX SBOM for the released binary (step 4.2). Requires
+# cargo-cyclonedx on PATH: `cargo install cargo-cyclonedx --locked`. Runs
+# across the whole workspace (cargo-cyclonedx writes one file per crate,
+# next to each Cargo.toml, regardless of --manifest-path); the CLI
+# crate's file is what ships as the release asset, so it's moved to the
+# repo root and renamed, and the library crate's file is discarded.
+sbom:
+    cargo cyclonedx --format json --all
+    mv crates/trousseau-cli/trousseau-cli.cdx.json trousseau.cdx.json
+    rm -f crates/trousseau/trousseau.cdx.json

@@ -9,15 +9,39 @@ version: 2
 # why this isn't a build-time hook instead: GoReleaser's per-build hooks
 # fire once per target, and completions/the man page don't vary by
 # target.
+#
+# `just sbom` (step 4.2) writes trousseau.cdx.json to the repo root,
+# which `release.extra_files` below picks up. It also doesn't write to
+# dist/, for the same reason. It needs cargo-cyclonedx on PATH; the
+# release workflow installs it before running GoReleaser, and a
+# contributor running `just release-dry-run` locally must do the same
+# (see the justfile).
 before:
   hooks:
     - just generate-artifacts
+    - just sbom
 
 # cargo-zigbuild only supports Linux and macOS targets (see its README's
 # "Caveats" section: "Currently only Linux and macOS targets are
 # supported"). motus does not build Windows either. So this build list
 # omits every windows-* target; see the PR description's Deviations
 # section.
+#
+# cargo-auditable (step 4.2): `cargo auditable zigbuild` works fine when
+# invoked directly (verified locally for the aarch64-apple-darwin host
+# target: the resulting binary carries an embedded `.dep-v0` section with
+# the dependency list). It does not compose with this `rust` builder,
+# though. GoReleaser's rust builder (internal/builders/rust/build.go)
+# runs `exec.Command(tool, command, "--target="+t, flags...)` and treats
+# `command` as a single argv token appended straight after `tool` - it
+# never passes through a shell, so a `command: "auditable zigbuild"`
+# value would be looked up by cargo as one subcommand literally named
+# "auditable zigbuild" (with an embedded space) and fail with "no such
+# subcommand". There is no `tool`/`command` combination that produces
+# the two-token `cargo auditable zigbuild` invocation; only a wrapper
+# script shadowing `cargo-zigbuild` on PATH would work, which is beyond
+# the one iteration this step budgets for. Left as `command: zigbuild`
+# (unaudited binaries) until a follow-up revisits this.
 builds:
   - id: trousseau
     builder: rust
@@ -128,6 +152,8 @@ release:
 
     * Binary downloads are available on the [releases page](https://github.com/oleiade/trousseau/releases).
     * Packages for various platforms are also available.
+  extra_files:
+    - glob: trousseau.cdx.json
 
 changelog:
   sort: asc

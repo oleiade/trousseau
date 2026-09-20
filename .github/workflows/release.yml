@@ -13,8 +13,8 @@ jobs:
     runs-on: macos-latest
     permissions:
       contents: write # for goreleaser to create the release
-      id-token: write # for future provenance attestations (step 4.2)
-      attestations: write # for future provenance attestations (step 4.2)
+      id-token: write # for actions/attest-build-provenance
+      attestations: write # for actions/attest-build-provenance
     steps:
       - name: Checkout the code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -58,6 +58,9 @@ jobs:
       - name: Install cargo-zigbuild
         run: cargo install --locked cargo-zigbuild
 
+      - name: Install cargo-cyclonedx
+        run: cargo install --locked cargo-cyclonedx
+
       - name: Install just
         run: brew install just
 
@@ -70,3 +73,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.deb
+            dist/*.apk
+            dist/checksums.txt
