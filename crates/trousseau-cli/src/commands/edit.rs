@@ -152,7 +152,7 @@ fn scratch_dir() -> PathBuf {
 /// deleted).
 fn run_editor(scratch_path: &Path) -> anyhow::Result<()> {
     let command_line = editor_command();
-    let argv = shell_words::split(&command_line)
+    let argv = split_editor_command(&command_line)
         .with_context(|| format!("parsing editor command {command_line:?}"))?;
     let (program, rest) = argv
         .split_first()
@@ -171,6 +171,30 @@ fn run_editor(scratch_path: &Path) -> anyhow::Result<()> {
         anyhow::bail!("editor exited with a non-zero status");
     }
     Ok(())
+}
+
+/// Split the editor command line into argv with POSIX shell quoting.
+#[cfg(unix)]
+fn split_editor_command(command_line: &str) -> anyhow::Result<Vec<String>> {
+    Ok(shell_words::split(command_line)?)
+}
+
+/// Split the editor command line into argv with Windows rules: a leading
+/// double-quoted program name, then whitespace-separated arguments.
+/// Backslashes are path separators here, never escapes, so the POSIX
+/// splitter would mangle `C:\Program Files\...`.
+#[cfg(not(unix))]
+fn split_editor_command(command_line: &str) -> anyhow::Result<Vec<String>> {
+    let trimmed = command_line.trim();
+    if let Some(rest) = trimmed.strip_prefix('"') {
+        let (program, args) = rest
+            .split_once('"')
+            .ok_or_else(|| anyhow::anyhow!("unterminated quote in editor command"))?;
+        let mut argv = vec![program.to_owned()];
+        argv.extend(args.split_whitespace().map(str::to_owned));
+        return Ok(argv);
+    }
+    Ok(trimmed.split_whitespace().map(str::to_owned).collect())
 }
 
 /// The editor command line: `$VISUAL`, else `$EDITOR`, else `vi` on Unix
