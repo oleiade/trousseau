@@ -102,6 +102,19 @@ pub fn raw(bytes: &[u8]) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// A locked handle to stdout, for a command (`completions`, `man`) that
+/// hands its output to another crate's own writer-based API —
+/// `clap_complete::generate`, `clap_mangen::Man::render` — instead of
+/// building a `String` first the way every other command here does.
+///
+/// `Stdout::lock` returns a handle with a `'static` lifetime regardless
+/// of the `Stdout` value's own (its lock targets a global buffer, not
+/// `self`), so this can be called and used directly without an
+/// intermediate binding.
+pub fn writer() -> std::io::StdoutLock<'static> {
+    std::io::stdout().lock()
+}
+
 /// Print a simple, dependency-free aligned table to stdout: `headers`
 /// as the first row, then `rows`, each column padded to the widest
 /// entry in that column (including the header).

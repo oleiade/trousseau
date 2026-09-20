@@ -4,9 +4,9 @@
 //! [`Config::default`]; a malformed one (unknown keys included) is an
 //! error whose message names the offending file and key.
 //!
-//! `timeout_seconds`, `env_prefix`, and `gpg` are not yet read by any
-//! command as of step 3.2; `get --clip`, `run`/`env`, and `migrate`
-//! start reading them in later steps.
+//! `[migrate].gpg` is read by `migrate` (step 3.8) and
+//! `[clipboard].timeout_seconds` by `get --clip` (step 3.9);
+//! `[run].env_prefix` has no reader yet.
 #![allow(dead_code)]
 
 use std::path::{Path, PathBuf};

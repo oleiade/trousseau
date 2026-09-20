@@ -1,4 +1,4 @@
-//! `trousseau get` (3.5.5). `--clip` lands in step 3.9.
+//! `trousseau get` (3.5.5), including `--clip` (3.5.16, step 3.9).
 
 use std::path::Path;
 
@@ -14,21 +14,20 @@ use crate::context::Context;
 use crate::exit::CliError;
 use crate::output::{self, OutputMode};
 
+use super::clip;
+
 /// Run `get`.
 ///
 /// # Errors
 ///
-/// Returns a "not implemented yet" error if `--clip` is given (step 3.9),
-/// [`trousseau::error::Error::InvalidKey`] if `KEY` does not satisfy the
-/// key grammar, [`trousseau::error::Error::KeyNotFound`] if it does not
-/// exist in the store, [`CliError::OutputExists`] if `--out` names an
-/// existing file without `--force`, or whatever [`Context::unlock`] or
-/// writing the output returns.
+/// Returns [`trousseau::error::Error::InvalidKey`] if `KEY` does not
+/// satisfy the key grammar, [`trousseau::error::Error::KeyNotFound`] if
+/// it does not exist in the store, [`CliError::OutputExists`] if
+/// `--out` names an existing file without `--force`, "built without
+/// clipboard support" if `--clip` is given and this build lacks the
+/// `clipboard` feature (3.5.5), or whatever [`Context::unlock`],
+/// [`clip::copy_to_clipboard`], or writing the output returns.
 pub fn run(ctx: &Context, args: &GetArgs) -> anyhow::Result<()> {
-    if args.clip {
-        return Err(anyhow::anyhow!("not implemented yet (step 3.9)"));
-    }
-
     let key = Key::parse(&args.key)?;
     let resolved = ctx.resolve_store();
     let path = resolved.path();
@@ -42,6 +41,10 @@ pub fn run(ctx: &Context, args: &GetArgs) -> anyhow::Result<()> {
             key: key.to_string(),
         })?;
     let bytes = entry.value.expose();
+
+    if args.clip {
+        clip::copy_to_clipboard(ctx, key.as_str(), entry.encoding, bytes)?;
+    }
 
     if ctx.output == OutputMode::Json {
         if let Some(out_path) = &args.out {
@@ -60,6 +63,10 @@ pub fn run(ctx: &Context, args: &GetArgs) -> anyhow::Result<()> {
 
     if let Some(out_path) = &args.out {
         return write_out_file(out_path, bytes, args.force);
+    }
+
+    if args.clip {
+        return Ok(());
     }
 
     print_raw(ctx, entry.encoding, bytes)

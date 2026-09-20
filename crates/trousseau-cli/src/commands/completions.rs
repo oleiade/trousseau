@@ -1,12 +1,26 @@
-//! `trousseau completions` (3.5.17). Implemented in step 3.9.
+//! `trousseau completions` (3.5.17).
 
-use crate::cli::CompletionsArgs;
+use clap::CommandFactory as _;
 
-/// Run `completions`.
+use crate::cli::{Cli, CompletionsArgs};
+
+/// Run `completions`: print `args.shell`'s completion script, generated
+/// by `clap_complete` from the same [`Cli`] tree `cli.rs` declares, to
+/// stdout.
+///
+/// The `Result` return type is dictated by [`crate::commands::dispatch`],
+/// which every subcommand handler must match; `clap_complete::generate`
+/// itself cannot fail (a stdout write error is not surfaced by its
+/// `Write`-based API).
 ///
 /// # Errors
 ///
-/// Always returns a "not implemented yet" error until step 3.9.
-pub fn run(_args: &CompletionsArgs) -> anyhow::Result<()> {
-    Err(anyhow::anyhow!("not implemented yet (step 3.9)"))
+/// Never returns an error.
+#[allow(clippy::unnecessary_wraps)]
+pub fn run(args: &CompletionsArgs) -> anyhow::Result<()> {
+    let mut command = Cli::command();
+    let name = command.get_name().to_owned();
+    let mut stdout = crate::output::writer();
+    clap_complete::generate(args.shell, &mut command, name, &mut stdout);
+    Ok(())
 }
