@@ -17,6 +17,7 @@ use trousseau::schema::{StoreKind, Value};
 const SYMMETRIC_FIXTURE: &[u8] = include_bytes!("fixtures/legacy/symmetric-v0.4.json");
 const ASYMMETRIC_FIXTURE: &[u8] = include_bytes!("fixtures/legacy/asymmetric-v0.4.json");
 const EXPECTED_JSON: &str = include_str!("fixtures/legacy/expected.json");
+#[cfg(unix)]
 const TEST_KEY_SEC: &[u8] = include_bytes!("fixtures/legacy/test-key.sec.asc");
 const SYMMETRIC_PASSPHRASE: &str = "correct horse battery staple";
 
@@ -75,6 +76,7 @@ fn decrypt_aes_wrong_passphrase_is_unlock_error() {
 }
 
 /// `true` if a `gpg` binary usable for the test is on `PATH`.
+#[cfg(unix)]
 fn gpg_available() -> bool {
     Command::new("gpg")
         .arg("--version")
@@ -82,6 +84,9 @@ fn gpg_available() -> bool {
         .is_ok_and(|output| output.status.success())
 }
 
+// GitHub's Windows runners ship an MSYS gpg that rejects a native Windows
+// GNUPGHOME path, so this test runs on Unix only, as the plan intended.
+#[cfg(unix)]
 #[test]
 #[allow(clippy::print_stdout)]
 fn decrypt_gpg_matches_expected() {
