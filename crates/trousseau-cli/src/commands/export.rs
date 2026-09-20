@@ -9,6 +9,7 @@ use trousseau::store::LockMode;
 
 use crate::cli::{ExportArgs, PayloadFormat};
 use crate::context::Context;
+use crate::document;
 use crate::exit::CliError;
 use crate::output;
 
@@ -82,28 +83,11 @@ fn build_dotenv(store: &Store) -> String {
                 // at every write path); `unwrap_or_default` is a
                 // defensive fallback, never expected to trigger.
                 let text = std::str::from_utf8(entry.value.expose()).unwrap_or_default();
-                out.push_str(&name);
-                out.push_str("=\"");
-                out.push_str(&escape_dotenv_value(text));
-                out.push_str("\"\n");
+                out.push_str(&document::dotenv_line(&name, text));
             }
         }
     }
     out
-}
-
-/// Escape `"`, `\`, and a newline as `\"`, `\\`, `\n` (3.5.11).
-fn escape_dotenv_value(text: &str) -> String {
-    let mut escaped = String::with_capacity(text.len());
-    for ch in text.chars() {
-        match ch {
-            '"' => escaped.push_str("\\\""),
-            '\\' => escaped.push_str("\\\\"),
-            '\n' => escaped.push_str("\\n"),
-            other => escaped.push(other),
-        }
-    }
-    escaped
 }
 
 /// Write `bytes` to `path` with mode `0600`, refusing to overwrite an

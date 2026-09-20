@@ -78,6 +78,47 @@ struct TomlEntryIn {
     description: Option<String>,
 }
 
+/// Escape `"`, `\`, and a newline as `\"`, `\\`, `\n`: the dotenv value
+/// escaping rule shared by `export --format dotenv` (3.5.11) and `env
+/// --format dotenv` (3.5.14).
+///
+/// `#[allow(dead_code)]`: `tests/export_import.rs` includes this file a
+/// second time via `#[path]` (see its module doc comment) to reuse
+/// `to_toml`/`from_toml` without a library target; that copy never calls
+/// this function or [`dotenv_line`], since `export --format dotenv` is
+/// exercised through the compiled binary there, not through this path
+/// inclusion.
+#[allow(dead_code)]
+#[must_use]
+pub fn escape_dotenv_value(text: &str) -> String {
+    let mut escaped = String::with_capacity(text.len());
+    for ch in text.chars() {
+        match ch {
+            '"' => escaped.push_str("\\\""),
+            '\\' => escaped.push_str("\\\\"),
+            '\n' => escaped.push_str("\\n"),
+            other => escaped.push(other),
+        }
+    }
+    escaped
+}
+
+/// Render one `NAME="value"` dotenv line, with a trailing newline,
+/// escaping `value` per [`escape_dotenv_value`]. Shared by `export
+/// --format dotenv` (3.5.11) and `env --format dotenv` (3.5.14).
+///
+/// `#[allow(dead_code)]`: see [`escape_dotenv_value`]'s doc comment.
+#[allow(dead_code)]
+#[must_use]
+pub fn dotenv_line(name: &str, value: &str) -> String {
+    let mut line = String::with_capacity(name.len() + value.len() + 4);
+    line.push_str(name);
+    line.push_str("=\"");
+    line.push_str(&escape_dotenv_value(value));
+    line.push_str("\"\n");
+    line
+}
+
 /// Render `store`'s entries as the TOML document format, prefixed by
 /// `header` (the caller's own comment lines, without a trailing blank
 /// line; pass an empty string for none).

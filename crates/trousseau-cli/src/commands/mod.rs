@@ -6,10 +6,12 @@
 //! it. `main.rs` maps that generic error to exit code 1 through
 //! `exit.rs`, same as any other unexpected failure.
 
+use std::collections::BTreeMap;
+
 use anyhow::Context as _;
 use time::OffsetDateTime;
 use time::format_description::well_known::Rfc3339;
-use trousseau::schema::Encoding;
+use trousseau::schema::{Encoding, Entry, Key, Store};
 
 use crate::cli::{Cli, Command, RecipientsAction};
 use crate::context::Context;
@@ -96,4 +98,42 @@ pub const fn encoding_label(encoding: Encoding) -> &'static str {
 /// entry's `created_at` or `updated_at` (3.1.2).
 pub fn format_rfc3339(at: OffsetDateTime) -> anyhow::Result<String> {
     at.format(&Rfc3339).context("formatting a timestamp")
+}
+
+/// The selection, skipping, and conflict rules shared by `run` and `env`
+/// (3.5.13, 3.5.14).
+///
+/// Parses `only_raw`'s path prefixes (same grammar and semantics as `ls
+/// PREFIX`), prints `skipping binary entry KEY` to stderr for every
+/// `base64` entry the selection would otherwise have included (in key
+/// order, before the environment mapping is built), then delegates to
+/// [`Store::env_map`] for the prefix, filtering, and conflict-detection
+/// rules of 3.1.4.
+///
+/// # Errors
+///
+/// Returns [`trousseau::error::Error::InvalidKey`] if a `--only` value
+/// does not satisfy the key grammar, [`trousseau::error::Error::InvalidStore`]
+/// if `prefix` does not match the environment-name grammar (3.1.4), or
+/// [`trousseau::error::Error::EnvConflict`] if two selected entries resolve
+/// to the same environment variable name.
+pub fn resolve_env_selection<'a>(
+    store: &'a Store,
+    prefix: &str,
+    only_raw: &[String],
+) -> anyhow::Result<BTreeMap<String, &'a Entry>> {
+    let only: Vec<Key> = only_raw
+        .iter()
+        .map(|p| Key::parse(p))
+        .collect::<Result<_, _>>()?;
+
+    for (key, entry) in &store.entries {
+        if matches!(entry.encoding, Encoding::Base64)
+            && (only.is_empty() || only.iter().any(|p| key.has_path_prefix(p)))
+        {
+            crate::output::warn(&format!("skipping binary entry {key}"));
+        }
+    }
+
+    Ok(store.env_map(prefix, &only)?)
 }

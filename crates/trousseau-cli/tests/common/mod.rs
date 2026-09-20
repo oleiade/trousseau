@@ -165,6 +165,36 @@ impl Env {
         cmd
     }
 
+    /// A raw [`std::process::Command`] with the same environment as
+    /// [`Env::command_with_identity`], for a test that needs
+    /// `std::process::Command`'s own `spawn`/`stdin`/`stdout`/`stderr`
+    /// control (not exposed through `assert_cmd::Command`), such as
+    /// holding a lock across a background process.
+    #[allow(clippy::expect_used)]
+    #[must_use]
+    pub fn std_command_with_identity(&self) -> std::process::Command {
+        let bin = assert_cmd::cargo::cargo_bin("trousseau");
+        let mut cmd = std::process::Command::new(bin);
+        cmd.current_dir(self.path());
+        cmd.env("HOME", &self.home);
+        cmd.env("XDG_CONFIG_HOME", &self.config);
+        cmd.env("XDG_DATA_HOME", &self.data);
+        cmd.env("XDG_CACHE_HOME", &self.cache);
+        #[cfg(windows)]
+        {
+            cmd.env("APPDATA", &self.config);
+            cmd.env("LOCALAPPDATA", &self.data);
+            cmd.env("USERPROFILE", &self.home);
+        }
+        for (key, _) in std::env::vars() {
+            if key.starts_with("TROUSSEAU_") {
+                cmd.env_remove(key);
+            }
+        }
+        cmd.arg("--identity").arg(ssh_identity_path());
+        cmd
+    }
+
     /// The project store's path: `.trousseau` under [`Env::path`] (3.2).
     #[must_use]
     pub fn store_path(&self) -> PathBuf {
