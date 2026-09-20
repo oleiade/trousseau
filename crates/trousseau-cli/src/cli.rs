@@ -13,7 +13,13 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 /// `trousseau`: a portable, encrypted keyring for storing and sharing
 /// secrets from the command line.
 #[derive(Debug, Parser)]
-#[command(name = "trousseau", version, about, propagate_version = false)]
+#[command(
+    name = "trousseau",
+    bin_name = "trousseau",
+    version,
+    about,
+    propagate_version = false
+)]
 pub struct Cli {
     /// Flags valid before or after the subcommand (3.5.1).
     #[command(flatten)]
