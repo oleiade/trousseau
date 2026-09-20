@@ -13,6 +13,10 @@ categories = ["command-line-utilities"]
 
 [[bin]]
 name = "trousseau"
+# The binary shares its name with the library crate; documenting both
+# makes rustdoc write into the same target/doc/trousseau directory and
+# race with itself. The library is the documented API.
+doc = false
 path = "src/main.rs"
 
 [features]
