@@ -183,7 +183,7 @@ impl Env {
         #[cfg(windows)]
         {
             cmd.env("APPDATA", &self.config);
-            cmd.env("LOCALAPPDATA", &self.data);
+            cmd.env("LOCALAPPDATA", &self.cache);
             cmd.env("USERPROFILE", &self.home);
         }
         for (key, _) in std::env::vars() {
