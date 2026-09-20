@@ -6,9 +6,9 @@ use anyhow::Context as _;
 use serde::Serialize;
 
 use trousseau::schema::{Store, StoreKind};
-use trousseau::store::LockMode;
+use trousseau::store::{LockGuard, LockMode};
 
-use crate::cli::InitArgs;
+use crate::cli::{InitArgs, TargetArgs};
 use crate::context::{Context, SealMaterial};
 use crate::exit::CliError;
 use crate::output::{self, OutputMode};
@@ -24,7 +24,36 @@ use crate::output::{self, OutputMode};
 pub fn run(ctx: &Context, args: &InitArgs) -> anyhow::Result<()> {
     let resolved = ctx.resolve_store_for_init();
     let path = resolved.path();
+    let _lock = lock_new_target(ctx, path)?;
 
+    let now = ctx.now();
+    let (kind, recipients) = resolve_target(ctx, &args.target)?;
+    let store = Store::new(kind, recipients, now);
+
+    let seal_material = if args.target.passphrase {
+        SealMaterial::Passphrase(ctx.new_store_passphrase()?)
+    } else {
+        ctx.seal_for(&store)?
+    };
+    trousseau::store::save(path, &store, seal_material.as_seal())?;
+
+    report(ctx, path, &store)
+}
+
+/// Fail with [`CliError::StoreExists`] (exit 8) if `path` already
+/// exists; otherwise create its parent directory and acquire an
+/// exclusive lock on it, re-checking existence under the lock in case
+/// another process created it meanwhile.
+///
+/// Shared by `init` (3.5.2) and `migrate` (3.5.15), whose target stores
+/// follow the same "must not already exist" rule.
+///
+/// # Errors
+///
+/// Returns [`CliError::StoreExists`] if `path` exists (checked both
+/// before and after acquiring the lock), or whatever creating the
+/// parent directory or acquiring the lock returns.
+pub fn lock_new_target(ctx: &Context, path: &Path) -> anyhow::Result<LockGuard> {
     // The library's `Error::KeyExists` is about an entry's key, not the
     // store file itself: this condition is caught here, before any
     // store is opened, and reported as `CliError::StoreExists` (3.5.2).
@@ -36,7 +65,7 @@ pub fn run(ctx: &Context, args: &InitArgs) -> anyhow::Result<()> {
     }
 
     Context::ensure_parent_dir(path)?;
-    let _lock = ctx.lock(path, LockMode::Exclusive)?;
+    let lock = ctx.lock(path, LockMode::Exclusive)?;
 
     // Re-check under the lock: another process may have created the
     // store between the check above and acquiring the lock.
@@ -46,23 +75,29 @@ pub fn run(ctx: &Context, args: &InitArgs) -> anyhow::Result<()> {
         }
         .into());
     }
+    Ok(lock)
+}
 
-    let now = ctx.now();
-    let store = if args.target.passphrase {
-        Store::new(StoreKind::Passphrase, Vec::new(), now)
+/// Resolve a target store's kind and recipients from `target` (3.5.2):
+/// [`StoreKind::Passphrase`] with no recipients if `--passphrase`, or
+/// [`StoreKind::Recipients`] with [`build_recipients`]'s result
+/// otherwise.
+///
+/// Shared by `init` (3.5.2) and `migrate` (3.5.15), which choose a
+/// target store's kind and recipients the same way.
+///
+/// # Errors
+///
+/// Returns whatever [`build_recipients`] returns.
+pub fn resolve_target(
+    ctx: &Context,
+    target: &TargetArgs,
+) -> anyhow::Result<(StoreKind, Vec<String>)> {
+    if target.passphrase {
+        Ok((StoreKind::Passphrase, Vec::new()))
     } else {
-        let recipients = build_recipients(ctx, args)?;
-        Store::new(StoreKind::Recipients, recipients, now)
-    };
-
-    let seal_material = if args.target.passphrase {
-        SealMaterial::Passphrase(ctx.new_store_passphrase()?)
-    } else {
-        ctx.seal_for(&store)?
-    };
-    trousseau::store::save(path, &store, seal_material.as_seal())?;
-
-    report(ctx, path, &store)
+        Ok((StoreKind::Recipients, build_recipients(ctx, target)?))
+    }
 }
 
 /// Gather the recipients for a new recipients store: the union of
@@ -77,12 +112,12 @@ pub fn run(ctx: &Context, args: &InitArgs) -> anyhow::Result<()> {
 /// whatever reading `--recipients-file`, generating or reading the
 /// default identity, or [`trousseau::identity::normalize_recipients`]
 /// returns.
-fn build_recipients(ctx: &Context, args: &InitArgs) -> anyhow::Result<Vec<String>> {
-    let mut recipients = args.target.recipient.clone();
-    if let Some(path) = &args.target.recipients_file {
+fn build_recipients(ctx: &Context, target: &TargetArgs) -> anyhow::Result<Vec<String>> {
+    let mut recipients = target.recipient.clone();
+    if let Some(path) = &target.recipients_file {
         recipients.extend(read_recipients_file(path)?);
     }
-    if !args.target.no_self {
+    if !target.no_self {
         recipients.push(own_recipient(ctx)?);
     }
     offer_ssh_recipient(ctx, &mut recipients)?;

@@ -62,3 +62,4 @@ shell-words = { workspace = true }
 assert_cmd = { workspace = true }
 predicates = { workspace = true }
 insta = { workspace = true }
+sha2 = { workspace = true }

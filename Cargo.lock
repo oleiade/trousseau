@@ -2571,6 +2571,7 @@ dependencies = [
  "secrecy",
  "serde",
  "serde_json",
+ "sha2 0.11.0",
  "shell-words",
  "tempfile",
  "time",

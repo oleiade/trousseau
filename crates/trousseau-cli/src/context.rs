@@ -306,13 +306,29 @@ impl Context {
     /// [`trousseau::error::Error::Unlock`], exit code 4) or the terminal cannot
     /// be read.
     pub fn passphrase_for_new_store(&self) -> anyhow::Result<SecretString> {
+        self.passphrase_double_prompt("New passphrase: ")
+    }
+
+    /// Ask twice for a brand-new store's passphrase (3.3.3), using
+    /// `prompt` as the first prompt's text. Shared by
+    /// [`Context::passphrase_for_new_store`] (`init --passphrase`,
+    /// `rekey --to-passphrase`) and [`Context::new_migrated_passphrase`]
+    /// (`migrate` into a passphrase store), which differ only in their
+    /// prompt text and which flag supplies the value non-interactively.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `--no-input` is set (mapped to
+    /// [`trousseau::error::Error::Unlock`], exit code 4) or the terminal
+    /// cannot be read.
+    fn passphrase_double_prompt(&self, prompt: &str) -> anyhow::Result<SecretString> {
         if self.no_input {
             return Err(trousseau::error::Error::Unlock {
                 reason: "no passphrase available (--no-input)".to_owned(),
             }
             .into());
         }
-        prompt::hidden_confirm("New passphrase: ")
+        prompt::hidden_confirm(prompt)
     }
 
     /// The passphrase for a brand-new passphrase store (`init
@@ -336,6 +352,29 @@ impl Context {
         self.passphrase_for_new_store()
     }
 
+    /// The new passphrase for a `migrate` target that is a passphrase
+    /// store (3.5.15): `file` (`--new-passphrase-file`) if given,
+    /// otherwise the interactive double prompt `New passphrase for the
+    /// migrated store: `.
+    ///
+    /// Distinct from [`Context::new_store_passphrase`] (used by `init
+    /// --passphrase` and `rekey --to-passphrase`, and which reads
+    /// `--passphrase-file`) only in its prompt text and which flag
+    /// supplies the file, so `migrate`'s two passphrases — the legacy
+    /// source's, from [`Context::legacy_passphrase`], and the migrated
+    /// store's, from here — are never assumed equal (3.5.15).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `file` was given but cannot be read, or
+    /// whatever [`Context::passphrase_double_prompt`] returns.
+    pub fn new_migrated_passphrase(&self, file: Option<&Path>) -> anyhow::Result<SecretString> {
+        if let Some(path) = file {
+            return read_passphrase_file(path);
+        }
+        self.passphrase_double_prompt("New passphrase for the migrated store: ")
+    }
+
     /// Obtain the store's passphrase, per 3.3.3, caching it for the
     /// rest of the command's duration.
     fn passphrase(&self) -> anyhow::Result<SecretString> {
@@ -349,6 +388,29 @@ impl Context {
 
     /// The 3.3.3 passphrase source order, not consulting the cache.
     fn resolve_passphrase(&self) -> anyhow::Result<SecretString> {
+        self.resolve_passphrase_with_prompt("Passphrase: ")
+    }
+
+    /// The legacy source store's passphrase for `migrate` (3.5.15): the
+    /// same 3.3.3 order as [`Context::passphrase`] (`--passphrase-file`,
+    /// `TROUSSEAU_PASSPHRASE`, then a hidden prompt), but prompting
+    /// `Legacy passphrase: ` and never cached, since `migrate` reads it
+    /// only once, to decrypt `SOURCE`, never to unlock the run's own
+    /// target store.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `--no-input` (or a non-terminal stdin) leaves
+    /// no source to read the passphrase from, or if the terminal cannot
+    /// be read.
+    pub fn legacy_passphrase(&self) -> anyhow::Result<SecretString> {
+        self.resolve_passphrase_with_prompt("Legacy passphrase: ")
+    }
+
+    /// The shared body of [`Context::resolve_passphrase`] and
+    /// [`Context::legacy_passphrase`]: the 3.3.3 source order, prompting
+    /// with `prompt` text if it falls through to the interactive case.
+    fn resolve_passphrase_with_prompt(&self, prompt: &str) -> anyhow::Result<SecretString> {
         if let Some(path) = &self.passphrase_file {
             return read_passphrase_file(path);
         }
@@ -366,7 +428,7 @@ impl Context {
             }
             .into());
         }
-        prompt::hidden("Passphrase: ")
+        prompt::hidden(prompt)
     }
 
     /// Acquire an advisory lock on `path` (3.2, 3.5.1): 5 seconds by
