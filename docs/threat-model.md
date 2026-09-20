@@ -50,3 +50,9 @@ Status: normative.
 - `run` cannot protect the child's environment once it has been injected.
 - `edit` scratch files and clipboard managers are documented exposures,
   not solved problems.
+
+## Accepted findings
+
+Findings from the step 5.2 external review that the reviewer accepted
+without a code change, recorded here per step 5.3, with the reasoning.
+Empty until step 5.3 lands.

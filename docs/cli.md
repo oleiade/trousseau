@@ -5,7 +5,7 @@ codes, every subcommand, and the JSON output shapes. It restates
 `docs/IMPLEMENTATION_PLAN.md` section 3.5 and appendix 5.1; that document is
 the source of truth and this one must not contradict it.
 
-Status: implemented in steps 3.1 to 3.9.
+Status: implemented.
 
 ## Global behavior
 
@@ -302,6 +302,8 @@ Rules:
 - Apply: removed tables remove entries; changed values or metadata bump
   `updated_at`; unchanged entries keep their timestamps; new tables create
   entries with both timestamps set to now.
+- `--json`: `{"ok": true, "changed": bool}` on stdout, whether or not the
+  file actually differed from the store.
 
 ### Editor advice
 
@@ -336,6 +338,9 @@ trousseau run [--env-prefix P] [--only KEYPREFIX]... [--no-inherit] -- CMD [ARGS
 
 - Unlocks the store, builds the environment (see `docs/format.md`), and
   executes `CMD`.
+- `--env-prefix P` defaults to `[run].env_prefix` from the configuration
+  file (`docs/format.md`'s "Configuration file") when absent; the flag
+  overrides the config value when given.
 - Selection: all entries, or only those under any `--only` path prefix
   (same semantics as `ls PREFIX`).
 - base64 entries are skipped with one stderr warning per entry:
@@ -364,7 +369,8 @@ trousseau env [--format shell|dotenv|json] [--env-prefix P] [--only KEYPREFIX]..
 - `dotenv`: as in `export`/`import`.
 - `json`: object `{"NAME": "value", ...}`. `--json` is an alias for
   `--format json`.
-- Same selection, skipping and conflict rules as `run`.
+- Same selection, skipping, conflict, and `--env-prefix` default rules as
+  `run`.
 
 ## `migrate`
 
@@ -478,6 +484,7 @@ scanner.
 | `rekey` | `{"ok":true,"kind":"...","recipients":["..."]}` |
 | `export` | the payload document (format json), or rejected with exit 2 for other formats |
 | `import` | `{"ok":true,"added":N,"updated":N,"skipped":N}` |
+| `edit` | `{"ok":true,"changed":bool}` |
 | `env` | `{"NAME":"value"}` |
 | `migrate` | `{"ok":true,"path":"...","entries":N,"renamed":[{"from":"...","to":"..."}],"legacy_recipients":["..."]}` |
 | errors | stderr: `{"error":{"code":"key_not_found","message":"key not found: x"}}` |
