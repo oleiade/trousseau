@@ -10,5 +10,5 @@ fn version_flag_prints_expected_string() {
     cmd.arg("--version")
         .assert()
         .success()
-        .stdout("trousseau 1.0.0-alpha.1\n");
+        .stdout("trousseau 1.0.0-rc.1\n");
 }
