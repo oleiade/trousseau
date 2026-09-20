@@ -1,0 +1,3 @@
+# Keep every text file LF on checkout so byte-exact fixtures (golden JSON,
+# armored age files) compare equal on Windows runners too.
+* text=auto eol=lf
