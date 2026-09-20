@@ -56,7 +56,11 @@ pub fn run(ctx: &Context) -> anyhow::Result<()> {
 
     let scratch = create_scratch()?;
     write_scratch(&scratch, &original)?;
-    let scratch_path = scratch.path().to_path_buf();
+    // Close our own handle before the editor opens the file: Windows
+    // refuses to let another process truncate or replace a file we still
+    // hold open. The `TempPath` keeps the delete-on-drop guarantee.
+    let scratch = scratch.into_temp_path();
+    let scratch_path = scratch.to_path_buf();
 
     let parsed = loop {
         run_editor(&scratch_path)?;
@@ -64,7 +68,7 @@ pub fn run(ctx: &Context) -> anyhow::Result<()> {
             .with_context(|| format!("reading {}", scratch_path.display()))?;
 
         if current.trim().is_empty() || current == original {
-            // `scratch` (a `NamedTempFile`) is dropped, and so deleted,
+            // `scratch` (a `TempPath`) is dropped, and so deleted,
             // when this function returns.
             return report_no_changes(ctx);
         }
