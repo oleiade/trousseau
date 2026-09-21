@@ -1,0 +1,55 @@
+[workspace]
+members = ["crates/*"]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+repository = "https://github.com/oleiade/trousseau"
+authors = ["Théo Crevon <theo@crevon.me>"]
+
+# Versions are the latest crates.io release satisfying the minimum in
+# docs/IMPLEMENTATION_PLAN.md section 2.3 at the time this file was written.
+# See the step 1.1 PR description for the full resolution table and the
+# deviations from the plan's listed minimums.
+[workspace.dependencies]
+age = { version = "0.12", features = ["armor", "ssh", "plugin"] }
+secrecy = { version = "0.10", features = ["serde"] }
+zeroize = { version = "1.9", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+toml = { version = "1.1" }
+time = { version = "0.3", features = [
+    "formatting",
+    "parsing",
+    "serde-well-known",
+    "macros",
+] }
+base64 = { version = "0.23" }
+thiserror = { version = "2" }
+anyhow = { version = "1" }
+sha2 = { version = "0.11" }
+tempfile = { version = "3" }
+fd-lock = { version = "4" }
+etcetera = { version = "0.11" }
+clap = { version = "4.6", features = ["derive", "env", "wrap_help"] }
+clap_complete = { version = "4.6" }
+clap_mangen = { version = "0.3" }
+rpassword = { version = "7" }
+dialoguer = { version = "0.12" }
+arboard = { version = "3.6", default-features = false }
+shell-words = { version = "1.1" }
+human-panic = { version = "2", default-features = false }
+scrypt = { version = "0.12" }
+aes = { version = "0.9" }
+cfb-mode = { version = "0.9" }
+assert_cmd = { version = "2" }
+predicates = { version = "3" }
+proptest = { version = "1" }
+insta = { version = "1", features = ["json"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
