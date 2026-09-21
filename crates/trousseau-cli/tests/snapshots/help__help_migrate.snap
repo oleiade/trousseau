@@ -1,0 +1,34 @@
+---
+source: crates/trousseau-cli/tests/help.rs
+expression: stdout
+---
+Migrate a legacy v0.4 store into a new store
+
+Usage: trousseau migrate [OPTIONS] <SOURCE>
+
+Arguments:
+  <SOURCE>  The legacy v0.4 store file to read
+
+Options:
+      --gpg <PATH>                  The `gpg` binary to use for an `OpenPGP` legacy store
+      --store <PATH>                The store to operate on. Overrides every other resolution rule
+                                    (3.2) [env: TROUSSEAU_STORE=]
+      --global                      Use the personal store instead of the nearest project store
+                                    (3.2)
+      --gnupg-home <PATH>           An isolated `GNUPGHOME` to use when invoking `gpg`
+      --identity <PATH>             An identity file to try when unlocking a recipients store.
+                                    Repeatable (3.3.2)
+      --new-passphrase-file <PATH>  A file holding the new store's passphrase (only with
+                                    `--passphrase`)
+      --recipient <R>               A recipient to encrypt to. Repeatable
+      --passphrase-file <PATH>      A file holding the passphrase for a passphrase store (3.3.3)
+      --recipients-file <PATH>      A file of recipients, one per line (blank lines and `#` comments
+                                    ignored)
+      --json                        Emit machine-readable JSON instead of human-readable text
+                                    (3.5.1)
+      --passphrase                  Create a passphrase store instead of a recipients store
+      --no-self                     Do not add the caller's own recipient to a recipients store
+      --quiet                       Suppress informational stderr lines. Errors still print (3.5.1)
+      --no-input                    Never prompt. Anything that would have prompted fails instead
+                                    (3.5.1)
+  -h, --help                        Print help

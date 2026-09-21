@@ -1,0 +1,29 @@
+---
+source: crates/trousseau-cli/tests/help.rs
+expression: stdout
+---
+Run a command with the store's entries injected as environment variables
+
+Usage: trousseau run [OPTIONS] -- <CMD>...
+
+Arguments:
+  <CMD>...  The command, and its arguments, to run
+
+Options:
+      --env-prefix <P>          A prefix prepended to every injected environment variable name.
+                                Defaults to `[run].env_prefix` from the configuration file (3.4)
+                                when absent
+      --store <PATH>            The store to operate on. Overrides every other resolution rule (3.2)
+                                [env: TROUSSEAU_STORE=]
+      --global                  Use the personal store instead of the nearest project store (3.2)
+      --only <KEYPREFIX>        Only inject entries under this path prefix. Repeatable
+      --identity <PATH>         An identity file to try when unlocking a recipients store.
+                                Repeatable (3.3.2)
+      --no-inherit              Give the child only the injected variables plus a small allow list,
+                                instead of inheriting the parent's environment
+      --passphrase-file <PATH>  A file holding the passphrase for a passphrase store (3.3.3)
+      --json                    Emit machine-readable JSON instead of human-readable text (3.5.1)
+      --quiet                   Suppress informational stderr lines. Errors still print (3.5.1)
+      --no-input                Never prompt. Anything that would have prompted fails instead
+                                (3.5.1)
+  -h, --help                    Print help

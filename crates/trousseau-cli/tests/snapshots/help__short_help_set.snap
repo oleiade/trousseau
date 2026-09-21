@@ -1,0 +1,28 @@
+---
+source: crates/trousseau-cli/tests/help.rs
+expression: stdout
+---
+Set a key's value
+
+Usage: trousseau set [OPTIONS] <KEY>
+
+Arguments:
+  <KEY>  The key to set
+
+Options:
+      --from-file <PATH>        Read the value from this file. `-` means stdin, verbatim
+      --store <PATH>            The store to operate on. Overrides every other resolution rule (3.2)
+                                [env: TROUSSEAU_STORE=]
+      --from-env <NAME>         Read the value from this environment variable
+      --global                  Use the personal store instead of the nearest project store (3.2)
+      --binary                  Force base64 encoding even if the value is valid UTF-8
+      --identity <PATH>         An identity file to try when unlocking a recipients store.
+                                Repeatable (3.3.2)
+      --env <NAME>              Override the derived environment variable name
+      --description <TEXT>      A free-text description of the entry
+      --passphrase-file <PATH>  A file holding the passphrase for a passphrase store (3.3.3)
+      --json                    Emit machine-readable JSON instead of human-readable text (3.5.1)
+      --quiet                   Suppress informational stderr lines. Errors still print (3.5.1)
+      --no-input                Never prompt. Anything that would have prompted fails instead
+                                (3.5.1)
+  -h, --help                    Print help

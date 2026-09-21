@@ -1,0 +1,58 @@
+---
+source: crates/trousseau-cli/tests/help.rs
+expression: stdout
+---
+Import entries into the store
+
+Usage: trousseau import [OPTIONS] [PATH]
+
+Arguments:
+  [PATH]
+          Read from this file instead of stdin
+
+Options:
+      --format <FORMAT>
+          The input format
+
+          Possible values:
+          - json:   The full JSON payload document
+          - dotenv: One `NAME="value"` line per UTF-8 entry
+          - toml:   The `edit` TOML document format
+          
+          [default: json]
+
+      --store <PATH>
+          The store to operate on. Overrides every other resolution rule (3.2)
+          
+          [env: TROUSSEAU_STORE=]
+
+      --global
+          Use the personal store instead of the nearest project store (3.2)
+
+      --strategy <STRATEGY>
+          How to resolve a key that already exists
+
+          Possible values:
+          - keep:      Keep the existing entry
+          - overwrite: Replace the existing entry with the imported one
+          - fail:      Abort the whole import on any collision
+          
+          [default: fail]
+
+      --identity <PATH>
+          An identity file to try when unlocking a recipients store. Repeatable (3.3.2)
+
+      --passphrase-file <PATH>
+          A file holding the passphrase for a passphrase store (3.3.3)
+
+      --json
+          Emit machine-readable JSON instead of human-readable text (3.5.1)
+
+      --quiet
+          Suppress informational stderr lines. Errors still print (3.5.1)
+
+      --no-input
+          Never prompt. Anything that would have prompted fails instead (3.5.1)
+
+  -h, --help
+          Print help (see a summary with '-h')

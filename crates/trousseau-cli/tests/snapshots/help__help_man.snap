@@ -1,0 +1,23 @@
+---
+source: crates/trousseau-cli/tests/help.rs
+expression: stdout
+---
+Print a roff man page
+
+Usage: trousseau man [OPTIONS] [SUBCOMMAND]
+
+Arguments:
+  [SUBCOMMAND]  Print the man page for this subcommand instead of the top level
+
+Options:
+      --store <PATH>            The store to operate on. Overrides every other resolution rule (3.2)
+                                [env: TROUSSEAU_STORE=]
+      --global                  Use the personal store instead of the nearest project store (3.2)
+      --identity <PATH>         An identity file to try when unlocking a recipients store.
+                                Repeatable (3.3.2)
+      --passphrase-file <PATH>  A file holding the passphrase for a passphrase store (3.3.3)
+      --json                    Emit machine-readable JSON instead of human-readable text (3.5.1)
+      --quiet                   Suppress informational stderr lines. Errors still print (3.5.1)
+      --no-input                Never prompt. Anything that would have prompted fails instead
+                                (3.5.1)
+  -h, --help                    Print help
