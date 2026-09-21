@@ -37,18 +37,22 @@ pub struct Cli {
 // they mirror.
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, Args)]
+#[command(next_help_heading = "Global options")]
 pub struct GlobalArgs {
-    /// The store to operate on. Overrides every other resolution rule
-    /// (3.2).
+    /// Use this store file. Wins over `--global` and over store
+    /// discovery.
     #[arg(long, global = true, env = "TROUSSEAU_STORE", value_name = "PATH")]
     pub store: Option<PathBuf>,
 
-    /// Use the personal store instead of the nearest project store (3.2).
+    /// Use your personal store instead of the nearest project store (the
+    /// `.trousseau` file in this directory or a parent).
     #[arg(long, global = true)]
     pub global: bool,
 
-    /// An identity file to try when unlocking a recipients store.
-    /// Repeatable (3.3.2).
+    /// An identity (private key) file to try when unlocking. Repeatable.
+    /// Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
+    /// `identity.files`, the default identity file, `~/.ssh/id_ed25519`
+    /// and `~/.ssh/id_rsa`.
     #[arg(long = "identity", global = true, value_name = "PATH")]
     pub identity: Vec<PathBuf>,
 
@@ -65,20 +69,22 @@ pub struct GlobalArgs {
     )]
     pub identity_file: Option<PathBuf>,
 
-    /// A file holding the passphrase for a passphrase store (3.3.3).
+    /// Read the store's passphrase from this file instead of prompting.
+    /// One trailing newline is stripped.
     #[arg(long = "passphrase-file", global = true, value_name = "PATH")]
     pub passphrase_file: Option<PathBuf>,
 
-    /// Emit machine-readable JSON instead of human-readable text (3.5.1).
+    /// Print one JSON document on stdout instead of text. Errors become
+    /// a JSON object on stderr.
     #[arg(long, global = true)]
     pub json: bool,
 
-    /// Suppress informational stderr lines. Errors still print (3.5.1).
+    /// Suppress informational messages on stderr. Errors still print.
     #[arg(long, global = true)]
     pub quiet: bool,
 
-    /// Never prompt. Anything that would have prompted fails instead
-    /// (3.5.1).
+    /// Never prompt. A command that would prompt fails instead: exit 4
+    /// for a secret, exit 2 for a confirmation.
     #[arg(long = "no-input", global = true)]
     pub no_input: bool,
 }
@@ -363,13 +369,13 @@ pub struct ImportArgs {
 /// `trousseau run` (3.5.13).
 #[derive(Debug, Args)]
 pub struct RunArgs {
-    /// A prefix prepended to every injected environment variable name.
-    /// Defaults to `[run].env_prefix` from the configuration file (3.4)
-    /// when absent.
+    /// A prefix added in front of every variable name. Defaults to
+    /// `[run].env_prefix` in the config file.
     #[arg(long = "env-prefix", value_name = "P")]
     pub env_prefix: Option<String>,
 
-    /// Only inject entries under this path prefix. Repeatable.
+    /// Only inject this key, or the keys under this path prefix.
+    /// Repeatable.
     #[arg(long = "only", value_name = "KEYPREFIX")]
     pub only: Vec<String>,
 
@@ -378,7 +384,7 @@ pub struct RunArgs {
     #[arg(long = "no-inherit")]
     pub no_inherit: bool,
 
-    /// The command, and its arguments, to run.
+    /// The command to run, and its arguments. Put it after `--`.
     #[arg(last = true, required = true, value_name = "CMD")]
     pub cmd: Vec<String>,
 }
@@ -403,13 +409,13 @@ pub struct EnvArgs {
     #[arg(long, value_enum, default_value_t = EnvFormat::Shell)]
     pub format: EnvFormat,
 
-    /// A prefix prepended to every environment variable name. Defaults
-    /// to `[run].env_prefix` from the configuration file (3.4) when
-    /// absent.
+    /// A prefix added in front of every variable name. Defaults to
+    /// `[run].env_prefix` in the config file.
     #[arg(long = "env-prefix", value_name = "P")]
     pub env_prefix: Option<String>,
 
-    /// Only include entries under this path prefix. Repeatable.
+    /// Only print this key, or the keys under this path prefix.
+    /// Repeatable.
     #[arg(long = "only", value_name = "KEYPREFIX")]
     pub only: Vec<String>,
 }

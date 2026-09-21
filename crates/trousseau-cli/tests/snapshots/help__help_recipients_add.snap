@@ -10,14 +10,21 @@ Arguments:
   <RECIPIENTS>...  The recipients to add
 
 Options:
-      --store <PATH>            The store to operate on. Overrides every other resolution rule (3.2)
+  -h, --help  Print help
+
+Global options:
+      --store <PATH>            Use this store file. Wins over `--global` and over store discovery
                                 [env: TROUSSEAU_STORE=]
-      --global                  Use the personal store instead of the nearest project store (3.2)
-      --identity <PATH>         An identity file to try when unlocking a recipients store.
-                                Repeatable (3.3.2)
-      --passphrase-file <PATH>  A file holding the passphrase for a passphrase store (3.3.3)
-      --json                    Emit machine-readable JSON instead of human-readable text (3.5.1)
-      --quiet                   Suppress informational stderr lines. Errors still print (3.5.1)
-      --no-input                Never prompt. Anything that would have prompted fails instead
-                                (3.5.1)
-  -h, --help                    Print help
+      --global                  Use your personal store instead of the nearest project store (the
+                                `.trousseau` file in this directory or a parent)
+      --identity <PATH>         An identity (private key) file to try when unlocking. Repeatable.
+                                Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
+                                `identity.files`, the default identity file, `~/.ssh/id_ed25519` and
+                                `~/.ssh/id_rsa`
+      --passphrase-file <PATH>  Read the store's passphrase from this file instead of prompting. One
+                                trailing newline is stripped
+      --json                    Print one JSON document on stdout instead of text. Errors become a
+                                JSON object on stderr
+      --quiet                   Suppress informational messages on stderr. Errors still print
+      --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
+                                a secret, exit 2 for a confirmation
