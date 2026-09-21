@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions: {}
+
+jobs:
+  release:
+    name: Release
+    runs-on: macos-latest
+    permissions:
+      contents: write # for goreleaser to create the release
+      id-token: write # for actions/attest-build-provenance
+      attestations: write # for actions/attest-build-provenance
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install stable toolchain for x86_64 linux
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        with:
+          toolchain: stable
+          target: x86_64-unknown-linux-gnu
+          cache: false
+
+      - name: Install stable toolchain for aarch64 linux
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        with:
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+          cache: false
+
+      - name: Install stable toolchain for x86_64 macOS
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        with:
+          toolchain: stable
+          target: x86_64-apple-darwin
+          cache: false
+
+      - name: Install stable toolchain for aarch64 macOS
+        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        with:
+          toolchain: stable
+          target: aarch64-apple-darwin
+          cache: false
+
+      - name: Setup zig
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
+        with:
+          use-cache: false
+
+      - name: Install cargo-zigbuild
+        run: cargo install --locked cargo-zigbuild
+
+      - name: Install cargo-cyclonedx
+        run: cargo install --locked cargo-cyclonedx
+
+      - name: Install just
+        run: brew install just
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --config=.goreleaser.yaml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.deb
+            dist/*.apk
+            dist/checksums.txt
+
+  # TODO(reviewer): publish the .deb built above to an apt repository, the
+  # way motus publishes to https://oleiade.github.io/deb (its README's
+  # install section references a keyring at
+  # https://oleiade.github.io/deb/oleiade-archive-keyring.gpg and a
+  # sources.list entry `deb [signed-by=...] https://oleiade.github.io/deb
+  # stable main`, so that repository is live). The mechanism that populates
+  # it is NOT visible in any public motus source checked for step 4.3:
+  #   - .goreleaser.yaml has no `publishers`, `blob`, or `uploads` section.
+  #   - .github/workflows/release.yml, ci.yml, and security.yml (fetched
+  #     from oleiade/motus@main) contain no apt/deb/oleiade.github.io step.
+  #   - The legacy Makefile has a `cargo-deb` build target but no publish
+  #     step.
+  #   - `oleiade/oleiade.github.io` returns 404 to unauthenticated GitHub
+  #     API requests (`GET /repos/oleiade/oleiade.github.io`), consistent
+  #     with it being a private repository, so its own workflow (if one
+  #     populates /deb) is not visible either.
+  #
+  # To make this job real, please supply:
+  #   1. The tool that maintains the apt repo index (reprepro, aptly,
+  #      deb-s3, or a hand-rolled script) and its invocation.
+  #   2. Where that tool's state/config lives: inside oleiade.github.io, a
+  #      separate private repo, or regenerated fresh each release.
+  #   3. The GPG private key that signs the repo's Release file (the public
+  #      side is the `oleiade-archive-keyring.gpg` the README references),
+  #      added as a repository secret, and its secret name.
+  #   4. A push credential for oleiade.github.io (deploy key or PAT), added
+  #      as a repository secret, and its secret name.
+  #   5. Whether this should be a job in this workflow (checking out
+  #      oleiade.github.io as a second working copy, running the tool,
+  #      committing, pushing) or a call to a separate reusable workflow,
+  #      the way motus's ci.yml calls oleiade/ci.
+  #
+  # Left disabled (`if: false`) until the above is filled in, so it never
+  # runs and never blocks a release.
+  publish-apt:
+    name: Publish to apt repository
+    needs: release
+    runs-on: ubuntu-latest
+    if: false
+    permissions:
+      contents: read
+    steps:
+      - name: Not implemented
+        run: |
+          echo "publish-apt is a TODO -- see the comment on this job in .github/workflows/release.yml" >&2
+          exit 1

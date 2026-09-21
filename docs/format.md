@@ -6,7 +6,7 @@ found on disk, and how recipients and identities are parsed. It restates
 `docs/IMPLEMENTATION_PLAN.md` section 3 (3.1 to 3.3); that document is the
 source of truth and this one must not contradict it.
 
-Status: implemented in steps 2.1 to 2.4.
+Status: implemented.
 
 ## Envelope
 

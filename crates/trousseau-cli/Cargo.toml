@@ -1,6 +1,6 @@
 [package]
 name = "trousseau-cli"
-version = "1.0.0-alpha.1"
+version = "1.0.0-rc.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -38,8 +38,28 @@ print_stdout = "warn"
 print_stderr = "warn"
 
 [dependencies]
+trousseau = { path = "../trousseau" }
+base64 = { workspace = true }
 clap = { workspace = true }
+clap_complete = { workspace = true }
+clap_mangen = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+etcetera = { workspace = true }
+rpassword = { workspace = true }
+dialoguer = { workspace = true }
+secrecy = { workspace = true }
+age = { workspace = true }
+human-panic = { workspace = true }
+time = { workspace = true }
 arboard = { workspace = true, optional = true }
+tempfile = { workspace = true }
+shell-words = { workspace = true }
+sha2 = { workspace = true }
 
 [dev-dependencies]
 assert_cmd = { workspace = true }
+predicates = { workspace = true }
+insta = { workspace = true }

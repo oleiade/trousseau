@@ -1,5 +1,46 @@
 # Change Log
 
+## 1.0.0-rc.1 (unreleased)
+
+Ground-up Rust rewrite. The store format, the CLI, and the underlying
+cryptography are all new. See `docs/IMPLEMENTATION_PLAN.md` for the full
+plan and `docs/migration.md` for moving an existing store.
+
+**Added**
+
+- age-encrypted store format (X25519, SSH, and plugin recipients, or a
+  passphrase), a versioned JSON payload, one file per store.
+- Project-local `.trousseau` stores, discovered like `.git`, alongside a
+  personal store.
+- `trousseau run` and `trousseau env`, to inject secrets as environment
+  variables into a child process or print them for `eval`, direnv, or CI.
+- `trousseau edit`, a full round trip through `$EDITOR`.
+- Hierarchical keys, binary values, and per-entry metadata (`env`,
+  `description`).
+- `--json` on every read command, and `{"ok": true, ...}` on writes.
+- A stable library crate (`trousseau`), usable independently of the CLI.
+- `trousseau migrate`, a read-only importer for v0.4 stores (see below).
+
+**Removed**
+
+- OpenPGP and every GnuPG integration for the store itself. `migrate`
+  still reads an old OpenPGP store, by shelling out to `gpg`.
+- The `push`/`pull` remotes: S3, `scp`, and gist.
+- DSN-style connection strings with embedded credentials.
+- `--ask-passphrase` and `--gnupg-home`.
+- Secret values accepted as a command-line argument, anywhere.
+
+**Migration path**
+
+Existing v0.4 stores (`~/.trousseau`, the Go binary's format) move over
+with one command: `trousseau migrate ~/.trousseau`. It reads the old
+store and writes a new age-encrypted store without touching or deleting
+the original. Key names that do not fit the new grammar are rewritten
+and printed. See `docs/migration.md` for the full walkthrough.
+
+The Go implementation and its history are preserved on the `legacy-go`
+branch and the `go-final` tag; its last release was v0.4.1.
+
 ## [Unreleased](https://github.com/oleiade/trousseau/tree/HEAD)
 
 [Full Changelog](https://github.com/oleiade/trousseau/compare/0.3.6...HEAD)

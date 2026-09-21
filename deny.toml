@@ -1,6 +1,17 @@
 [advisories]
 version = 2
-ignore = []
+ignore = [
+    # RUSTSEC-2023-0071: timing side channel in RSA PKCS#1v1.5 decryption
+    # ("Marvin Attack"), pulled in transitively by age's `ssh` feature
+    # (age -> rsa, for ssh-rsa recipients/identities per
+    # docs/IMPLEMENTATION_PLAN.md section 3.3.1). No fix is available
+    # upstream (rsa 0.9.10 and 0.10.0-rc.18 are both still affected; see
+    # the advisory). The attack requires an adversary able to observe
+    # decryption timing over a network oracle; trousseau is a local CLI
+    # that never exposes RSA decryption as a network service, so the
+    # threat model in the advisory does not apply to this crate's use.
+    "RUSTSEC-2023-0071",
+]
 
 [licenses]
 version = 2
@@ -9,6 +20,7 @@ allow = [
     "Apache-2.0",
     "Apache-2.0 WITH LLVM-exception",
     "BSD-2-Clause",
+    "BSD-3-Clause",
     "BSL-1.0",
     "0BSD",
     "MPL-2.0",

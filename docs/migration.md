@@ -5,7 +5,7 @@ you move its contents into a new, age-encrypted store. It restates
 `docs/IMPLEMENTATION_PLAN.md` sections 3.5.15 and 3.7; that document is the
 source of truth and this one must not contradict it.
 
-Status: implemented in steps 2.5 and 3.8.
+Status: implemented.
 
 ## Before you start
 

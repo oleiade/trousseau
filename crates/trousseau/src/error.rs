@@ -119,6 +119,15 @@ pub enum Error {
         reason: String,
     },
 
+    /// An identity file's contents could not be recognized or parsed.
+    #[error("invalid identity file {path}: {reason}")]
+    InvalidIdentity {
+        /// The path of the offending identity file.
+        path: PathBuf,
+        /// Why it was rejected.
+        reason: String,
+    },
+
     /// An underlying I/O operation failed.
     #[error(transparent)]
     Io(#[from] std::io::Error),

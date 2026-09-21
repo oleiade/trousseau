@@ -1,0 +1,166 @@
+version: 2
+
+# Build the completions and man page from a freshly built native binary
+# before GoReleaser's own (cross-compiled) builds run. This can't write
+# into ./dist: GoReleaser requires dist/ to still be empty once `before`
+# hooks finish, even under --clean, so the recipe writes under
+# target/release-artifacts instead, and the archives/nfpms sections
+# below pull the files from there. See the step 4.1 PR description for
+# why this isn't a build-time hook instead: GoReleaser's per-build hooks
+# fire once per target, and completions/the man page don't vary by
+# target.
+#
+# `just sbom` (step 4.2) writes trousseau.cdx.json to the repo root,
+# which `release.extra_files` below picks up. It also doesn't write to
+# dist/, for the same reason. It needs cargo-cyclonedx on PATH; the
+# release workflow installs it before running GoReleaser, and a
+# contributor running `just release-dry-run` locally must do the same
+# (see the justfile).
+before:
+  hooks:
+    - just generate-artifacts
+    - just sbom
+
+# cargo-zigbuild only supports Linux and macOS targets (see its README's
+# "Caveats" section: "Currently only Linux and macOS targets are
+# supported"). motus does not build Windows either. So this build list
+# omits every windows-* target; see the PR description's Deviations
+# section.
+#
+# cargo-auditable (step 4.2): `cargo auditable zigbuild` works fine when
+# invoked directly (verified locally for the aarch64-apple-darwin host
+# target: the resulting binary carries an embedded `.dep-v0` section with
+# the dependency list). It does not compose with this `rust` builder,
+# though. GoReleaser's rust builder (internal/builders/rust/build.go)
+# runs `exec.Command(tool, command, "--target="+t, flags...)` and treats
+# `command` as a single argv token appended straight after `tool` - it
+# never passes through a shell, so a `command: "auditable zigbuild"`
+# value would be looked up by cargo as one subcommand literally named
+# "auditable zigbuild" (with an embedded space) and fail with "no such
+# subcommand". There is no `tool`/`command` combination that produces
+# the two-token `cargo auditable zigbuild` invocation; only a wrapper
+# script shadowing `cargo-zigbuild` on PATH would work, which is beyond
+# the one iteration this step budgets for. Left as `command: zigbuild`
+# (unaudited binaries) until a follow-up revisits this.
+builds:
+  - id: trousseau
+    builder: rust
+    binary: trousseau
+    dir: "."
+    tool: cargo
+    command: zigbuild
+    targets:
+      - x86_64-unknown-linux-gnu
+      - aarch64-unknown-linux-gnu
+      - x86_64-apple-darwin
+      - aarch64-apple-darwin
+    flags:
+      - --release
+      - -p=trousseau-cli
+    env:
+      - CARGO_NET_GIT_FETCH_WITH_CLI=true
+
+archives:
+  - id: trousseau-archives
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: ["tar.gz"]
+    files:
+      - LICENSE
+      - README.md
+      - src: target/release-artifacts/completions/trousseau.bash
+        dst: completions/trousseau.bash
+      - src: target/release-artifacts/completions/trousseau.zsh
+        dst: completions/trousseau.zsh
+      - src: target/release-artifacts/completions/trousseau.fish
+        dst: completions/trousseau.fish
+      - src: target/release-artifacts/man/trousseau.1
+        dst: man/trousseau.1
+
+# Linux package configuration (deb, apk)
+nfpms:
+  - id: trousseau-packages
+    package_name: trousseau
+    file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Arch }}"
+
+    vendor: Théo Crevon
+    homepage: https://github.com/oleiade/trousseau
+    maintainer: Théo Crevon <theo@crevon.me>
+    description: Command-line interface for the trousseau encrypted keyring.
+    license: MIT
+
+    section: utils
+    priority: optional
+
+    contents:
+      - src: LICENSE
+        dst: /usr/share/doc/trousseau/LICENSE
+      - src: README.md
+        dst: /usr/share/doc/trousseau/README.md
+      - src: target/release-artifacts/completions/trousseau.bash
+        dst: /usr/share/bash-completion/completions/trousseau
+      - src: target/release-artifacts/completions/trousseau.zsh
+        dst: /usr/share/zsh/vendor-completions/_trousseau
+      - src: target/release-artifacts/completions/trousseau.fish
+        dst: /usr/share/fish/vendor_completions.d/trousseau.fish
+      - src: target/release-artifacts/man/trousseau.1
+        dst: /usr/share/man/man1/trousseau.1
+
+    formats:
+      - apk
+      - deb
+
+# Homebrew tap configuration
+brews:
+  - name: trousseau
+    repository:
+      owner: oleiade
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: https://github.com/oleiade/trousseau
+    description: Command-line interface for the trousseau encrypted keyring.
+    license: MIT
+    install: |
+      bin.install "trousseau"
+      bash_completion.install "completions/trousseau.bash" => "trousseau"
+      zsh_completion.install "completions/trousseau.zsh" => "_trousseau"
+      fish_completion.install "completions/trousseau.fish"
+      man1.install "man/trousseau.1"
+    test: |
+      system "#{bin}/trousseau --version"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+# GitHub release configuration
+release:
+  github:
+    owner: oleiade
+    name: trousseau
+  draft: true
+  prerelease: auto
+  mode: replace
+  header: |
+    # Trousseau {{ .Tag }} Release
+  footer: |
+    ## Installation
+
+    * Binary downloads are available on the [releases page](https://github.com/oleiade/trousseau/releases).
+    * Packages for various platforms are also available.
+  extra_files:
+    - glob: trousseau.cdx.json
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
