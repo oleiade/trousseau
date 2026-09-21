@@ -26,6 +26,10 @@ Status: implemented.
 - Colors: none. trousseau does not depend on a color library.
 - Panics: `human-panic` is configured with a report path; the report never
   includes environment variables or arguments.
+- Every command's `--help` ends with worked examples and, where relevant,
+  notes on selection or naming rules; `-h` shows a shorter version of the
+  same. This text is snapshot tested in
+  `crates/trousseau-cli/tests/help.rs`.
 
 ## Exit codes
 
@@ -120,6 +124,10 @@ Value source, exactly one:
    confirmation.
 4. Neither, stdin is not a terminal: read all of stdin, then strip exactly
    one trailing `\n` or `\r\n`.
+
+A second positional argument (`set KEY VALUE`) is refused with exit code
+2 and an explanation of the four sources above; the value itself is
+never echoed, on either stdout or stderr.
 
 Encoding: `base64` if `--binary` or if the bytes are not valid UTF-8 or
 contain NUL; otherwise `utf8`.

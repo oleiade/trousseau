@@ -20,6 +20,11 @@ plan and `docs/migration.md` for moving an existing store.
 - `--json` on every read command, and `{"ok": true, ...}` on writes.
 - A stable library crate (`trousseau`), usable independently of the CLI.
 - `trousseau migrate`, a read-only importer for v0.4 stores (see below).
+- Every command's `--help` now has a long description and worked
+  examples, so the CLI is usable from the terminal alone.
+- `set KEY VALUE` is refused with an explanation of where the value
+  should come from (prompt, pipe, `--from-file`, `--from-env`), instead
+  of clap's generic usage error, and never echoes the value.
 
 **Removed**
 
