@@ -196,8 +196,15 @@ pub struct InitArgs {
 /// `trousseau set` (3.5.4).
 #[derive(Debug, Args)]
 pub struct SetArgs {
-    /// The key to set.
+    /// The key to set: a path such as `database/password`. Segments use
+    /// letters, digits, `.`, `_` and `-`, and are separated by `/`. Keys
+    /// are case-sensitive.
     pub key: String,
+
+    /// Catches `set KEY VALUE` so the command can explain itself instead
+    /// of failing with a generic usage error. Hidden from help.
+    #[arg(hide = true, value_name = "VALUE", value_parser = discard_value, num_args = 0..)]
+    pub rejected_value: Vec<RejectedValue>,
 
     /// Read the value from this file. `-` means stdin, verbatim.
     #[arg(long = "from-file", value_name = "PATH", conflicts_with = "from_env")]
@@ -207,17 +214,31 @@ pub struct SetArgs {
     #[arg(long = "from-env", value_name = "NAME")]
     pub from_env: Option<String>,
 
-    /// Force base64 encoding even if the value is valid UTF-8.
+    /// Store the value as binary (base64) even if it is valid text.
+    /// Binary entries are skipped by `run` and `env`.
     #[arg(long)]
     pub binary: bool,
 
-    /// Override the derived environment variable name.
+    /// The variable name `run` and `env` use for this entry, instead of
+    /// the name derived from the key.
     #[arg(long, value_name = "NAME")]
     pub env: Option<String>,
 
     /// A free-text description of the entry.
     #[arg(long, value_name = "TEXT")]
     pub description: Option<String>,
+}
+
+/// Marker for a positional `VALUE` given to `set`. The text itself is
+/// discarded at parse time: `set` never accepts a value on the command
+/// line, and this keeps the secret out of any `Debug` output.
+#[derive(Debug, Clone, Copy)]
+pub struct RejectedValue;
+
+/// Parse any string into [`RejectedValue`], dropping the input.
+#[allow(clippy::unnecessary_wraps)]
+const fn discard_value(_: &str) -> Result<RejectedValue, std::convert::Infallible> {
+    Ok(RejectedValue)
 }
 
 /// `trousseau get` (3.5.5).

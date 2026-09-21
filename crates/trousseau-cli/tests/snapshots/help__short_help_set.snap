@@ -7,13 +7,16 @@ Set a key's value
 Usage: trousseau set [OPTIONS] <KEY>
 
 Arguments:
-  <KEY>  The key to set
+  <KEY>  The key to set: a path such as `database/password`. Segments use letters, digits, `.`, `_`
+         and `-`, and are separated by `/`. Keys are case-sensitive
 
 Options:
       --from-file <PATH>    Read the value from this file. `-` means stdin, verbatim
       --from-env <NAME>     Read the value from this environment variable
-      --binary              Force base64 encoding even if the value is valid UTF-8
-      --env <NAME>          Override the derived environment variable name
+      --binary              Store the value as binary (base64) even if it is valid text. Binary
+                            entries are skipped by `run` and `env`
+      --env <NAME>          The variable name `run` and `env` use for this entry, instead of the
+                            name derived from the key
       --description <TEXT>  A free-text description of the entry
   -h, --help                Print help
 

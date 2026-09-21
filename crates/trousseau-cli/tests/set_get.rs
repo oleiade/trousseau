@@ -72,6 +72,52 @@ fn set_from_piped_stdin_strips_newline_and_get_prints_without_newline() {
 }
 
 #[test]
+fn set_with_value_on_command_line_is_refused() {
+    let env = common::Env::new();
+    env.init_store();
+
+    let output = env
+        .command_with_identity()
+        .args(["set", "abc", "hunter2"])
+        .output()
+        .expect("run set abc hunter2");
+    assert!(!output.status.success());
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8(output.stderr).expect("utf8 stderr");
+    assert!(stderr.contains("never from the command line"), "{stderr}");
+    assert!(!stderr.contains("hunter2"), "{stderr}");
+
+    // Nothing was written: `abc` never made it into the store.
+    let ls = env
+        .command_with_identity()
+        .args(["ls"])
+        .output()
+        .expect("run ls");
+    let stdout = String::from_utf8(ls.stdout).expect("utf8 stdout");
+    assert!(!stdout.contains("abc"), "{stdout}");
+}
+
+#[test]
+fn set_with_value_on_command_line_in_json_mode_reports_a_usage_error() {
+    let env = common::Env::new();
+    env.init_store();
+
+    let output = env
+        .command_with_identity()
+        .args(["--json", "set", "abc", "hunter2"])
+        .output()
+        .expect("run --json set abc hunter2");
+    assert!(!output.status.success());
+    assert_eq!(output.status.code(), Some(2));
+    assert!(output.stdout.is_empty());
+
+    let stderr = String::from_utf8(output.stderr).expect("utf8 stderr");
+    assert!(!stderr.contains("hunter2"), "{stderr}");
+    let error: serde_json::Value = serde_json::from_str(&stderr).expect("stderr is JSON");
+    assert_eq!(error["error"]["code"], "usage");
+}
+
+#[test]
 fn set_from_env_missing_variable_exits_1() {
     let env = common::Env::new();
     env.init_store();

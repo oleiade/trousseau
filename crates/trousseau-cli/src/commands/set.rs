@@ -12,19 +12,34 @@ use trousseau::store::LockMode;
 
 use crate::cli::SetArgs;
 use crate::context::Context;
+use crate::exit::CliError;
 use crate::output::{self, OutputMode};
 use crate::prompt;
+
+/// The error for `set KEY VALUE`. Never includes the value.
+const VALUE_ON_COMMAND_LINE: &str = "\
+set takes the value from a prompt, stdin, a file, or an environment variable, never from the command line (it would land in your shell history and the process list).
+  prompt:  trousseau set KEY
+  pipe:    printf %s 'value' | trousseau set KEY
+  file:    trousseau set KEY --from-file PATH
+The value you just typed is now in your shell history. Remove it from there if it is a real secret.";
 
 /// Run `set`.
 ///
 /// # Errors
 ///
-/// Returns [`trousseau::error::Error::InvalidKey`] if `KEY` does not
-/// satisfy the key grammar, an error if `--from-env` names a variable
-/// that is not set, whatever reading `--from-file` or stdin returns,
-/// whatever [`Context::unlock`], [`Context::seal_for`], or
+/// Returns [`CliError::Usage`] if a value was given on the command line
+/// (`set KEY VALUE`, 3.5.4: the value is never accepted there),
+/// [`trousseau::error::Error::InvalidKey`] if `KEY` does not satisfy the
+/// key grammar, an error if `--from-env` names a variable that is not
+/// set, whatever reading `--from-file` or stdin returns, whatever
+/// [`Context::unlock`], [`Context::seal_for`], or
 /// [`trousseau::store::save`] returns.
 pub fn run(ctx: &Context, args: &SetArgs) -> anyhow::Result<()> {
+    if !args.rejected_value.is_empty() {
+        return Err(CliError::Usage(VALUE_ON_COMMAND_LINE.to_owned()).into());
+    }
+
     let key = Key::parse(&args.key)?;
     let resolved = ctx.resolve_store();
     let path = resolved.path();
