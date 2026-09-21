@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "kind": "recipients",
+  "created_at": "2026-09-12T09:41:00Z",
+  "updated_at": "2026-09-12T10:02:13Z",
+  "recipients": [
+    "age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p",
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHhX3Q6M1u4T4z0tR8O7x0Zk5rQ0p5s5H3o1Gv3nS6uM deploy@web-01"
+  ],
+  "entries": {
+    "database/password": {
+      "value": "s3cr3t",
+      "encoding": "utf8",
+      "env": "DATABASE_PASSWORD",
+      "description": "Postgres app role",
+      "created_at": "2026-09-12T09:41:00Z",
+      "updated_at": "2026-09-12T09:41:00Z"
+    },
+    "tls/server.key": {
+      "value": "LS0tLS1CRUdJTi4uLg==",
+      "encoding": "base64",
+      "created_at": "2026-09-12T09:50:00Z",
+      "updated_at": "2026-09-12T09:50:00Z"
+    }
+  }
+}

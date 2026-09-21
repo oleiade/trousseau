@@ -27,3 +27,13 @@ print_stderr = "deny"
 
 [dependencies]
 thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+secrecy = { workspace = true }
+zeroize = { workspace = true }
+time = { workspace = true }
+base64 = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+serde_json = { workspace = true }

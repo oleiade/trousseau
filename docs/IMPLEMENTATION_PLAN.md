@@ -276,7 +276,7 @@ channel = "stable"
 components = ["rustfmt", "clippy"]
 ```
 
-Both crates' `Cargo.toml` carry `edition = "2024"`, `rust-version = "1.85"`, and this block, copied verbatim from motus and extended:
+Both crates' `Cargo.toml` carry `edition = "2024"`, `rust-version = "1.89"` (raised from 1.85 during step 2.1 because `aes` 0.9 and the patched `time` 0.3.46+ require it), and this block, copied verbatim from motus and extended:
 
 ```toml
 [lints.rust]
@@ -888,11 +888,11 @@ Branch `rr/1.1-workspace`, base `rr/0.2-remove-go`. Size: ~250 lines.
 
 Deliverables:
 
-- `Cargo.toml` workspace with `members = ["crates/*"]`, `resolver = "3"`, `[workspace.package]` with `edition = "2024"`, `rust-version = "1.85"`, `license = "MIT"`, `repository`, `authors = ["Théo Crevon <theo@crevon.me>"]`, and `[workspace.dependencies]` listing every crate from 2.3 with versions and features. Also `[profile.release]` with `lto = "thin"`, `codegen-units = 1`, `strip = "symbols"`, `panic = "abort"` is NOT set (human-panic needs unwinding).
+- `Cargo.toml` workspace with `members = ["crates/*"]`, `resolver = "3"`, `[workspace.package]` with `edition = "2024"`, `rust-version = "1.89"`, `license = "MIT"`, `repository`, `authors = ["Théo Crevon <theo@crevon.me>"]`, and `[workspace.dependencies]` listing every crate from 2.3 with versions and features. Also `[profile.release]` with `lto = "thin"`, `codegen-units = 1`, `strip = "symbols"`, `panic = "abort"` is NOT set (human-panic needs unwinding).
 - `crates/trousseau/Cargo.toml`: `name = "trousseau"`, `version = "1.0.0-alpha.1"`, `publish = false` for now, description, keywords, categories, the lint block from 2.4, dependencies from the workspace. `src/lib.rs` with crate docs and `pub mod error;` only; `error.rs` with the enum from 3.6.
 - `crates/trousseau-cli/Cargo.toml`: `name = "trousseau-cli"`, `[[bin]] name = "trousseau"`, `publish = false`, features `default = ["clipboard"]`, `clipboard = ["dep:arboard"]`. `src/main.rs` that builds a clap `Command` named `trousseau` with `--version` and nothing else, and exits 0.
 - `rust-toolchain.toml`, `rustfmt.toml` as in 2.4.
-- `.github/workflows/ci.yml`: triggers on `pull_request` and on `push` to `rust-rewrite` and `master`. Jobs: `fmt` (ubuntu), `clippy` (ubuntu, `--all-targets --all-features -D warnings`), `test` (matrix ubuntu-latest, macos-latest, windows-latest; `cargo test --workspace --all-features`), `doc` (ubuntu, `RUSTDOCFLAGS=-D warnings cargo doc --workspace --no-deps`), `msrv` (ubuntu, toolchain `1.85`, `cargo check --workspace --all-features`). Pin every action to a commit SHA with a trailing `# vX.Y.Z` comment, as motus does. Use `actions-rust-lang/setup-rust-toolchain` and enable its cache. Set `permissions: contents: read` at the top.
+- `.github/workflows/ci.yml`: triggers on `pull_request` and on `push` to `rust-rewrite` and `master`. Jobs: `fmt` (ubuntu), `clippy` (ubuntu, `--all-targets --all-features -D warnings`), `test` (matrix ubuntu-latest, macos-latest, windows-latest; `cargo test --workspace --all-features`), `doc` (ubuntu, `RUSTDOCFLAGS=-D warnings cargo doc --workspace --no-deps`), `msrv` (ubuntu, toolchain `1.89`, `cargo check --workspace --all-features`). Pin every action to a commit SHA with a trailing `# vX.Y.Z` comment, as motus does. Use `actions-rust-lang/setup-rust-toolchain` and enable its cache. Set `permissions: contents: read` at the top.
 - `justfile` with recipes `check` (fmt, clippy, test, doc in sequence), `test`, `lint`, `fmt`.
 
 Tests: one unit test in `error.rs` asserting `Display` of `Error::KeyNotFound` equals `key not found: foo`. One integration test in `crates/trousseau-cli/tests/version.rs` using `assert_cmd` that `trousseau --version` prints `trousseau 1.0.0-alpha.1`.
