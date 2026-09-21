@@ -2,26 +2,68 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Edit the store in `$VISUAL` or `$EDITOR`
+Edit the whole store as a TOML document in your editor.
+
+Opens a temporary plaintext copy in `$VISUAL`, then `$EDITOR`, then `vi`. Save and quit to apply.
+Leave the file empty, or quit without changes, to abort. The temporary file is deleted afterward in
+every case.
 
 Usage: trousseau edit [OPTIONS]
 
 Options:
-  -h, --help  Print help
+  -h, --help
+          Print help (see a summary with '-h')
 
 Global options:
-      --store <PATH>            Use this store file. Wins over `--global` and over store discovery
-                                [env: TROUSSEAU_STORE=]
-      --global                  Use your personal store instead of the nearest project store (the
-                                `.trousseau` file in this directory or a parent)
-      --identity <PATH>         An identity (private key) file to try when unlocking. Repeatable.
-                                Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
-                                `identity.files`, the default identity file, `~/.ssh/id_ed25519` and
-                                `~/.ssh/id_rsa`
-      --passphrase-file <PATH>  Read the store's passphrase from this file instead of prompting. One
-                                trailing newline is stripped
-      --json                    Print one JSON document on stdout instead of text. Errors become a
-                                JSON object on stderr
-      --quiet                   Suppress informational messages on stderr. Errors still print
-      --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
-                                a secret, exit 2 for a confirmation
+      --store <PATH>
+          Use this store file. Wins over `--global` and over store discovery
+          
+          [env: TROUSSEAU_STORE=]
+
+      --global
+          Use your personal store instead of the nearest project store (the `.trousseau` file in
+          this directory or a parent)
+
+      --identity <PATH>
+          An identity (private key) file to try when unlocking. Repeatable. Also tried:
+          `TROUSSEAU_IDENTITY_FILE`, the config file's `identity.files`, the default identity file,
+          `~/.ssh/id_ed25519` and `~/.ssh/id_rsa`
+
+      --passphrase-file <PATH>
+          Read the store's passphrase from this file instead of prompting. One trailing newline is
+          stripped
+
+      --json
+          Print one JSON document on stdout instead of text. Errors become a JSON object on stderr
+
+      --quiet
+          Suppress informational messages on stderr. Errors still print
+
+      --no-input
+          Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
+          confirmation
+
+The document has one table per entry, keyed by the entry's key:
+
+  ["database/password"]
+  value = "s3cr3t"
+  env = "PGPASSWORD"                  # optional
+  description = "Postgres app role"   # optional
+
+  Add a table to create an entry. Delete a table to remove the entry.
+  Binary entries use 'value_base64' instead of 'value'.
+
+Examples:
+  Edit with your default editor:
+    trousseau edit
+
+  Use VS Code for this one edit (--wait is required):
+    EDITOR="code --wait" trousseau edit
+
+Notes:
+  edit is the way to change an entry's env name or description without
+  retyping its value.
+  Some editors keep swap or backup copies of what you open. For vim, add
+  to ~/.vimrc:
+    autocmd BufNewFile,BufRead trousseau-*.toml
+      \ setlocal nobackup nowritebackup noswapfile

@@ -2,7 +2,7 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Set a key's value
+Save a value under a key
 
 Usage: trousseau set [OPTIONS] <KEY>
 
@@ -18,7 +18,7 @@ Options:
       --env <NAME>          The variable name `run` and `env` use for this entry, instead of the
                             name derived from the key
       --description <TEXT>  A free-text description of the entry
-  -h, --help                Print help
+  -h, --help                Print help (see more with '--help')
 
 Global options:
       --store <PATH>            Use this store file. Wins over `--global` and over store discovery
@@ -36,3 +36,30 @@ Global options:
       --quiet                   Suppress informational messages on stderr. Errors still print
       --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
                                 a secret, exit 2 for a confirmation
+
+Where the value comes from (first match wins):
+  1. --from-file PATH   the file's bytes, verbatim ('-' reads stdin verbatim)
+  2. --from-env NAME    the value of that environment variable
+  3. a hidden prompt    when stdin is a terminal
+  4. stdin              when piped; one trailing newline is stripped
+
+Examples:
+  Type the value at a hidden prompt:
+    trousseau set database/password
+
+  Pipe the value in:
+    printf %s "$TOKEN" | trousseau set api/token
+
+  Store a file, such as a TLS key (binary data is handled for you):
+    trousseau set tls/server.key --from-file server.key
+
+  Copy the value of an environment variable:
+    trousseau set api/token --from-env API_TOKEN
+
+  Choose the variable name 'run' and 'env' will use, and describe the entry:
+    trousseau set db/password --env PGPASSWORD --description "Postgres role"
+
+Notes:
+  Setting an existing key replaces its value and keeps its --env and
+  --description unless you pass them again.
+  To change only --env or --description, use 'trousseau edit'.

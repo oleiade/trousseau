@@ -2,7 +2,7 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Print a roff man page
+Print a man page in roff format
 
 Usage: trousseau man [OPTIONS] [SUBCOMMAND]
 
@@ -28,3 +28,11 @@ Global options:
       --quiet                   Suppress informational messages on stderr. Errors still print
       --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
                                 a secret, exit 2 for a confirmation
+
+Examples:
+  Write the top-level man page and read it:
+    trousseau man > trousseau.1
+    man ./trousseau.1
+
+  The man page of one subcommand:
+    trousseau man set > trousseau-set.1

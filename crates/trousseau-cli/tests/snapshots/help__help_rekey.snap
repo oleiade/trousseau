@@ -2,28 +2,64 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Re-encrypt the store, optionally changing its kind or recipients
+Re-encrypt the store, optionally changing how it is protected.
+
+With no flags, re-encrypts to the same recipients (or passphrase) with a fresh file key. The entries
+themselves do not change.
 
 Usage: trousseau rekey [OPTIONS]
 
 Options:
-      --to-passphrase         Convert to a passphrase store
-      --to-recipients <R>...  Convert to a recipients store with exactly these recipients
-  -h, --help                  Print help
+      --to-passphrase
+          Convert to a passphrase store, or change the passphrase. Prompts twice
+
+      --to-recipients <R>...
+          Convert to a recipients store with exactly these recipients
+
+  -h, --help
+          Print help (see a summary with '-h')
 
 Global options:
-      --store <PATH>            Use this store file. Wins over `--global` and over store discovery
-                                [env: TROUSSEAU_STORE=]
-      --global                  Use your personal store instead of the nearest project store (the
-                                `.trousseau` file in this directory or a parent)
-      --identity <PATH>         An identity (private key) file to try when unlocking. Repeatable.
-                                Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
-                                `identity.files`, the default identity file, `~/.ssh/id_ed25519` and
-                                `~/.ssh/id_rsa`
-      --passphrase-file <PATH>  Read the store's passphrase from this file instead of prompting. One
-                                trailing newline is stripped
-      --json                    Print one JSON document on stdout instead of text. Errors become a
-                                JSON object on stderr
-      --quiet                   Suppress informational messages on stderr. Errors still print
-      --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
-                                a secret, exit 2 for a confirmation
+      --store <PATH>
+          Use this store file. Wins over `--global` and over store discovery
+          
+          [env: TROUSSEAU_STORE=]
+
+      --global
+          Use your personal store instead of the nearest project store (the `.trousseau` file in
+          this directory or a parent)
+
+      --identity <PATH>
+          An identity (private key) file to try when unlocking. Repeatable. Also tried:
+          `TROUSSEAU_IDENTITY_FILE`, the config file's `identity.files`, the default identity file,
+          `~/.ssh/id_ed25519` and `~/.ssh/id_rsa`
+
+      --passphrase-file <PATH>
+          Read the store's passphrase from this file instead of prompting. One trailing newline is
+          stripped
+
+      --json
+          Print one JSON document on stdout instead of text. Errors become a JSON object on stderr
+
+      --quiet
+          Suppress informational messages on stderr. Errors still print
+
+      --no-input
+          Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
+          confirmation
+
+Examples:
+  Re-encrypt with a fresh file key, same recipients or passphrase:
+    trousseau rekey
+
+  Change the passphrase of a passphrase store, or convert a recipients
+  store to a passphrase store (prompts twice):
+    trousseau rekey --to-passphrase
+
+  Convert to a recipients store with exactly these recipients:
+    trousseau rekey --to-recipients age1... "ssh-ed25519 AAAA... sam@laptop"
+
+Notes:
+  --to-recipients does not add you implicitly. Include your own recipient,
+  or you will not be able to open the store afterward.
+  To add or remove one recipient, 'trousseau recipients' is simpler.

@@ -2,7 +2,10 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Export the store's entries
+Write the store's entries out in plaintext.
+
+The output is NOT encrypted. Prefer `run` or `env` to hand secrets to a program, and delete exported
+files when you are done.
 
 Usage: trousseau export [OPTIONS]
 
@@ -54,3 +57,22 @@ Global options:
       --no-input
           Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
           confirmation
+
+Formats:
+  json     the full document, with metadata (default); round-trips through
+           'import'
+  dotenv   NAME="value" lines; binary entries are skipped with a warning
+  toml     the same document 'trousseau edit' opens
+
+Examples:
+  A full backup, as JSON, to a new file (mode 0600):
+    trousseau export --out backup.json
+
+  A .env file:
+    trousseau export --format dotenv --out .env
+
+  Copy every entry into another store:
+    trousseau export | trousseau import --store ./other.trousseau
+
+Notes:
+  --out refuses to overwrite an existing file (exit 8) unless --force.

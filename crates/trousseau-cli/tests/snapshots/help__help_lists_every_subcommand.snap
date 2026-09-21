@@ -7,42 +7,91 @@ Command-line interface for the trousseau encrypted keyring.
 Usage: trousseau [OPTIONS] <COMMAND>
 
 Commands:
-  init         Create a new store
-  info         Show information about the resolved store
-  set          Set a key's value
-  get          Get a key's value
-  ls           List keys
+  init         Create a new, empty store
+  info         Show which store is in use, and what is in it
+  set          Save a value under a key
+  get          Print a key's value
+  ls           List keys. Never prints values
   rm           Remove one or more keys
-  mv           Rename a key
-  recipients   Manage a recipients store's recipient list
-  rekey        Re-encrypt the store, optionally changing its kind or recipients
-  export       Export the store's entries
-  import       Import entries into the store
-  run          Run a command with the store's entries injected as environment variables
+  mv           Rename a key, keeping its value and metadata
+  recipients   Manage who can open a recipients store
+  rekey        Re-encrypt the store, optionally changing how it is protected
+  export       Write the store's entries out in plaintext
+  import       Add entries from a JSON, dotenv, or TOML document
+  run          Run a command with the store's entries as environment variables
   env          Print the store's entries as environment variable assignments
-  edit         Edit the store in `$VISUAL` or `$EDITOR`
-  migrate      Migrate a legacy v0.4 store into a new store
+  edit         Edit the whole store as a TOML document in your editor
+  migrate      Copy a legacy v0.4 store into a new store
   completions  Print a shell completion script
-  man          Print a roff man page
+  man          Print a man page in roff format
   help         Print this message or the help of the given subcommand(s)
 
 Options:
-  -h, --help     Print help
-  -V, --version  Print version
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
 
 Global options:
-      --store <PATH>            Use this store file. Wins over `--global` and over store discovery
-                                [env: TROUSSEAU_STORE=]
-      --global                  Use your personal store instead of the nearest project store (the
-                                `.trousseau` file in this directory or a parent)
-      --identity <PATH>         An identity (private key) file to try when unlocking. Repeatable.
-                                Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
-                                `identity.files`, the default identity file, `~/.ssh/id_ed25519` and
-                                `~/.ssh/id_rsa`
-      --passphrase-file <PATH>  Read the store's passphrase from this file instead of prompting. One
-                                trailing newline is stripped
-      --json                    Print one JSON document on stdout instead of text. Errors become a
-                                JSON object on stderr
-      --quiet                   Suppress informational messages on stderr. Errors still print
-      --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
-                                a secret, exit 2 for a confirmation
+      --store <PATH>
+          Use this store file. Wins over `--global` and over store discovery
+          
+          [env: TROUSSEAU_STORE=]
+
+      --global
+          Use your personal store instead of the nearest project store (the `.trousseau` file in
+          this directory or a parent)
+
+      --identity <PATH>
+          An identity (private key) file to try when unlocking. Repeatable. Also tried:
+          `TROUSSEAU_IDENTITY_FILE`, the config file's `identity.files`, the default identity file,
+          `~/.ssh/id_ed25519` and `~/.ssh/id_rsa`
+
+      --passphrase-file <PATH>
+          Read the store's passphrase from this file instead of prompting. One trailing newline is
+          stripped
+
+      --json
+          Print one JSON document on stdout instead of text. Errors become a JSON object on stderr
+
+      --quiet
+          Suppress informational messages on stderr. Errors still print
+
+      --no-input
+          Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
+          confirmation
+
+Quick start:
+  trousseau init                    Create a store in this directory
+  trousseau set database/password   Save a secret (prompts for the value)
+  trousseau get database/password   Print it
+  trousseau ls                      List the keys
+  trousseau run -- ./server         Run a command with the secrets in its env
+
+Which store a command uses (first match wins):
+  1. --store PATH
+  2. the TROUSSEAU_STORE environment variable
+  3. with --global: your personal store
+  4. the nearest '.trousseau' file, from this directory upward
+  5. your personal store
+  'trousseau info' prints the store a command would use.
+  'trousseau init' never walks up: it creates '.trousseau' right here, or
+  your personal store with --global.
+
+How a store is unlocked:
+  A recipients store opens with any matching identity (private key) from
+  --identity, TROUSSEAU_IDENTITY_FILE, 'identity.files' in the config file,
+  the default identity file that 'init' creates, ~/.ssh/id_ed25519, and
+  ~/.ssh/id_rsa.
+  A passphrase store prompts for its passphrase, or reads --passphrase-file.
+
+Exit codes:
+  0  success                     5  key not found
+  1  generic failure             6  store locked by another process
+  2  usage error or refusal      7  legacy v0.4 store: run 'migrate'
+  3  store not found             8  conflict (already exists, env clash)
+  4  cannot unlock the store
+  'run' exits with the child command's exit code.
+
+Run 'trousseau help <command>' for details and examples.

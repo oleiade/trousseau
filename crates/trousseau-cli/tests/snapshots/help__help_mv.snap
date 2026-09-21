@@ -2,7 +2,7 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Rename a key
+Rename a key, keeping its value and metadata
 
 Usage: trousseau mv [OPTIONS] <OLD> <NEW>
 
@@ -30,3 +30,15 @@ Global options:
       --quiet                   Suppress informational messages on stderr. Errors still print
       --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
                                 a secret, exit 2 for a confirmation
+
+Examples:
+  Rename a key:
+    trousseau mv api/token api/github-token
+
+  Replace the destination if it already exists:
+    trousseau mv --force staging/db-password database/password
+
+Notes:
+  Without --force, an existing destination is an error (exit 8).
+  An entry with no explicit --env name gets a new derived variable name
+  after a rename, because the name comes from the key.

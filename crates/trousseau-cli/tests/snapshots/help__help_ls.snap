@@ -2,7 +2,7 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-List keys
+List keys. Never prints values
 
 Usage: trousseau ls [OPTIONS] [PREFIX]
 
@@ -30,3 +30,22 @@ Global options:
       --quiet                   Suppress informational messages on stderr. Errors still print
       --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
                                 a secret, exit 2 for a confirmation
+
+Examples:
+  Every key, one per line:
+    trousseau ls
+
+  Only 'database' and the keys under 'database/':
+    trousseau ls database
+
+  A table with encoding, explicit env name, update time, and description:
+    trousseau ls --long
+
+  The same data as JSON:
+    trousseau ls --json
+
+Notes:
+  PREFIX matches whole path segments: 'ls data' does not list
+  'database/password'.
+  The ENV column of --long shows only names set with 'set --env'. Other
+  entries get a name derived from the key; see 'trousseau help run'.

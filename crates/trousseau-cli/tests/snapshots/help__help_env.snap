@@ -2,7 +2,10 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Print the store's entries as environment variable assignments
+Print the store's entries as environment variable assignments.
+
+Same naming and selection rules as `run`. The output contains secret values in plaintext: send it to
+`eval` or a pipe, not to your terminal scrollback or a committed file.
 
 Usage: trousseau env [OPTIONS]
 
@@ -55,3 +58,39 @@ Global options:
       --no-input
           Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
           confirmation
+
+Variable names:
+  A name is derived from the key: '/', '-' and '.' become '_', letters are
+  uppercased, and a leading digit gets '_' in front.
+    database/password   ->  DATABASE_PASSWORD
+  An entry saved with 'set --env NAME' uses NAME instead.
+  --env-prefix goes in front of every name, derived or explicit.
+
+Which entries are printed:
+  Every text entry, unless --only is given. Binary entries are skipped
+  with a warning. --only takes a whole key or a path prefix, and can be
+  repeated.
+
+Examples:
+  Load every secret into the current bash or zsh session:
+    eval "$(trousseau env)"
+
+  The same in fish:
+    trousseau env | source
+
+  Load only the entries under 'database/':
+    eval "$(trousseau env --only database)"
+
+  In a direnv .envrc, load exactly two entries:
+    eval "$(trousseau env --only database/password --only api/token)"
+
+  Write a .env file for a tool that needs one (plaintext, do not commit):
+    trousseau env --format dotenv > .env
+
+  Read one variable with jq:
+    trousseau env --format json | jq -r .DATABASE_PASSWORD
+
+Notes:
+  Two entries that resolve to the same name are an error (exit 8).
+  To run a single command with the secrets, 'trousseau run' is safer:
+  nothing stays behind in your shell.

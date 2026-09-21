@@ -2,32 +2,75 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Get a key's value
+Print a key's value.
+
+Writes the raw value to stdout. On a terminal a newline is added after text values, and binary
+values are refused (use `--out` or a pipe). When piped, the bytes are written exactly as stored.
 
 Usage: trousseau get [OPTIONS] <KEY>
 
 Arguments:
-  <KEY>  The key to read
+  <KEY>
+          The key to read
 
 Options:
-      --out <PATH>  Write the value to this file instead of stdout
-      --force       Overwrite `--out` if it already exists
-      --clip        Copy the value to the clipboard instead of printing it
-  -h, --help        Print help
+      --out <PATH>
+          Write the value to this file instead of stdout
+
+      --force
+          Overwrite `--out` if it already exists
+
+      --clip
+          Copy the value to the clipboard instead of printing it
+
+  -h, --help
+          Print help (see a summary with '-h')
 
 Global options:
-      --store <PATH>            Use this store file. Wins over `--global` and over store discovery
-                                [env: TROUSSEAU_STORE=]
-      --global                  Use your personal store instead of the nearest project store (the
-                                `.trousseau` file in this directory or a parent)
-      --identity <PATH>         An identity (private key) file to try when unlocking. Repeatable.
-                                Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
-                                `identity.files`, the default identity file, `~/.ssh/id_ed25519` and
-                                `~/.ssh/id_rsa`
-      --passphrase-file <PATH>  Read the store's passphrase from this file instead of prompting. One
-                                trailing newline is stripped
-      --json                    Print one JSON document on stdout instead of text. Errors become a
-                                JSON object on stderr
-      --quiet                   Suppress informational messages on stderr. Errors still print
-      --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
-                                a secret, exit 2 for a confirmation
+      --store <PATH>
+          Use this store file. Wins over `--global` and over store discovery
+          
+          [env: TROUSSEAU_STORE=]
+
+      --global
+          Use your personal store instead of the nearest project store (the `.trousseau` file in
+          this directory or a parent)
+
+      --identity <PATH>
+          An identity (private key) file to try when unlocking. Repeatable. Also tried:
+          `TROUSSEAU_IDENTITY_FILE`, the config file's `identity.files`, the default identity file,
+          `~/.ssh/id_ed25519` and `~/.ssh/id_rsa`
+
+      --passphrase-file <PATH>
+          Read the store's passphrase from this file instead of prompting. One trailing newline is
+          stripped
+
+      --json
+          Print one JSON document on stdout instead of text. Errors become a JSON object on stderr
+
+      --quiet
+          Suppress informational messages on stderr. Errors still print
+
+      --no-input
+          Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
+          confirmation
+
+Examples:
+  Print a secret:
+    trousseau get database/password
+
+  Copy it to the clipboard (cleared again after 45 seconds):
+    trousseau get api/token --clip
+
+  Write a binary value to a file (created with mode 0600):
+    trousseau get tls/server.key --out server.key
+
+  Use a secret in another command without printing it:
+    PGPASSWORD="$(trousseau get db/password)" psql -h db.internal app
+
+  Value plus metadata as JSON:
+    trousseau get database/password --json
+
+Notes:
+  A missing key exits with code 5. 'trousseau ls' lists the keys.
+  To hand many secrets to a program at once, see 'trousseau run'.

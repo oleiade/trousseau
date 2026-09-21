@@ -2,38 +2,87 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Migrate a legacy v0.4 store into a new store
+Copy a legacy v0.4 store into a new store.
+
+Reads the old file (usually `~/.trousseau`) and creates a new store, following the same rules and
+flags as `init`. The old file is never modified or deleted.
 
 Usage: trousseau migrate [OPTIONS] <SOURCE>
 
 Arguments:
-  <SOURCE>  The legacy v0.4 store file to read
+  <SOURCE>
+          The legacy v0.4 store file to read
 
 Options:
-      --gpg <PATH>                  The `gpg` binary to use for an `OpenPGP` legacy store
-      --gnupg-home <PATH>           An isolated `GNUPGHOME` to use when invoking `gpg`
-      --new-passphrase-file <PATH>  A file holding the new store's passphrase (only with
-                                    `--passphrase`)
-      --recipient <R>               A recipient to encrypt to. Repeatable
-      --recipients-file <PATH>      A file of recipients, one per line (blank lines and `#` comments
-                                    ignored)
-      --passphrase                  Create a passphrase store instead of a recipients store
-      --no-self                     Do not add the caller's own recipient to a recipients store
-  -h, --help                        Print help
+      --gpg <PATH>
+          The `gpg` binary to use for an `OpenPGP` legacy store
+
+      --gnupg-home <PATH>
+          An isolated `GNUPGHOME` to use when invoking `gpg`
+
+      --new-passphrase-file <PATH>
+          A file holding the new store's passphrase (only with `--passphrase`)
+
+      --recipient <R>
+          A recipient (public key) to encrypt to: `age1...`, an SSH public key, or a plugin
+          recipient. Repeatable
+
+      --recipients-file <PATH>
+          A file of recipients, one per line (blank lines and `#` comments ignored)
+
+      --passphrase
+          Create a passphrase store instead of a recipients store
+
+      --no-self
+          Do not add the caller's own recipient to a recipients store
+
+  -h, --help
+          Print help (see a summary with '-h')
 
 Global options:
-      --store <PATH>            Use this store file. Wins over `--global` and over store discovery
-                                [env: TROUSSEAU_STORE=]
-      --global                  Use your personal store instead of the nearest project store (the
-                                `.trousseau` file in this directory or a parent)
-      --identity <PATH>         An identity (private key) file to try when unlocking. Repeatable.
-                                Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
-                                `identity.files`, the default identity file, `~/.ssh/id_ed25519` and
-                                `~/.ssh/id_rsa`
-      --passphrase-file <PATH>  Read the store's passphrase from this file instead of prompting. One
-                                trailing newline is stripped
-      --json                    Print one JSON document on stdout instead of text. Errors become a
-                                JSON object on stderr
-      --quiet                   Suppress informational messages on stderr. Errors still print
-      --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
-                                a secret, exit 2 for a confirmation
+      --store <PATH>
+          Use this store file. Wins over `--global` and over store discovery
+          
+          [env: TROUSSEAU_STORE=]
+
+      --global
+          Use your personal store instead of the nearest project store (the `.trousseau` file in
+          this directory or a parent)
+
+      --identity <PATH>
+          An identity (private key) file to try when unlocking. Repeatable. Also tried:
+          `TROUSSEAU_IDENTITY_FILE`, the config file's `identity.files`, the default identity file,
+          `~/.ssh/id_ed25519` and `~/.ssh/id_rsa`
+
+      --passphrase-file <PATH>
+          Read the store's passphrase from this file instead of prompting. One trailing newline is
+          stripped
+
+      --json
+          Print one JSON document on stdout instead of text. Errors become a JSON object on stderr
+
+      --quiet
+          Suppress informational messages on stderr. Errors still print
+
+      --no-input
+          Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
+          confirmation
+
+Examples:
+  Migrate into your personal store:
+    trousseau migrate ~/.trousseau --global
+
+  Migrate into a new store file of your choice:
+    trousseau migrate ~/.trousseau --store ./team.trousseau
+
+  Migrate into a passphrase store:
+    trousseau migrate ~/.trousseau --global --passphrase
+
+Notes:
+  Without --global or --store, the new store is '.trousseau' in the
+  current directory. Run from your home directory, that is the legacy file
+  itself, and migrate stops with exit 8. Use --global or --store there.
+  The legacy passphrase comes from --passphrase-file or a prompt.
+  OpenPGP legacy stores need the 'gpg' binary (see --gpg).
+  Keys with characters the new format does not allow are renamed, and
+  every rename is printed.

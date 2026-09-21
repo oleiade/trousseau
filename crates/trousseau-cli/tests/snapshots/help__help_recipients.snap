@@ -2,32 +2,76 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Manage a recipients store's recipient list
+Manage who can open a recipients store.
+
+A recipient is a public key. Everyone whose recipient is in the list can decrypt the store with
+their matching identity (private key). Accepted forms: an age key (`age1...`), an SSH public key
+(`ssh-ed25519 ...` or `ssh-rsa ...`), or an age plugin recipient (such as `age1yubikey1...`).
 
 Usage: trousseau recipients [OPTIONS] <COMMAND>
 
 Commands:
-  ls    List the store's recipients
-  add   Add one or more recipients
-  rm    Remove one or more recipients
+  ls    List the store's recipients, one per line
+  add   Add one or more recipients and re-encrypt the store to the new list
+  rm    Remove one or more recipients and re-encrypt the store
   help  Print this message or the help of the given subcommand(s)
 
 Options:
-  -h, --help  Print help
+  -h, --help
+          Print help (see a summary with '-h')
 
 Global options:
-      --store <PATH>            Use this store file. Wins over `--global` and over store discovery
-                                [env: TROUSSEAU_STORE=]
-      --global                  Use your personal store instead of the nearest project store (the
-                                `.trousseau` file in this directory or a parent)
-      --identity <PATH>         An identity (private key) file to try when unlocking. Repeatable.
-                                Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
-                                `identity.files`, the default identity file, `~/.ssh/id_ed25519` and
-                                `~/.ssh/id_rsa`
-      --passphrase-file <PATH>  Read the store's passphrase from this file instead of prompting. One
-                                trailing newline is stripped
-      --json                    Print one JSON document on stdout instead of text. Errors become a
-                                JSON object on stderr
-      --quiet                   Suppress informational messages on stderr. Errors still print
-      --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
-                                a secret, exit 2 for a confirmation
+      --store <PATH>
+          Use this store file. Wins over `--global` and over store discovery
+          
+          [env: TROUSSEAU_STORE=]
+
+      --global
+          Use your personal store instead of the nearest project store (the `.trousseau` file in
+          this directory or a parent)
+
+      --identity <PATH>
+          An identity (private key) file to try when unlocking. Repeatable. Also tried:
+          `TROUSSEAU_IDENTITY_FILE`, the config file's `identity.files`, the default identity file,
+          `~/.ssh/id_ed25519` and `~/.ssh/id_rsa`
+
+      --passphrase-file <PATH>
+          Read the store's passphrase from this file instead of prompting. One trailing newline is
+          stripped
+
+      --json
+          Print one JSON document on stdout instead of text. Errors become a JSON object on stderr
+
+      --quiet
+          Suppress informational messages on stderr. Errors still print
+
+      --no-input
+          Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
+          confirmation
+
+Examples:
+  See who can open the store:
+    trousseau recipients ls
+
+  Give a teammate access with their age key:
+    trousseau recipients add age1...
+
+  Give access with an SSH public key (quote it, it contains spaces):
+    trousseau recipients add "ssh-ed25519 AAAA... sam@laptop"
+
+  Take access away:
+    trousseau recipients rm age1...
+
+Finding a recipient to share:
+  Your age recipient is the '# public key:' line of your identity file,
+  by default ~/.config/trousseau/identity.txt. 'trousseau init' also
+  prints it when it creates the identity.
+  An SSH recipient is the content of the .pub file, for example
+  ~/.ssh/id_ed25519.pub.
+
+Notes:
+  Removing a recipient only affects future versions of the file. Someone
+  who kept an old copy (git history, a backup) can still read that copy,
+  so change the secrets too.
+  Passphrase stores have no recipients. Convert one with
+  'trousseau rekey --to-recipients'.

@@ -2,7 +2,7 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-List the store's recipients
+List the store's recipients, one per line
 
 Usage: trousseau recipients ls [OPTIONS]
 

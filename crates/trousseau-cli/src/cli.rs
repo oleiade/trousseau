@@ -18,7 +18,9 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
     bin_name = "trousseau",
     version,
     about,
-    propagate_version = false
+    propagate_version = false,
+    after_help = crate::help::TOP,
+    after_long_help = crate::help::TOP_LONG
 )]
 pub struct Cli {
     /// Flags valid before or after the subcommand (3.5.1).
@@ -92,60 +94,134 @@ pub struct GlobalArgs {
 /// Every `trousseau` subcommand (3.5).
 #[derive(Debug, Subcommand)]
 pub enum Command {
-    /// Create a new store.
+    /// Create a new, empty store.
+    ///
+    /// Without flags, creates `.trousseau` in the current directory,
+    /// encrypted to your own key. If you have no identity yet, `init`
+    /// generates one and prints your recipient (your public key,
+    /// `age1...`). Share that recipient with teammates so they can add
+    /// you to their stores.
+    #[command(after_help = crate::help::INIT)]
     Init(InitArgs),
 
-    /// Show information about the resolved store.
+    /// Show which store is in use, and what is in it.
+    ///
+    /// Prints the store's path, kind (recipients or passphrase), schema
+    /// version, and recipient and entry counts. Works even when the
+    /// store cannot be unlocked: the path and kind still print.
+    #[command(after_help = crate::help::INFO)]
     Info,
 
-    /// Set a key's value.
+    /// Save a value under a key.
+    ///
+    /// The value is never passed on the command line, where it would
+    /// end up in your shell history and the process list. With no
+    /// flags, `set` prompts for it (hidden input), or reads it from
+    /// stdin when stdin is piped.
+    #[command(after_help = crate::help::SET)]
     Set(SetArgs),
 
-    /// Get a key's value.
+    /// Print a key's value.
+    ///
+    /// Writes the raw value to stdout. On a terminal a newline is added
+    /// after text values, and binary values are refused (use `--out` or
+    /// a pipe). When piped, the bytes are written exactly as stored.
+    #[command(after_help = crate::help::GET)]
     Get(GetArgs),
 
-    /// List keys.
+    /// List keys. Never prints values.
+    #[command(after_help = crate::help::LS)]
     Ls(LsArgs),
 
     /// Remove one or more keys.
+    ///
+    /// All or nothing: if any key is missing, nothing is removed (exit
+    /// 5), unless `--force` is given.
+    #[command(after_help = crate::help::RM)]
     Rm(RmArgs),
 
-    /// Rename a key.
+    /// Rename a key, keeping its value and metadata.
+    #[command(after_help = crate::help::MV)]
     Mv(MvArgs),
 
-    /// Manage a recipients store's recipient list.
+    /// Manage who can open a recipients store.
+    ///
+    /// A recipient is a public key. Everyone whose recipient is in the
+    /// list can decrypt the store with their matching identity (private
+    /// key). Accepted forms: an age key (`age1...`), an SSH public key
+    /// (`ssh-ed25519 ...` or `ssh-rsa ...`), or an age plugin recipient
+    /// (such as `age1yubikey1...`).
+    #[command(after_help = crate::help::RECIPIENTS)]
     Recipients {
         /// The recipients operation to perform.
         #[command(subcommand)]
         action: RecipientsAction,
     },
 
-    /// Re-encrypt the store, optionally changing its kind or recipients.
+    /// Re-encrypt the store, optionally changing how it is protected.
+    ///
+    /// With no flags, re-encrypts to the same recipients (or
+    /// passphrase) with a fresh file key. The entries themselves do not
+    /// change.
+    #[command(after_help = crate::help::REKEY)]
     Rekey(RekeyArgs),
 
-    /// Export the store's entries.
+    /// Write the store's entries out in plaintext.
+    ///
+    /// The output is NOT encrypted. Prefer `run` or `env` to hand
+    /// secrets to a program, and delete exported files when you are
+    /// done.
+    #[command(after_help = crate::help::EXPORT)]
     Export(ExportArgs),
 
-    /// Import entries into the store.
+    /// Add entries from a JSON, dotenv, or TOML document.
+    ///
+    /// Reads the file given as `PATH`, or stdin when `PATH` is omitted.
+    /// Only entries are merged: the imported document's recipients and
+    /// kind are ignored.
+    #[command(after_help = crate::help::IMPORT)]
     Import(ImportArgs),
 
-    /// Run a command with the store's entries injected as environment
-    /// variables.
+    /// Run a command with the store's entries as environment variables.
+    ///
+    /// Decrypts the store, adds one variable per entry to the
+    /// environment, and runs `CMD`. Nothing is written to disk. `run`
+    /// exits with `CMD`'s exit code. Everything after `--` is the
+    /// command and its arguments.
+    #[command(after_help = crate::help::RUN)]
     Run(RunArgs),
 
     /// Print the store's entries as environment variable assignments.
+    ///
+    /// Same naming and selection rules as `run`. The output contains
+    /// secret values in plaintext: send it to `eval` or a pipe, not to
+    /// your terminal scrollback or a committed file.
+    #[command(after_help = crate::help::ENV)]
     Env(EnvArgs),
 
-    /// Edit the store in `$VISUAL` or `$EDITOR`.
+    /// Edit the whole store as a TOML document in your editor.
+    ///
+    /// Opens a temporary plaintext copy in `$VISUAL`, then `$EDITOR`,
+    /// then `vi`. Save and quit to apply. Leave the file empty, or quit
+    /// without changes, to abort. The temporary file is deleted
+    /// afterward in every case.
+    #[command(after_help = crate::help::EDIT)]
     Edit,
 
-    /// Migrate a legacy v0.4 store into a new store.
+    /// Copy a legacy v0.4 store into a new store.
+    ///
+    /// Reads the old file (usually `~/.trousseau`) and creates a new
+    /// store, following the same rules and flags as `init`. The old
+    /// file is never modified or deleted.
+    #[command(after_help = crate::help::MIGRATE)]
     Migrate(MigrateArgs),
 
     /// Print a shell completion script.
+    #[command(after_help = crate::help::COMPLETIONS)]
     Completions(CompletionsArgs),
 
-    /// Print a roff man page.
+    /// Print a man page in roff format.
+    #[command(after_help = crate::help::MAN)]
     Man(ManArgs),
 
     /// Clear the clipboard after `get --clip` (hidden, internal).
@@ -167,7 +243,8 @@ pub enum Command {
 /// kind and recipients (3.5.2, 3.5.15).
 #[derive(Debug, Clone, Args)]
 pub struct TargetArgs {
-    /// A recipient to encrypt to. Repeatable.
+    /// A recipient (public key) to encrypt to: `age1...`, an SSH public
+    /// key, or a plugin recipient. Repeatable.
     #[arg(long = "recipient", value_name = "R")]
     pub recipient: Vec<String>,
 
@@ -301,15 +378,25 @@ pub struct MvArgs {
 /// `trousseau recipients <ls|add|rm>` (3.5.9).
 #[derive(Debug, Subcommand)]
 pub enum RecipientsAction {
-    /// List the store's recipients.
+    /// List the store's recipients, one per line.
     Ls,
-    /// Add one or more recipients.
+    /// Add one or more recipients and re-encrypt the store to the new
+    /// list.
+    ///
+    /// Recipients already in the list are skipped with a note.
+    #[command(after_help = crate::help::RECIPIENTS_ADD)]
     Add {
         /// The recipients to add.
         #[arg(required = true)]
         recipients: Vec<String>,
     },
-    /// Remove one or more recipients.
+    /// Remove one or more recipients and re-encrypt the store.
+    ///
+    /// SSH keys match on the key itself, so the trailing comment does
+    /// not have to be the same. The last recipient cannot be removed.
+    /// Removing your own recipient asks for confirmation, because you
+    /// lock yourself out.
+    #[command(after_help = crate::help::RECIPIENTS_RM)]
     Rm {
         /// The recipients to remove.
         #[arg(required = true)]
@@ -323,7 +410,8 @@ pub enum RecipientsAction {
 /// `trousseau rekey` (3.5.10).
 #[derive(Debug, Args)]
 pub struct RekeyArgs {
-    /// Convert to a passphrase store.
+    /// Convert to a passphrase store, or change the passphrase. Prompts
+    /// twice.
     #[arg(long = "to-passphrase", conflicts_with = "to_recipients")]
     pub to_passphrase: bool,
 

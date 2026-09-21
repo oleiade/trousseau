@@ -15,6 +15,7 @@ mod config;
 mod context;
 mod document;
 mod exit;
+mod help;
 mod output;
 mod prompt;
 

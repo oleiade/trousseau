@@ -29,3 +29,13 @@ Global options:
       --quiet                   Suppress informational messages on stderr. Errors still print
       --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
                                 a secret, exit 2 for a confirmation
+
+Examples:
+  fish:
+    trousseau completions fish > ~/.config/fish/completions/trousseau.fish
+
+  zsh (a directory in your fpath):
+    trousseau completions zsh > "${fpath[1]}/_trousseau"
+
+  bash, from ~/.bashrc:
+    source <(trousseau completions bash)

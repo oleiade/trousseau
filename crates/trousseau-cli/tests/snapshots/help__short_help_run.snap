@@ -2,7 +2,7 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Run a command with the store's entries injected as environment variables
+Run a command with the store's entries as environment variables
 
 Usage: trousseau run [OPTIONS] -- <CMD>...
 
@@ -15,7 +15,7 @@ Options:
       --only <KEYPREFIX>  Only inject this key, or the keys under this path prefix. Repeatable
       --no-inherit        Give the child only the injected variables plus a small allow list,
                           instead of inheriting the parent's environment
-  -h, --help              Print help
+  -h, --help              Print help (see more with '--help')
 
 Global options:
       --store <PATH>            Use this store file. Wins over `--global` and over store discovery
@@ -33,3 +33,42 @@ Global options:
       --quiet                   Suppress informational messages on stderr. Errors still print
       --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
                                 a secret, exit 2 for a confirmation
+
+Variable names:
+  A name is derived from the key: '/', '-' and '.' become '_', letters are
+  uppercased, and a leading digit gets '_' in front.
+    database/password   ->  DATABASE_PASSWORD
+    api/v2.token        ->  API_V2_TOKEN
+  An entry saved with 'set --env NAME' uses NAME instead.
+  --env-prefix goes in front of every name, derived or explicit.
+
+Which entries are injected:
+  Every text entry, unless --only is given. Binary entries are skipped
+  with a warning. --only takes a whole key or a path prefix, and can be
+  repeated: '--only database' selects 'database' and everything under
+  'database/', but not 'database-replica/password'.
+  If the store also holds secrets this command should not see, use --only.
+
+Examples:
+  Run a server with every secret in its environment:
+    trousseau run -- ./server --port 8080
+
+  Inject only the entries under 'database/':
+    trousseau run --only database -- psql
+
+  Inject exactly two entries:
+    trousseau run --only database/password --only api/token -- ./deploy.sh
+
+  Prefix every variable (APP_DATABASE_PASSWORD, ...):
+    trousseau run --env-prefix APP_ -- ./server
+
+  Give the child a minimal environment: the injected variables plus PATH,
+  HOME, TMPDIR, TERM, LANG and LC_*:
+    trousseau run --no-inherit -- ./server
+
+Notes:
+  Injected variables win over variables already in your environment.
+  Two entries that resolve to the same name stop the command before it
+  starts (exit 8). Fix it with an explicit 'set --env NAME' on one of them.
+  To preview names and values without running anything, use 'trousseau env'
+  with the same --only and --env-prefix flags.

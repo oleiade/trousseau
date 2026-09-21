@@ -2,7 +2,10 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Import entries into the store
+Add entries from a JSON, dotenv, or TOML document.
+
+Reads the file given as `PATH`, or stdin when `PATH` is omitted. Only entries are merged: the
+imported document's recipients and kind are ignored.
 
 Usage: trousseau import [OPTIONS] [PATH]
 
@@ -62,3 +65,23 @@ Global options:
       --no-input
           Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
           confirmation
+
+Strategies, for keys that already exist:
+  fail        abort the whole import, change nothing (default, exit 8)
+  keep        keep the existing entry, skip the imported one
+  overwrite   replace the existing entry with the imported one
+
+Examples:
+  Restore a JSON backup into an empty store:
+    trousseau import backup.json
+
+  Bring in an existing .env file, replacing keys that already exist:
+    trousseau import --format dotenv --strategy overwrite .env
+
+  Read from stdin:
+    trousseau export --store ./old.store | trousseau import --strategy keep
+
+Notes:
+  dotenv import lowercases each NAME to make the key (DATABASE_URL becomes
+  'database_url') and records NAME as the entry's explicit env name, so
+  'run' and 'env' give back the exact variable you imported.

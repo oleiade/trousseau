@@ -2,31 +2,77 @@
 source: crates/trousseau-cli/tests/help.rs
 expression: stdout
 ---
-Create a new store
+Create a new, empty store.
+
+Without flags, creates `.trousseau` in the current directory, encrypted to your own key. If you have
+no identity yet, `init` generates one and prints your recipient (your public key, `age1...`). Share
+that recipient with teammates so they can add you to their stores.
 
 Usage: trousseau init [OPTIONS]
 
 Options:
-      --recipient <R>           A recipient to encrypt to. Repeatable
-      --recipients-file <PATH>  A file of recipients, one per line (blank lines and `#` comments
-                                ignored)
-      --passphrase              Create a passphrase store instead of a recipients store
-      --no-self                 Do not add the caller's own recipient to a recipients store
-  -h, --help                    Print help
+      --recipient <R>
+          A recipient (public key) to encrypt to: `age1...`, an SSH public key, or a plugin
+          recipient. Repeatable
+
+      --recipients-file <PATH>
+          A file of recipients, one per line (blank lines and `#` comments ignored)
+
+      --passphrase
+          Create a passphrase store instead of a recipients store
+
+      --no-self
+          Do not add the caller's own recipient to a recipients store
+
+  -h, --help
+          Print help (see a summary with '-h')
 
 Global options:
-      --store <PATH>            Use this store file. Wins over `--global` and over store discovery
-                                [env: TROUSSEAU_STORE=]
-      --global                  Use your personal store instead of the nearest project store (the
-                                `.trousseau` file in this directory or a parent)
-      --identity <PATH>         An identity (private key) file to try when unlocking. Repeatable.
-                                Also tried: `TROUSSEAU_IDENTITY_FILE`, the config file's
-                                `identity.files`, the default identity file, `~/.ssh/id_ed25519` and
-                                `~/.ssh/id_rsa`
-      --passphrase-file <PATH>  Read the store's passphrase from this file instead of prompting. One
-                                trailing newline is stripped
-      --json                    Print one JSON document on stdout instead of text. Errors become a
-                                JSON object on stderr
-      --quiet                   Suppress informational messages on stderr. Errors still print
-      --no-input                Never prompt. A command that would prompt fails instead: exit 4 for
-                                a secret, exit 2 for a confirmation
+      --store <PATH>
+          Use this store file. Wins over `--global` and over store discovery
+          
+          [env: TROUSSEAU_STORE=]
+
+      --global
+          Use your personal store instead of the nearest project store (the `.trousseau` file in
+          this directory or a parent)
+
+      --identity <PATH>
+          An identity (private key) file to try when unlocking. Repeatable. Also tried:
+          `TROUSSEAU_IDENTITY_FILE`, the config file's `identity.files`, the default identity file,
+          `~/.ssh/id_ed25519` and `~/.ssh/id_rsa`
+
+      --passphrase-file <PATH>
+          Read the store's passphrase from this file instead of prompting. One trailing newline is
+          stripped
+
+      --json
+          Print one JSON document on stdout instead of text. Errors become a JSON object on stderr
+
+      --quiet
+          Suppress informational messages on stderr. Errors still print
+
+      --no-input
+          Never prompt. A command that would prompt fails instead: exit 4 for a secret, exit 2 for a
+          confirmation
+
+Examples:
+  A project store in this directory, encrypted to your own key:
+    trousseau init
+
+  Your personal store, used when no project store is found:
+    trousseau init --global
+
+  A store shared with a teammate's age key and an SSH key:
+    trousseau init --recipient age1... --recipient "ssh-ed25519 AAAA..."
+
+  Recipients from a file, one per line ('#' comments allowed):
+    trousseau init --recipients-file team.txt
+
+  A store protected by a passphrase instead of keys:
+    trousseau init --passphrase
+
+Notes:
+  init refuses to overwrite an existing store (exit 8).
+  The store file is encrypted, so committing '.trousseau' to git is fine.
+  Your identity file is the private half. Never commit or share it.
