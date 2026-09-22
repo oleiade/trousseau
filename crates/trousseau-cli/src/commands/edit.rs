@@ -233,7 +233,7 @@ const fn default_editor() -> &'static str {
 /// Returns `true` if the store actually changed (so the store-level
 /// `updated_at` was bumped too).
 fn apply(store: &mut Store, parsed: BTreeMap<Key, DocEntry>, now: OffsetDateTime) -> bool {
-    let now = truncate_to_seconds(now);
+    let now = trousseau::schema::truncate_to_seconds(now);
     let mut changed = false;
 
     let existing_keys: Vec<Key> = store.entries.keys().cloned().collect();
@@ -295,16 +295,6 @@ fn entry_matches(existing: &Entry, doc_entry: &DocEntry) -> bool {
         && existing.encoding == doc_entry.encoding
         && existing.env == doc_entry.env
         && existing.description == doc_entry.description
-}
-
-/// Truncate an [`OffsetDateTime`] to whole seconds, matching the
-/// timestamp precision `docs/format.md` requires (3.1.2). `trousseau`'s
-/// own `Store` methods do this internally; `edit` writes entries
-/// directly (to implement 3.5.12's "unchanged entries keep their
-/// timestamps" rule, which `Store::set`'s always-bump semantics do not
-/// give it), so it needs its own copy.
-fn truncate_to_seconds(at: OffsetDateTime) -> OffsetDateTime {
-    at.replace_nanosecond(0).unwrap_or(at)
 }
 
 /// The `edit` output shape for `--json` (3.5.1's general "write commands
