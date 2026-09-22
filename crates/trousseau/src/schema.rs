@@ -36,10 +36,11 @@ const MAX_DESCRIPTION_BYTES: usize = 1024;
 const MAX_KEY_BYTES: usize = 256;
 
 /// Truncate an [`OffsetDateTime`] to whole seconds, as required by the
-/// on-disk timestamp format (3.1.2). Also used directly by the CLI
-/// crate's `edit` and `import` commands, which write entries outside
-/// [`Store`]'s own always-bump setters (see their own doc comments for
-/// why).
+/// on-disk timestamp format (3.1.2).
+///
+/// Also used directly by the CLI crate's `edit` and `import` commands,
+/// which write entries outside [`Store`]'s own always-bump setters (see
+/// their own doc comments for why).
 #[must_use]
 pub fn truncate_to_seconds(t: OffsetDateTime) -> OffsetDateTime {
     t.replace_nanosecond(0).unwrap_or(t)

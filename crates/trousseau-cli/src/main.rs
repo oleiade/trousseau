@@ -101,13 +101,11 @@ fn install_panic_hook() {
 /// fixed placeholder.
 fn panic_message(info: &std::panic::PanicHookInfo<'_>) -> String {
     let payload = info.payload();
-    if let Some(message) = payload.downcast_ref::<&str>() {
-        (*message).to_owned()
-    } else if let Some(message) = payload.downcast_ref::<String>() {
-        message.clone()
-    } else {
-        "Box<dyn Any>".to_owned()
-    }
+    payload
+        .downcast_ref::<&str>()
+        .map(|message| (*message).to_owned())
+        .or_else(|| payload.downcast_ref::<String>().cloned())
+        .unwrap_or_else(|| "Box<dyn Any>".to_owned())
 }
 
 /// Best-effort: write `report` under
