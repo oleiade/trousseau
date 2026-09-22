@@ -66,14 +66,7 @@ impl SealMaterial {
 // `quiet`, `no_input`, `is_stdin_tty`, and `is_stdout_tty` are four
 // independent, separately documented flags mirroring 3.5.1; collapsing
 // them into an enum would not describe the run context they capture.
-//
-// `config` and `data_dir` have no reader yet: `run`, `env`, and
-// `migrate` start reading `config`'s `[run]`/`[migrate]` tables in
-// later steps, and a command that needs the bare data directory (as
-// opposed to `personal_store`, already derived from it) has not landed
-// yet.
 #[allow(clippy::struct_excessive_bools)]
-#[allow(dead_code)]
 pub struct Context {
     /// The parsed configuration file.
     pub config: Config,
@@ -87,13 +80,9 @@ pub struct Context {
     pub is_stdin_tty: bool,
     /// Whether stdout is a terminal.
     pub is_stdout_tty: bool,
-    /// `<config_dir>/trousseau`.
-    pub config_dir: PathBuf,
-    /// `<data_dir>/trousseau`.
-    pub data_dir: PathBuf,
-    /// `<cache_dir>/trousseau`.
-    pub cache_dir: PathBuf,
 
+    config_dir: PathBuf,
+    cache_dir: PathBuf,
     cwd: PathBuf,
     home: PathBuf,
     personal_store: PathBuf,
@@ -154,7 +143,6 @@ impl Context {
             is_stdin_tty,
             is_stdout_tty,
             config_dir,
-            data_dir,
             cache_dir,
             cwd,
             home,
@@ -384,14 +372,9 @@ impl Context {
         if let Some(cached) = self.passphrase_cache.borrow().as_ref() {
             return Ok(cached.clone());
         }
-        let passphrase = self.resolve_passphrase()?;
+        let passphrase = self.resolve_passphrase_with_prompt("Passphrase: ")?;
         *self.passphrase_cache.borrow_mut() = Some(passphrase.clone());
         Ok(passphrase)
-    }
-
-    /// The 3.3.3 passphrase source order, not consulting the cache.
-    fn resolve_passphrase(&self) -> anyhow::Result<SecretString> {
-        self.resolve_passphrase_with_prompt("Passphrase: ")
     }
 
     /// The legacy source store's passphrase for `migrate` (3.5.15): the
@@ -410,7 +393,7 @@ impl Context {
         self.resolve_passphrase_with_prompt("Legacy passphrase: ")
     }
 
-    /// The shared body of [`Context::resolve_passphrase`] and
+    /// The shared body of [`Context::passphrase`] and
     /// [`Context::legacy_passphrase`]: the 3.3.3 source order, prompting
     /// with `prompt` text if it falls through to the interactive case.
     fn resolve_passphrase_with_prompt(&self, prompt: &str) -> anyhow::Result<SecretString> {
@@ -503,11 +486,24 @@ impl Context {
         }
         Ok(())
     }
+
+    /// The resolved 3.3.2 identity path list (existing files only).
+    ///
+    /// Used by `recipients rm` to check whether a recipient being
+    /// removed is one of the caller's own, through
+    /// [`trousseau::identity::own_recipients`] (3.5.9).
+    #[must_use]
+    pub fn identity_paths(&self) -> &[PathBuf] {
+        &self.identity_paths
+    }
 }
 
 /// Read a passphrase file's content, stripping exactly one trailing
-/// `\r\n` or `\n` (3.3.3). Shared by [`Context::resolve_passphrase`] and
-/// [`Context::new_store_passphrase`].
+/// `\r\n` or `\n` (3.3.3). Shared by every `--passphrase-file` reader:
+/// [`Context::passphrase`] (through
+/// [`Context::resolve_passphrase_with_prompt`]),
+/// [`Context::new_store_passphrase`], and
+/// [`Context::new_migrated_passphrase`].
 fn read_passphrase_file(path: &Path) -> anyhow::Result<SecretString> {
     let contents = std::fs::read_to_string(path)
         .with_context(|| format!("reading passphrase file {}", path.display()))?;
@@ -543,17 +539,4 @@ fn resolve_identity_paths(
         .into_iter()
         .filter(|path| std::fs::metadata(path).is_ok_and(|metadata| metadata.is_file()))
         .collect()
-}
-
-// step 3.4
-impl Context {
-    /// The resolved 3.3.2 identity path list (existing files only).
-    ///
-    /// Used by `recipients rm` to check whether a recipient being
-    /// removed is one of the caller's own, through
-    /// [`trousseau::identity::own_recipients`] (3.5.9).
-    #[must_use]
-    pub fn identity_paths(&self) -> &[PathBuf] {
-        &self.identity_paths
-    }
 }
