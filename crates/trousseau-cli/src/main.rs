@@ -24,9 +24,9 @@ fn main() {
     // a recoverable `io::Error` rather than killing the process. That
     // breaks `clap_complete`/`clap_mangen`, which `.expect()` on that
     // error internally (e.g. `completions fish | head` panics into a
-    // human-panic report). Restoring the default disposition makes a
-    // broken pipe kill the process via signal, quietly and non-zero,
-    // like any other Unix tool, before that error can reach a `.expect()`.
+    // panic report). Restoring the default disposition makes a broken
+    // pipe kill the process via signal, quietly and non-zero, like any
+    // other Unix tool, before that error can reach a `.expect()`.
     sigpipe::reset();
 
     install_panic_hook();
@@ -65,40 +65,56 @@ const fn json_mode(json: bool) -> output::OutputMode {
     }
 }
 
-/// Install a panic hook that reports the panic message, this build's
-/// version, and the operating system, and writes that same information
-/// to a report file under the cache directory.
-///
-/// The report is built entirely from [`human_panic::report::Report`],
-/// which never includes environment variables or command-line
-/// arguments (checked by reading its fields: crate name and version,
-/// operating system, panic location and message, and a backtrace of
-/// function symbol names, none of which carry argv or env content).
-/// This crate does not use `human_panic::setup_panic!`, because that
-/// macro only installs its hook in release builds (`PanicStyle::Debug`
-/// otherwise) and always writes its report to the system temp
-/// directory; a custom hook, built from the same public `Report` and
-/// `print_msg` API, is used instead so the report lands under this
-/// build's own cache directory and the behavior is the same in debug
-/// and release builds alike (the `__panic-test` integration test in
-/// `tests/panic_test.rs` runs against a debug build).
+/// Install a panic hook that reports the panic message, location, this
+/// build's version, and the operating system, and writes that same
+/// information to a report file under the cache directory. Never
+/// includes environment variables or command-line arguments, so a
+/// secret passed on the command line or through `TROUSSEAU_PASSPHRASE`
+/// cannot leak into either the report file or stderr (checked by the
+/// `__panic-test` integration test in `tests/panic_test.rs`, which runs
+/// against a debug build).
 fn install_panic_hook() {
-    let metadata = human_panic::Metadata::new("trousseau", env!("CARGO_PKG_VERSION"))
-        .authors(env!("CARGO_PKG_AUTHORS").replace(':', ", "))
-        .repository(env!("CARGO_PKG_REPOSITORY"));
-    std::panic::set_hook(Box::new(move |info| {
-        let report = human_panic::report::Report::with_panic(&metadata, info);
+    std::panic::set_hook(Box::new(|info| {
+        let message = panic_message(info);
+        let location = info
+            .location()
+            .map_or_else(|| "<unknown>".to_owned(), ToString::to_string);
+        let report = format!(
+            "trousseau {}\nos: {}\nlocation: {location}\nmessage: {message}\n",
+            env!("CARGO_PKG_VERSION"),
+            std::env::consts::OS,
+        );
         let file_path = write_panic_report(&report);
-        let _ = human_panic::print_msg(file_path.as_deref(), &metadata);
+        crate::output::warn(&format!("error: trousseau crashed: {message}"));
+        if let Some(path) = &file_path {
+            crate::output::warn(&format!("a report was saved to {}", path.display()));
+        }
+        crate::output::warn(&format!(
+            "this is a bug; please report it at {}/issues",
+            env!("CARGO_PKG_REPOSITORY")
+        ));
     }));
 }
 
-/// Best-effort: serialize `report` and write it under
-/// `<cache_dir>/trousseau/panic-report-<pid>-<nanos>.toml`, returning
-/// the path on success. Never panics: this runs from inside a panic
-/// hook, where a second panic would abort the process.
-fn write_panic_report(report: &human_panic::report::Report) -> Option<PathBuf> {
-    let toml = report.serialize()?;
+/// The panic payload as a string, the way the standard panic hook
+/// prints it: a `&str` or `String` payload verbatim, anything else as a
+/// fixed placeholder.
+fn panic_message(info: &std::panic::PanicHookInfo<'_>) -> String {
+    let payload = info.payload();
+    if let Some(message) = payload.downcast_ref::<&str>() {
+        (*message).to_owned()
+    } else if let Some(message) = payload.downcast_ref::<String>() {
+        message.clone()
+    } else {
+        "Box<dyn Any>".to_owned()
+    }
+}
+
+/// Best-effort: write `report` under
+/// `<cache_dir>/trousseau/panic-report-<pid>-<nanos>.txt`, returning the
+/// path on success. Never panics: this runs from inside a panic hook,
+/// where a second panic would abort the process.
+fn write_panic_report(report: &str) -> Option<PathBuf> {
     let strategy = etcetera::choose_base_strategy().ok()?;
     let dir = {
         use etcetera::BaseStrategy as _;
@@ -108,7 +124,7 @@ fn write_panic_report(report: &human_panic::report::Report) -> Option<PathBuf> {
     let unique = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_or(0, |duration| duration.as_nanos());
-    let path = dir.join(format!("panic-report-{}-{unique}.toml", std::process::id()));
-    std::fs::write(&path, toml).ok()?;
+    let path = dir.join(format!("panic-report-{}-{unique}.txt", std::process::id()));
+    std::fs::write(&path, report).ok()?;
     Some(path)
 }

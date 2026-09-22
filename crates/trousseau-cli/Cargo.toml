@@ -52,7 +52,6 @@ rpassword = { workspace = true }
 dialoguer = { workspace = true }
 secrecy = { workspace = true }
 age = { workspace = true }
-human-panic = { workspace = true }
 time = { workspace = true }
 arboard = { workspace = true, optional = true }
 tempfile = { workspace = true }

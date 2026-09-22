@@ -40,7 +40,6 @@ rpassword = { version = "7" }
 dialoguer = { version = "0.12" }
 arboard = { version = "3.6", default-features = false }
 shell-words = { version = "1.1" }
-human-panic = { version = "2", default-features = false }
 sigpipe = { version = "0.1" }
 scrypt = { version = "0.12" }
 aes = { version = "0.9" }
