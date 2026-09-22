@@ -268,16 +268,8 @@ fn report(ctx: &Context, path: &Path, store: &Store) -> anyhow::Result<()> {
         OutputMode::Json => output::json(&InitJson {
             ok: true,
             path: path.display().to_string(),
-            kind: store_kind_label(store.kind),
+            kind: store.kind.as_str(),
             recipients: &store.recipients,
         }),
-    }
-}
-
-/// The `kind` string for a [`StoreKind`] (3.5.2, appendix 5.1).
-const fn store_kind_label(kind: StoreKind) -> &'static str {
-    match kind {
-        StoreKind::Recipients => "recipients",
-        StoreKind::Passphrase => "passphrase",
     }
 }

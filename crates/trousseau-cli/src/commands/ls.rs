@@ -56,7 +56,7 @@ fn print_long(matches: &[(&Key, &Entry)]) -> anyhow::Result<()> {
     for (key, entry) in matches {
         rows.push(vec![
             key.to_string(),
-            super::encoding_label(entry.encoding).to_owned(),
+            entry.encoding.as_str().to_owned(),
             entry.env.clone().unwrap_or_default(),
             super::format_rfc3339(entry.updated_at)?,
             entry.description.clone().unwrap_or_default(),
@@ -83,7 +83,7 @@ fn print_json(matches: &[(&Key, &Entry)]) -> anyhow::Result<()> {
     for (key, entry) in matches {
         items.push(LsEntryJson {
             key: key.as_str(),
-            encoding: super::encoding_label(entry.encoding),
+            encoding: entry.encoding.as_str(),
             env: entry.env.as_deref(),
             description: entry.description.as_deref(),
             created_at: super::format_rfc3339(entry.created_at)?,

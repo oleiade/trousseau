@@ -53,7 +53,7 @@ pub fn run(ctx: &Context, args: &GetArgs) -> anyhow::Result<()> {
         return output::json(&GetJson {
             key: key.as_str(),
             value: stored_representation(entry.encoding, bytes)?,
-            encoding: super::encoding_label(entry.encoding),
+            encoding: entry.encoding.as_str(),
             env: entry.env.as_deref(),
             description: entry.description.as_deref(),
             created_at: super::format_rfc3339(entry.created_at)?,

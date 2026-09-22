@@ -37,6 +37,19 @@ pub enum EnvelopeKind {
     Passphrase,
 }
 
+impl EnvelopeKind {
+    /// This kind's lowercase name, matching [`crate::schema::StoreKind`]'s
+    /// own (the two enums agree on every variant, since an envelope's
+    /// kind and its decrypted store's kind describe the same store).
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Recipients => "recipients",
+            Self::Passphrase => "passphrase",
+        }
+    }
+}
+
 /// Inspect the age header of `armored` without decrypting the payload.
 ///
 /// `armored` MUST be an ASCII-armored age file (section 3.1.1); a
