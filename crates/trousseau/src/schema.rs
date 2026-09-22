@@ -37,7 +37,12 @@ const MAX_KEY_BYTES: usize = 256;
 
 /// Truncate an [`OffsetDateTime`] to whole seconds, as required by the
 /// on-disk timestamp format (3.1.2).
-fn truncate_to_seconds(t: OffsetDateTime) -> OffsetDateTime {
+///
+/// Also used directly by the CLI crate's `edit` and `import` commands,
+/// which write entries outside [`Store`]'s own always-bump setters (see
+/// their own doc comments for why).
+#[must_use]
+pub fn truncate_to_seconds(t: OffsetDateTime) -> OffsetDateTime {
     t.replace_nanosecond(0).unwrap_or(t)
 }
 
@@ -213,6 +218,19 @@ pub enum Encoding {
     Base64,
 }
 
+impl Encoding {
+    /// This encoding's lowercase name, matching its serialized form
+    /// (`#[serde(rename_all = "lowercase")]` above) and the CLI's
+    /// `encoding` field in `docs/cli.md` appendix 5.1.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Utf8 => "utf8",
+            Self::Base64 => "base64",
+        }
+    }
+}
+
 /// The kind of store, distinguished by the age envelope header (3.1.1).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -221,6 +239,19 @@ pub enum StoreKind {
     Recipients,
     /// A single passphrase (scrypt) opens the store.
     Passphrase,
+}
+
+impl StoreKind {
+    /// This kind's lowercase name, matching its serialized form
+    /// (`#[serde(rename_all = "lowercase")]` above) and the CLI's
+    /// `kind` field in `docs/cli.md` appendix 5.1.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Recipients => "recipients",
+            Self::Passphrase => "passphrase",
+        }
+    }
 }
 
 /// Secret bytes: an entry's value.

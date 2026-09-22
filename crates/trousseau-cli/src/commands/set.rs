@@ -158,7 +158,7 @@ fn report(ctx: &Context, key: &Key, encoding: Encoding, created: bool) -> anyhow
         OutputMode::Json => output::json(&SetJson {
             ok: true,
             key: key.as_str(),
-            encoding: super::encoding_label(encoding),
+            encoding: encoding.as_str(),
             created,
         }),
     }

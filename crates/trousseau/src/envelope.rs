@@ -23,8 +23,10 @@ use crate::schema::MAX_PAYLOAD_BYTES;
 /// Binary (unarmored) age files are not accepted as stores (section
 /// 3.1.1): this crate checks for the marker before attempting to parse
 /// anything, so an unarmored age file is rejected the same way as
-/// arbitrary garbage.
-const ARMOR_HEADER: &[u8] = b"-----BEGIN AGE ENCRYPTED FILE-----";
+/// arbitrary garbage. `pub(crate)` so `store.rs`'s own classification
+/// check ([`crate::store::looks_like_legacy`]'s neighbor) can share it
+/// instead of keeping its own copy.
+pub(crate) const ARMOR_HEADER: &[u8] = b"-----BEGIN AGE ENCRYPTED FILE-----";
 
 /// Which kind of age envelope a store's bytes are, distinguished by the
 /// age header alone (no decryption required).
@@ -35,6 +37,19 @@ pub enum EnvelopeKind {
     Recipients,
     /// Exactly one scrypt (passphrase) stanza.
     Passphrase,
+}
+
+impl EnvelopeKind {
+    /// This kind's lowercase name, matching [`crate::schema::StoreKind`]'s
+    /// own (the two enums agree on every variant, since an envelope's
+    /// kind and its decrypted store's kind describe the same store).
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Recipients => "recipients",
+            Self::Passphrase => "passphrase",
+        }
+    }
 }
 
 /// Inspect the age header of `armored` without decrypting the payload.

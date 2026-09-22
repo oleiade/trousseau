@@ -49,18 +49,15 @@ serde_json = { workspace = true }
 toml = { workspace = true }
 etcetera = { workspace = true }
 rpassword = { workspace = true }
-dialoguer = { workspace = true }
 secrecy = { workspace = true }
 age = { workspace = true }
-human-panic = { workspace = true }
 time = { workspace = true }
 arboard = { workspace = true, optional = true }
 tempfile = { workspace = true }
-shell-words = { workspace = true }
 sha2 = { workspace = true }
 sigpipe = { workspace = true }
 
 [dev-dependencies]
 assert_cmd = { workspace = true }
-predicates = { workspace = true }
 insta = { workspace = true }
+shell-words = { workspace = true }

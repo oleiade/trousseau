@@ -7,7 +7,7 @@ use serde::Serialize;
 use time::format_description::well_known::Rfc3339;
 
 use trousseau::envelope::EnvelopeKind;
-use trousseau::schema::{Store, StoreKind};
+use trousseau::schema::Store;
 use trousseau::store::{LockMode, RawStore};
 
 use crate::context::Context;
@@ -156,16 +156,13 @@ fn print_json(path: &Path, unlocked: &Unlocked<'_>) -> anyhow::Result<()> {
     output::json(&json)
 }
 
-/// The `kind` string shared by both output modes (3.5.3, appendix 5.1).
+/// The `kind` string shared by both output modes (3.5.3, appendix 5.1):
+/// [`trousseau::schema::StoreKind::as_str`] once unlocked,
+/// [`EnvelopeKind::as_str`] while still locked. The two agree on every
+/// variant (see [`EnvelopeKind::as_str`]'s doc comment).
 const fn kind_label(unlocked: &Unlocked<'_>) -> &'static str {
     match unlocked {
-        Unlocked::Store(store) => match store.kind {
-            StoreKind::Recipients => "recipients",
-            StoreKind::Passphrase => "passphrase",
-        },
-        Unlocked::Locked(kind) => match kind {
-            EnvelopeKind::Recipients => "recipients",
-            EnvelopeKind::Passphrase => "passphrase",
-        },
+        Unlocked::Store(store) => store.kind.as_str(),
+        Unlocked::Locked(kind) => kind.as_str(),
     }
 }

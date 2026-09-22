@@ -69,7 +69,7 @@ struct RekeyJson<'a> {
 /// Print `rekey`'s result: a one-line summary on stderr in human mode,
 /// or the JSON shape from appendix 5.1 on stdout in `--json` mode.
 fn report(ctx: &Context, store: &Store) -> anyhow::Result<()> {
-    let kind = store_kind_label(store.kind);
+    let kind = store.kind.as_str();
     match ctx.output {
         OutputMode::Human => {
             output::info(ctx.quiet, &format!("rekeyed ({kind})"));
@@ -80,16 +80,5 @@ fn report(ctx: &Context, store: &Store) -> anyhow::Result<()> {
             kind,
             recipients: &store.recipients,
         }),
-    }
-}
-
-/// The `kind` string for a [`StoreKind`] (appendix 5.1). A small,
-/// deliberate duplicate of `commands::init`'s own private helper of the
-/// same shape, rather than a shared one, per step 3.4's minimal-touch
-/// note.
-const fn store_kind_label(kind: StoreKind) -> &'static str {
-    match kind {
-        StoreKind::Recipients => "recipients",
-        StoreKind::Passphrase => "passphrase",
     }
 }

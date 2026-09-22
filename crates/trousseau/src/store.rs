@@ -16,7 +16,7 @@ use std::time::{Duration, Instant};
 use secrecy::SecretString;
 use sha2::{Digest, Sha256};
 
-use crate::envelope;
+use crate::envelope::{self, ARMOR_HEADER};
 use crate::error::Error;
 use crate::schema::Store;
 
@@ -26,14 +26,6 @@ pub const PROJECT_STORE_FILENAME: &str = ".trousseau";
 
 /// The file mode a saved store is written with on Unix (3.2).
 const STORE_FILE_MODE: u32 = 0o600;
-
-/// The armor header every current-format store starts with (3.1.1).
-///
-/// This mirrors the private constant of the same name in
-/// [`crate::envelope`]; it is duplicated here rather than exposed from
-/// there so `envelope` does not need a `pub(crate)` item just for this
-/// module's classification check.
-const ARMOR_HEADER: &[u8] = b"-----BEGIN AGE ENCRYPTED FILE-----";
 
 /// How often [`lock`] polls for the lock to become available.
 const LOCK_POLL_INTERVAL: Duration = Duration::from_millis(50);
@@ -89,6 +81,21 @@ impl Locator<'_> {
     /// `init`.
     #[must_use]
     pub fn resolve(&self) -> Resolved {
+        self.resolve_with(true)
+    }
+
+    /// Resolve a store path for `init`: identical to [`Locator::resolve`]
+    /// except rule 4 becomes "the current directory's `.trousseau`",
+    /// never walking up to an ancestor's store.
+    #[must_use]
+    pub fn resolve_for_init(&self) -> Resolved {
+        self.resolve_with(false)
+    }
+
+    /// The shared body of [`Locator::resolve`] and
+    /// [`Locator::resolve_for_init`]: rules 1 through 3 and 5 are
+    /// identical between them, and `walk_up` picks rule 4's behavior.
+    fn resolve_with(&self, walk_up: bool) -> Resolved {
         if let Some(path) = &self.explicit {
             return Resolved::Explicit(path.clone());
         }
@@ -98,24 +105,10 @@ impl Locator<'_> {
         if self.global {
             return Resolved::Personal(self.personal.to_path_buf());
         }
-        if let Some(path) = find_project_store(self.cwd) {
-            return Resolved::Project(path);
-        }
-        Resolved::Personal(self.personal.to_path_buf())
-    }
-
-    /// Resolve a store path for `init`: identical to [`Locator::resolve`]
-    /// except rule 4 becomes "the current directory's `.trousseau`",
-    /// never walking up to an ancestor's store.
-    #[must_use]
-    pub fn resolve_for_init(&self) -> Resolved {
-        if let Some(path) = &self.explicit {
-            return Resolved::Explicit(path.clone());
-        }
-        if let Some(path) = &self.env {
-            return Resolved::Explicit(path.clone());
-        }
-        if self.global {
+        if walk_up {
+            if let Some(path) = find_project_store(self.cwd) {
+                return Resolved::Project(path);
+            }
             return Resolved::Personal(self.personal.to_path_buf());
         }
         Resolved::Project(self.cwd.join(PROJECT_STORE_FILENAME))

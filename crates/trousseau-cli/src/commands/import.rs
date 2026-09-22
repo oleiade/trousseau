@@ -46,7 +46,7 @@ pub fn run(ctx: &Context, args: &ImportArgs) -> anyhow::Result<()> {
     let path = resolved.path();
     let _lock = ctx.lock(path, LockMode::Exclusive)?;
     let mut store = ctx.unlock(path)?;
-    let now = truncate_to_seconds(ctx.now());
+    let now = trousseau::schema::truncate_to_seconds(ctx.now());
 
     // `fail` (the default) is all-or-nothing: check every imported key
     // against the store before mutating anything, so a collision leaves
@@ -254,12 +254,6 @@ fn parse_toml(bytes: &[u8]) -> anyhow::Result<BTreeMap<Key, ImportedEntry>> {
             )
         })
         .collect())
-}
-
-/// Truncate `at` to whole seconds, matching the on-disk timestamp
-/// precision (3.1.2).
-fn truncate_to_seconds(at: OffsetDateTime) -> OffsetDateTime {
-    at.replace_nanosecond(0).unwrap_or(at)
 }
 
 /// The `import` output shape for `--json` (appendix 5.1).

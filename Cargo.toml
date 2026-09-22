@@ -37,16 +37,13 @@ clap = { version = "4.6", features = ["derive", "env", "wrap_help"] }
 clap_complete = { version = "4.6" }
 clap_mangen = { version = "0.3" }
 rpassword = { version = "7" }
-dialoguer = { version = "0.12" }
 arboard = { version = "3.6", default-features = false }
 shell-words = { version = "1.1" }
-human-panic = { version = "2", default-features = false }
 sigpipe = { version = "0.1" }
 scrypt = { version = "0.12" }
 aes = { version = "0.9" }
 cfb-mode = { version = "0.9" }
 assert_cmd = { version = "2" }
-predicates = { version = "3" }
 proptest = { version = "1" }
 insta = { version = "1", features = ["json"] }
 
