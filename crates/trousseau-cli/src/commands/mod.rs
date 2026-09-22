@@ -1,10 +1,4 @@
 //! One module per subcommand, dispatched from [`dispatch`].
-//!
-//! Every command not yet implemented (everything before its plan step
-//! lands) returns `anyhow::anyhow!("not implemented yet (step N)")` with
-//! the step from `docs/IMPLEMENTATION_PLAN.md` section 4 that implements
-//! it. `main.rs` maps that generic error to exit code 1 through
-//! `exit.rs`, same as any other unexpected failure.
 
 use std::collections::BTreeMap;
 
@@ -39,9 +33,7 @@ pub mod set;
 ///
 /// # Errors
 ///
-/// Returns whatever the selected command's implementation returns; for
-/// a command not yet implemented, a generic "not implemented yet"
-/// error.
+/// Returns whatever the selected command's implementation returns.
 pub fn dispatch(cli: &Cli, ctx: &Context) -> anyhow::Result<()> {
     match &cli.command {
         Command::Init(args) => init::run(ctx, args),

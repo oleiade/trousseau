@@ -9,7 +9,6 @@
 //! `[run].env_prefix` by `run` and `env` (3.5.13, 3.5.14): the
 //! `--env-prefix` flag overrides it when given, and it is the default
 //! when the flag is absent.
-#![allow(dead_code)]
 
 use std::path::{Path, PathBuf};
 

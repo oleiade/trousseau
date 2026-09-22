@@ -7,9 +7,7 @@ mod common;
 
 /// `get` on a key that does not exist, in `--json` mode: exit 5, stdout
 /// stays empty, and stderr carries the JSON error object with code
-/// `key_not_found` (3.5.5, 3.5.1). Every subcommand is implemented as
-/// of step 3.9, so this uses an ordinary failure instead of the
-/// "not implemented yet" stub earlier steps relied on here.
+/// `key_not_found` (3.5.5, 3.5.1).
 #[test]
 fn json_mode_error_prints_json_error_only() {
     let env = common::Env::new();

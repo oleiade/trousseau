@@ -21,21 +21,21 @@ use crate::output::{self, OutputMode};
 /// any store is opened, and reported here as [`CliError::StoreExists`].
 /// [`CliError::Usage`] covers a command-line combination clap's own
 /// grammar cannot express as invalid, such as `init --no-self` with no
-/// recipients (3.5.2). [`CliError::Refused`] and [`CliError::ChildFailed`]
-/// are not constructed until the commands that need them land in a later
-/// step (`recipients rm`'s confirmation, and `run`'s child-process
-/// handling); `code_for` and `json_code_for` already handle both so
-/// those steps need no changes here.
-#[allow(dead_code)]
+/// recipients (3.5.2). [`CliError::Refused`] is `recipients rm`'s
+/// declined-confirmation error; [`CliError::ChildFailed`] is `run`'s
+/// Windows-only child-process-handling error (see its own doc comment),
+/// so it is never constructed on other platforms.
 #[derive(Debug)]
 pub enum CliError {
     /// The user declined a confirmation, or one was refused
     /// automatically because `--no-input` (or a non-terminal stdin) was
     /// in effect.
     Refused,
-    /// A child process spawned by `run` could not be waited on, or (on
-    /// Windows) reported an unrepresentable exit status. Does not cover
-    /// the child's own exit code, which `run` passes through directly.
+    /// A child process spawned by `run` reported an unrepresentable
+    /// exit status. Windows only: on Unix, `run` replaces the current
+    /// process with the child instead of waiting on it, so this variant
+    /// is never constructed there.
+    #[cfg_attr(not(windows), allow(dead_code))]
     ChildFailed,
     /// `init`'s target store already exists (3.5.2).
     StoreExists {
@@ -73,9 +73,8 @@ impl std::error::Error for CliError {}
 
 /// The process exit code for `err`, per the table in `docs/cli.md`.
 ///
-/// Downcasts to [`trousseau::error::Error`] first, then to [`CliError`]; any
-/// other error (including every "not implemented yet" stub in this
-/// step) is exit code 1, the generic failure code.
+/// Downcasts to [`trousseau::error::Error`] first, then to [`CliError`];
+/// any other error is exit code 1, the generic failure code.
 #[must_use]
 pub fn code_for(err: &anyhow::Error) -> i32 {
     if let Some(lib_err) = err.downcast_ref::<Error>() {
@@ -115,8 +114,7 @@ const fn code_for_lib_error(err: &Error) -> i32 {
 
 /// The JSON error `code` for `err` (appendix 5.1): a [`trousseau::error::Error`]
 /// variant's name in `snake_case`, `"refused"` or `"child_failed"` for a
-/// [`CliError`], or `"error"` for anything else (including a
-/// "not implemented yet" stub).
+/// [`CliError`], or `"error"` for anything else.
 #[must_use]
 pub fn json_code_for(err: &anyhow::Error) -> &'static str {
     if let Some(lib_err) = err.downcast_ref::<Error>() {
@@ -257,7 +255,7 @@ mod tests {
 
     #[test]
     fn non_library_error_is_generic_failure() {
-        let err = anyhow::anyhow!("not implemented yet (step 3.2)");
+        let err = anyhow::anyhow!("something unexpected");
         assert_eq!(code_for(&err), 1);
         assert_eq!(super::json_code_for(&err), "error");
     }
