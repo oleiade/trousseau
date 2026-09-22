@@ -174,7 +174,10 @@ fn run_editor(scratch_path: &Path) -> anyhow::Result<()> {
 }
 
 #[cfg(unix)]
-fn spawn_editor(command_line: &str, scratch_path: &Path) -> std::io::Result<std::process::ExitStatus> {
+fn spawn_editor(
+    command_line: &str,
+    scratch_path: &Path,
+) -> std::io::Result<std::process::ExitStatus> {
     Command::new("sh")
         .arg("-c")
         .arg(format!("{command_line} \"$1\""))
@@ -187,7 +190,10 @@ fn spawn_editor(command_line: &str, scratch_path: &Path) -> std::io::Result<std:
 }
 
 #[cfg(not(unix))]
-fn spawn_editor(command_line: &str, scratch_path: &Path) -> std::io::Result<std::process::ExitStatus> {
+fn spawn_editor(
+    command_line: &str,
+    scratch_path: &Path,
+) -> std::io::Result<std::process::ExitStatus> {
     Command::new("cmd")
         .arg("/C")
         .arg(format!("{command_line} \"{}\"", scratch_path.display()))
