@@ -37,7 +37,6 @@ clap = { version = "4.6", features = ["derive", "env", "wrap_help"] }
 clap_complete = { version = "4.6" }
 clap_mangen = { version = "0.3" }
 rpassword = { version = "7" }
-dialoguer = { version = "0.12" }
 arboard = { version = "3.6", default-features = false }
 shell-words = { version = "1.1" }
 sigpipe = { version = "0.1" }

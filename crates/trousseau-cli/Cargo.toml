@@ -49,7 +49,6 @@ serde_json = { workspace = true }
 toml = { workspace = true }
 etcetera = { workspace = true }
 rpassword = { workspace = true }
-dialoguer = { workspace = true }
 secrecy = { workspace = true }
 age = { workspace = true }
 time = { workspace = true }

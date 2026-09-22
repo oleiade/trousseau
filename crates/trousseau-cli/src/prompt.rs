@@ -49,17 +49,27 @@ pub fn hidden_confirm(prompt: &str) -> anyhow::Result<SecretString> {
     }
 }
 
-/// Ask a yes/no question, defaulting to `default` on a bare Enter.
+/// Ask a yes/no question, defaulting to `default` on a bare Enter (or
+/// EOF): prints `question` and a `[y/N]`/`[Y/n]` hint matching
+/// `default`, then reads a line, accepting `y`/`yes` or `n`/`no`
+/// (case-insensitively) and reprompting on anything else.
 ///
 /// # Errors
 ///
 /// Returns an error if the terminal cannot be read.
 pub fn confirm(question: &str, default: bool) -> anyhow::Result<bool> {
-    let answer = dialoguer::Confirm::new()
-        .with_prompt(question)
-        .default(default)
-        .interact()?;
-    Ok(answer)
+    let hint = if default { "Y/n" } else { "y/N" };
+    loop {
+        output::warn(&format!("{question} [{hint}]"));
+        let mut line = String::new();
+        std::io::stdin().read_line(&mut line)?;
+        match line.trim().to_ascii_lowercase().as_str() {
+            "" => return Ok(default),
+            "y" | "yes" => return Ok(true),
+            "n" | "no" => return Ok(false),
+            _ => output::warn("please answer y or n"),
+        }
+    }
 }
 
 /// The `age::Callbacks` implementor used everywhere this crate hands
