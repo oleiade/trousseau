@@ -89,6 +89,21 @@ impl Locator<'_> {
     /// `init`.
     #[must_use]
     pub fn resolve(&self) -> Resolved {
+        self.resolve_with(true)
+    }
+
+    /// Resolve a store path for `init`: identical to [`Locator::resolve`]
+    /// except rule 4 becomes "the current directory's `.trousseau`",
+    /// never walking up to an ancestor's store.
+    #[must_use]
+    pub fn resolve_for_init(&self) -> Resolved {
+        self.resolve_with(false)
+    }
+
+    /// The shared body of [`Locator::resolve`] and
+    /// [`Locator::resolve_for_init`]: rules 1 through 3 and 5 are
+    /// identical between them, and `walk_up` picks rule 4's behavior.
+    fn resolve_with(&self, walk_up: bool) -> Resolved {
         if let Some(path) = &self.explicit {
             return Resolved::Explicit(path.clone());
         }
@@ -98,24 +113,10 @@ impl Locator<'_> {
         if self.global {
             return Resolved::Personal(self.personal.to_path_buf());
         }
-        if let Some(path) = find_project_store(self.cwd) {
-            return Resolved::Project(path);
-        }
-        Resolved::Personal(self.personal.to_path_buf())
-    }
-
-    /// Resolve a store path for `init`: identical to [`Locator::resolve`]
-    /// except rule 4 becomes "the current directory's `.trousseau`",
-    /// never walking up to an ancestor's store.
-    #[must_use]
-    pub fn resolve_for_init(&self) -> Resolved {
-        if let Some(path) = &self.explicit {
-            return Resolved::Explicit(path.clone());
-        }
-        if let Some(path) = &self.env {
-            return Resolved::Explicit(path.clone());
-        }
-        if self.global {
+        if walk_up {
+            if let Some(path) = find_project_store(self.cwd) {
+                return Resolved::Project(path);
+            }
             return Resolved::Personal(self.personal.to_path_buf());
         }
         Resolved::Project(self.cwd.join(PROJECT_STORE_FILENAME))

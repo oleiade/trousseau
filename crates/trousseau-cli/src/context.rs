@@ -98,7 +98,6 @@ pub struct Context {
     home: PathBuf,
     personal_store: PathBuf,
     explicit_store: Option<PathBuf>,
-    env_store: Option<PathBuf>,
     global_store: bool,
     identity_paths: Vec<PathBuf>,
     passphrase_file: Option<PathBuf>,
@@ -161,7 +160,6 @@ impl Context {
             home,
             personal_store,
             explicit_store: cli.global.store.clone(),
-            env_store: None,
             global_store: cli.global.global,
             identity_paths,
             passphrase_file: cli.global.passphrase_file.clone(),
@@ -185,11 +183,16 @@ impl Context {
 
     /// Build a [`Locator`] borrowing this context's resolved inputs
     /// (3.2).
+    ///
+    /// `Locator::env` (rule 2, `TROUSSEAU_STORE`) is always `None` here:
+    /// `--store` is declared with `#[arg(env = "TROUSSEAU_STORE")]`
+    /// (`cli.rs`), so clap already folds that environment variable into
+    /// `cli.global.store`/`explicit_store` before this runs.
     #[must_use]
     pub fn locator(&self) -> Locator<'_> {
         Locator {
             explicit: self.explicit_store.clone(),
-            env: self.env_store.clone(),
+            env: None,
             global: self.global_store,
             cwd: &self.cwd,
             personal: &self.personal_store,
