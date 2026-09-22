@@ -20,6 +20,15 @@ mod output;
 mod prompt;
 
 fn main() {
+    // Rust ignores SIGPIPE at startup, turning a closed-pipe write into
+    // a recoverable `io::Error` rather than killing the process. That
+    // breaks `clap_complete`/`clap_mangen`, which `.expect()` on that
+    // error internally (e.g. `completions fish | head` panics into a
+    // human-panic report). Restoring the default disposition makes a
+    // broken pipe kill the process via signal, quietly and non-zero,
+    // like any other Unix tool, before that error can reach a `.expect()`.
+    sigpipe::reset();
+
     install_panic_hook();
 
     let cli = match cli::Cli::try_parse() {
