@@ -149,26 +149,22 @@ fn scratch_dir() -> PathBuf {
 
 /// Spawn the editor on `scratch_path`, waiting for it to exit.
 ///
+/// `command_line` is a whole shell command (`$VISUAL`/`$EDITOR` can be
+/// `"code --wait"`, not just a bare program name), so rather than
+/// splitting it by hand, it is handed to the platform's own shell: `sh
+/// -c` on Unix, with `scratch_path` passed as `$1` so it never has to be
+/// escaped into the command string, and `cmd /C` on Windows, where
+/// simple quoting is safe because `"` is a reserved character no valid
+/// path can contain.
+///
 /// # Errors
 ///
-/// Returns an error if the editor command cannot be parsed or spawned,
-/// or if it exits with a non-zero status (3.5.12: abort, exit 1, scratch
+/// Returns an error if the shell cannot be spawned, or if the editor
+/// exits with a non-zero status (3.5.12: abort, exit 1, scratch
 /// deleted).
 fn run_editor(scratch_path: &Path) -> anyhow::Result<()> {
     let command_line = editor_command();
-    let argv = split_editor_command(&command_line)
-        .with_context(|| format!("parsing editor command {command_line:?}"))?;
-    let (program, rest) = argv
-        .split_first()
-        .ok_or_else(|| anyhow::anyhow!("empty editor command"))?;
-
-    let status = Command::new(program)
-        .args(rest)
-        .arg(scratch_path)
-        .stdin(Stdio::inherit())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .status()
+    let status = spawn_editor(&command_line, scratch_path)
         .with_context(|| format!("running editor {command_line:?}"))?;
 
     if !status.success() {
@@ -177,28 +173,28 @@ fn run_editor(scratch_path: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Split the editor command line into argv with POSIX shell quoting.
 #[cfg(unix)]
-fn split_editor_command(command_line: &str) -> anyhow::Result<Vec<String>> {
-    Ok(shell_words::split(command_line)?)
+fn spawn_editor(command_line: &str, scratch_path: &Path) -> std::io::Result<std::process::ExitStatus> {
+    Command::new("sh")
+        .arg("-c")
+        .arg(format!("{command_line} \"$1\""))
+        .arg("sh") // $0: conventionally the program name, unused here
+        .arg(scratch_path)
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status()
 }
 
-/// Split the editor command line into argv with Windows rules: a leading
-/// double-quoted program name, then whitespace-separated arguments.
-/// Backslashes are path separators here, never escapes, so the POSIX
-/// splitter would mangle `C:\Program Files\...`.
 #[cfg(not(unix))]
-fn split_editor_command(command_line: &str) -> anyhow::Result<Vec<String>> {
-    let trimmed = command_line.trim();
-    if let Some(rest) = trimmed.strip_prefix('"') {
-        let (program, args) = rest
-            .split_once('"')
-            .ok_or_else(|| anyhow::anyhow!("unterminated quote in editor command"))?;
-        let mut argv = vec![program.to_owned()];
-        argv.extend(args.split_whitespace().map(str::to_owned));
-        return Ok(argv);
-    }
-    Ok(trimmed.split_whitespace().map(str::to_owned).collect())
+fn spawn_editor(command_line: &str, scratch_path: &Path) -> std::io::Result<std::process::ExitStatus> {
+    Command::new("cmd")
+        .arg("/C")
+        .arg(format!("{command_line} \"{}\"", scratch_path.display()))
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status()
 }
 
 /// The editor command line: `$VISUAL`, else `$EDITOR`, else `vi` on Unix
