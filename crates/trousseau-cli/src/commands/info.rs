@@ -8,7 +8,7 @@ use time::format_description::well_known::Rfc3339;
 
 use trousseau::envelope::EnvelopeKind;
 use trousseau::schema::Store;
-use trousseau::store::{LockMode, RawStore};
+use trousseau::store::LockMode;
 
 use crate::context::Context;
 use crate::output::{self, OutputMode};
@@ -32,20 +32,10 @@ pub fn run(ctx: &Context) -> anyhow::Result<()> {
     let path = resolved.path();
     let _lock = ctx.lock(path, LockMode::Shared)?;
 
-    let raw = trousseau::store::read_raw(path)?;
-    let bytes = match &raw {
-        RawStore::Current(bytes) => bytes,
-        // A legacy store is never reported as "(locked)": it must
-        // surface as exit 7 with the `migrate` hint, same as every
-        // other command (3.5.3, 3.6).
-        RawStore::Legacy(_) => {
-            return Err(trousseau::error::Error::LegacyStore {
-                path: path.to_path_buf(),
-            }
-            .into());
-        }
-    };
-    let kind = trousseau::envelope::peek_kind(bytes)?;
+    // A legacy store is never reported as "(locked)": `peek_kind` fails
+    // with exit 7 and the `migrate` hint, same as every other command
+    // (3.5.3, 3.6).
+    let kind = Context::peek_kind(path)?;
 
     match ctx.unlock(path) {
         Ok(store) => report(ctx, path, &Unlocked::Store(&store)),
