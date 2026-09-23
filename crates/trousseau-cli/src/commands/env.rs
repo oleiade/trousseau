@@ -46,16 +46,6 @@ pub fn run(ctx: &Context, args: &EnvArgs) -> anyhow::Result<()> {
     }
 }
 
-/// An entry's value as a `String`. `env_map` only ever contains `utf8`
-/// entries (`base64` entries are excluded, 3.1.4), whose bytes are
-/// always valid UTF-8 (checked at every write path); `unwrap_or_default`
-/// is a defensive fallback, never expected to trigger.
-fn entry_value(entry: &Entry) -> String {
-    std::str::from_utf8(entry.value.expose())
-        .unwrap_or_default()
-        .to_owned()
-}
-
 /// `export NAME='value'` lines, one per selected entry, in name order
 /// (`env_map`'s `BTreeMap`); `'` in `value` becomes `'\''` (3.5.14),
 /// which is the only character that needs escaping inside a POSIX
@@ -66,7 +56,7 @@ fn print_shell(map: &BTreeMap<String, &Entry>) -> anyhow::Result<()> {
         out.push_str("export ");
         out.push_str(name);
         out.push_str("='");
-        out.push_str(&escape_shell_value(&entry_value(entry)));
+        out.push_str(&escape_shell_value(super::entry_text(entry)));
         out.push_str("'\n");
     }
     output::raw(out.as_bytes())
@@ -84,16 +74,16 @@ fn escape_shell_value(text: &str) -> String {
 fn print_dotenv(map: &BTreeMap<String, &Entry>) -> anyhow::Result<()> {
     let mut out = String::new();
     for (name, entry) in map {
-        out.push_str(&document::dotenv_line(name, &entry_value(entry)));
+        out.push_str(&document::dotenv_line(name, super::entry_text(entry)));
     }
     output::raw(out.as_bytes())
 }
 
 /// `{"NAME": "value"}` (appendix 5.1).
 fn print_json(map: &BTreeMap<String, &Entry>) -> anyhow::Result<()> {
-    let object: BTreeMap<&str, String> = map
+    let object: BTreeMap<&str, &str> = map
         .iter()
-        .map(|(name, entry)| (name.as_str(), entry_value(entry)))
+        .map(|(name, entry)| (name.as_str(), super::entry_text(entry)))
         .collect();
     output::json(&object)
 }

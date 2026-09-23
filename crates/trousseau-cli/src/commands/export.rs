@@ -75,11 +75,7 @@ fn build_dotenv(store: &Store) -> String {
             }
             Encoding::Utf8 => {
                 let name = entry.env.clone().unwrap_or_else(|| key.env_name(""));
-                // A `utf8` entry's bytes are always valid UTF-8 (checked
-                // at every write path); `unwrap_or_default` is a
-                // defensive fallback, never expected to trigger.
-                let text = std::str::from_utf8(entry.value.expose()).unwrap_or_default();
-                out.push_str(&document::dotenv_line(&name, text));
+                out.push_str(&document::dotenv_line(&name, super::entry_text(entry)));
             }
         }
     }

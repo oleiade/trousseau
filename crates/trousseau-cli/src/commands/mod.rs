@@ -86,6 +86,15 @@ pub fn format_rfc3339(at: OffsetDateTime) -> anyhow::Result<String> {
     at.format(&Rfc3339).context("formatting a timestamp")
 }
 
+/// A `utf8` entry's value as text, for `run`, `env`, and `export
+/// --format dotenv`, which only ever handle `utf8` entries. Those bytes
+/// are always valid UTF-8 (checked at every write path);
+/// `unwrap_or_default` is a defensive fallback, never expected to
+/// trigger.
+pub fn entry_text(entry: &Entry) -> &str {
+    std::str::from_utf8(entry.value.expose()).unwrap_or_default()
+}
+
 /// Write `bytes` to `path`, readable by the owner only: mode `0600` on
 /// Unix, both when the file is created and when an existing one is
 /// overwritten. Windows relies on the user profile's ACLs (3.2). Shared
