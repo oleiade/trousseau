@@ -3,19 +3,10 @@
 //! Every test creates a recipients store with [`common::Env::init_store`],
 //! sealed to the fixture SSH identity's recipient only, and unlocks it
 //! through [`common::Env::command_with_identity`].
-//!
-//! The `export --format toml` / `document::from_toml` cross-test (the
-//! toml half of Step 3.5's test list) reuses `src/document.rs` directly
-//! via `#[path]`, since `trousseau-cli` is a binary-only crate with no
-//! library target for an integration test to depend on; `edit` (which
-//! also uses this format) is step 3.7's own cross-test.
 
 #![allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
 mod common;
-
-#[path = "../src/document.rs"]
-mod document;
 
 use common::json_stdout;
 
@@ -406,14 +397,15 @@ fn export_out_refuses_overwrite_without_force_and_warns() {
         .success();
 }
 
-/// `export --format toml` output parses with `document::from_toml`
-/// (the `edit` document format, 3.5.12): the cross-test with `edit`
-/// itself lands in step 3.7.
+/// `export --format toml` output round-trips through
+/// `import --format toml` into a fresh store (the document format
+/// `edit` also uses, 3.5.12): values, encodings, env, and description
+/// all survive, including a binary entry through `value_base64`.
 #[test]
-fn export_toml_output_parses_with_document_from_toml() {
-    let env = common::Env::new();
-    env.init_store();
-    env.command_with_identity()
+fn export_toml_round_trips_through_import_toml() {
+    let src = common::Env::new();
+    src.init_store();
+    src.command_with_identity()
         .args([
             "set",
             "database/password",
@@ -426,34 +418,48 @@ fn export_toml_output_parses_with_document_from_toml() {
         .assert()
         .success();
 
-    let bin_path = env.path().join("server.key");
+    let bin_path = src.path().join("server.key");
     std::fs::write(&bin_path, [0x00, 0x01, 0xff]).expect("write binary fixture");
-    env.command_with_identity()
+    src.command_with_identity()
         .args(["set", "tls/server.key", "--from-file"])
         .arg(&bin_path)
         .assert()
         .success();
 
-    let output = env
+    let export_output = src
         .command_with_identity()
         .args(["export", "--format", "toml"])
         .output()
         .expect("run export");
-    assert!(output.status.success());
-    let text = String::from_utf8(output.stdout).expect("stdout is utf8");
+    assert!(export_output.status.success());
 
-    let parsed = document::from_toml(&text).expect("parse toml export");
-    assert_eq!(parsed.len(), 2);
+    let dst = common::Env::new();
+    dst.init_store();
+    dst.command_with_identity()
+        .args(["import", "--format", "toml"])
+        .write_stdin(export_output.stdout)
+        .assert()
+        .success();
 
-    let password_key: trousseau::schema::Key = "database/password".parse().expect("parse key");
-    let password = &parsed[&password_key];
-    assert_eq!(password.value.expose(), b"s3cr3t");
-    assert_eq!(password.encoding, trousseau::schema::Encoding::Utf8);
-    assert_eq!(password.env.as_deref(), Some("DATABASE_PASSWORD"));
-    assert_eq!(password.description.as_deref(), Some("Postgres app role"));
-
-    let tls_key: trousseau::schema::Key = "tls/server.key".parse().expect("parse key");
-    let tls = &parsed[&tls_key];
-    assert_eq!(tls.value.expose(), &[0x00, 0x01, 0xff]);
-    assert_eq!(tls.encoding, trousseau::schema::Encoding::Base64);
+    for key in ["database/password", "tls/server.key"] {
+        let get = |env: &common::Env| {
+            json_stdout(
+                &env.command_with_identity()
+                    .args(["get", key, "--json"])
+                    .output()
+                    .expect("get"),
+            )
+        };
+        let (from, to) = (get(&src), get(&dst));
+        for field in ["value", "encoding", "env", "description"] {
+            assert_eq!(to[field], from[field], "{key}: {field}");
+        }
+    }
+    let tls = json_stdout(
+        &dst.command_with_identity()
+            .args(["get", "tls/server.key", "--json"])
+            .output()
+            .expect("get"),
+    );
+    assert_eq!(tls["encoding"], "base64");
 }
