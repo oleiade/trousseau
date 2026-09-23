@@ -18,7 +18,6 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
     bin_name = "trousseau",
     version,
     about,
-    propagate_version = false,
     after_help = crate::help::TOP,
     after_long_help = crate::help::TOP_LONG
 )]
@@ -422,7 +421,6 @@ pub struct RekeyArgs {
 
 /// The export/import payload format (3.5.11).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
-#[value(rename_all = "lowercase")]
 pub enum PayloadFormat {
     /// The full JSON payload document.
     Json,
@@ -450,7 +448,6 @@ pub struct ExportArgs {
 
 /// How `import` resolves a key that already exists (3.5.11).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
-#[value(rename_all = "lowercase")]
 pub enum ImportStrategy {
     /// Keep the existing entry.
     Keep,
@@ -499,11 +496,9 @@ pub struct RunArgs {
 }
 
 /// The output format for `trousseau env` (3.5.14).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum, Default)]
-#[value(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum EnvFormat {
     /// `export NAME='value'` lines.
-    #[default]
     Shell,
     /// `NAME="value"` lines.
     Dotenv,
