@@ -3,6 +3,7 @@
 use std::path::Path;
 
 use anyhow::Context as _;
+use secrecy::ExposeSecret as _;
 use serde::Serialize;
 
 use trousseau::schema::{Store, StoreKind};
@@ -164,7 +165,12 @@ fn own_recipient(ctx: &Context) -> anyhow::Result<String> {
     }
 
     let generated = trousseau::identity::generate_identity(ctx.now());
-    write_identity_file(&identity_path, &generated.identity_file_contents)?;
+    Context::ensure_parent_dir(&identity_path)?;
+    super::write_private_file(
+        &identity_path,
+        generated.identity_file_contents.expose_secret().as_bytes(),
+        true,
+    )?;
     output::info(
         ctx.quiet,
         &format!("created identity {}", identity_path.display()),
@@ -174,39 +180,6 @@ fn own_recipient(ctx: &Context) -> anyhow::Result<String> {
         &format!("your recipient: {}", generated.recipient),
     );
     Ok(generated.recipient)
-}
-
-/// Write a freshly generated identity file's contents to `path` with
-/// mode `0600` (3.2, 3.5.2), creating its parent directory (mode
-/// `0700`) first.
-#[cfg(unix)]
-fn write_identity_file(path: &Path, contents: &secrecy::SecretString) -> anyhow::Result<()> {
-    use secrecy::ExposeSecret as _;
-    use std::io::Write as _;
-    use std::os::unix::fs::OpenOptionsExt as _;
-
-    Context::ensure_parent_dir(path)?;
-    let mut file = std::fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .mode(0o600)
-        .open(path)
-        .with_context(|| format!("creating identity file {}", path.display()))?;
-    file.write_all(contents.expose_secret().as_bytes())
-        .with_context(|| format!("writing identity file {}", path.display()))
-}
-
-/// Write a freshly generated identity file's contents to `path` (3.5.2).
-/// Windows relies on the user profile's ACLs (3.2); there is no mode to
-/// set.
-#[cfg(not(unix))]
-fn write_identity_file(path: &Path, contents: &secrecy::SecretString) -> anyhow::Result<()> {
-    use secrecy::ExposeSecret as _;
-
-    Context::ensure_parent_dir(path)?;
-    std::fs::write(path, contents.expose_secret().as_bytes())
-        .with_context(|| format!("writing identity file {}", path.display()))
 }
 
 /// If interactive (stdin is a terminal and `--no-input` was not given)

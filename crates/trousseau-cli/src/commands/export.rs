@@ -1,9 +1,5 @@
 //! `trousseau export` (3.5.11).
 
-use std::path::Path;
-
-use anyhow::Context as _;
-
 use trousseau::schema::{Encoding, Store};
 use trousseau::store::LockMode;
 
@@ -47,7 +43,7 @@ pub fn run(ctx: &Context, args: &ExportArgs) -> anyhow::Result<()> {
     };
 
     if let Some(out_path) = &args.out {
-        write_out_file(out_path, &bytes, args.force)?;
+        super::write_private_file(out_path, &bytes, args.force)?;
         output::warn(&format!(
             "warning: {} contains plaintext secrets",
             out_path.display()
@@ -88,55 +84,4 @@ fn build_dotenv(store: &Store) -> String {
         }
     }
     out
-}
-
-/// Write `bytes` to `path` with mode `0600`, refusing to overwrite an
-/// existing file unless `force` (3.5.11). Mirrors `get`'s `--out`
-/// handling (3.5.5).
-///
-/// # Errors
-///
-/// Returns [`CliError::OutputExists`] if `path` already exists and
-/// `force` is `false`, or an I/O error otherwise.
-fn write_out_file(path: &Path, bytes: &[u8], force: bool) -> anyhow::Result<()> {
-    let mut options = std::fs::OpenOptions::new();
-    options.write(true);
-    if force {
-        options.create(true).truncate(true);
-    } else {
-        options.create_new(true);
-    }
-    let file = match options.open(path) {
-        Ok(file) => file,
-        Err(err) if err.kind() == std::io::ErrorKind::AlreadyExists => {
-            return Err(CliError::OutputExists {
-                path: path.to_path_buf(),
-            }
-            .into());
-        }
-        Err(err) => return Err(err).with_context(|| format!("writing {}", path.display())),
-    };
-    set_out_file_mode(&file, path)?;
-    write_bytes(file, path, bytes)
-}
-
-/// Set `file`'s permissions to `0600` (3.5.11). A no-op on Windows,
-/// which relies on the user profile's ACLs (3.2).
-#[cfg(unix)]
-fn set_out_file_mode(file: &std::fs::File, path: &Path) -> anyhow::Result<()> {
-    use std::os::unix::fs::PermissionsExt as _;
-    file.set_permissions(std::fs::Permissions::from_mode(0o600))
-        .with_context(|| format!("setting permissions on {}", path.display()))
-}
-
-#[cfg(not(unix))]
-fn set_out_file_mode(_file: &std::fs::File, _path: &Path) -> anyhow::Result<()> {
-    Ok(())
-}
-
-/// Write `bytes` to an already-opened `file`.
-fn write_bytes(mut file: std::fs::File, path: &Path, bytes: &[u8]) -> anyhow::Result<()> {
-    use std::io::Write as _;
-    file.write_all(bytes)
-        .with_context(|| format!("writing {}", path.display()))
 }

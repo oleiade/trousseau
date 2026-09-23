@@ -1,6 +1,8 @@
 //! One module per subcommand, dispatched from [`dispatch`].
 
 use std::collections::BTreeMap;
+use std::io::Write as _;
+use std::path::Path;
 
 use anyhow::Context as _;
 use time::OffsetDateTime;
@@ -9,6 +11,7 @@ use trousseau::schema::{Encoding, Entry, Key, Store};
 
 use crate::cli::{Cli, Command, RecipientsAction};
 use crate::context::Context;
+use crate::exit::CliError;
 
 pub mod clip;
 pub mod completions;
@@ -81,6 +84,48 @@ fn panic_test() -> anyhow::Result<()> {
 /// entry's `created_at` or `updated_at` (3.1.2).
 pub fn format_rfc3339(at: OffsetDateTime) -> anyhow::Result<String> {
     at.format(&Rfc3339).context("formatting a timestamp")
+}
+
+/// Write `bytes` to `path`, readable by the owner only: mode `0600` on
+/// Unix, both when the file is created and when an existing one is
+/// overwritten. Windows relies on the user profile's ACLs (3.2). Shared
+/// by `get --out`, `export --out` (3.5.5, 3.5.11), and `init`'s
+/// identity file (3.5.2).
+///
+/// # Errors
+///
+/// Returns [`CliError::OutputExists`] if `path` already exists and
+/// `overwrite` is `false`, or an I/O error otherwise.
+pub fn write_private_file(path: &Path, bytes: &[u8], overwrite: bool) -> anyhow::Result<()> {
+    let mut options = std::fs::OpenOptions::new();
+    options.write(true);
+    if overwrite {
+        options.create(true).truncate(true);
+    } else {
+        options.create_new(true);
+    }
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut options, 0o600);
+    let mut file = match options.open(path) {
+        Ok(file) => file,
+        Err(err) if err.kind() == std::io::ErrorKind::AlreadyExists => {
+            return Err(CliError::OutputExists {
+                path: path.to_path_buf(),
+            }
+            .into());
+        }
+        Err(err) => return Err(err).with_context(|| format!("writing {}", path.display())),
+    };
+    // `mode` above only applies to a newly created file; an overwritten
+    // one keeps its old mode unless reset here.
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt as _;
+        file.set_permissions(std::fs::Permissions::from_mode(0o600))
+            .with_context(|| format!("setting permissions on {}", path.display()))?;
+    }
+    file.write_all(bytes)
+        .with_context(|| format!("writing {}", path.display()))
 }
 
 /// The selection, skipping, and conflict rules shared by `run` and `env`
