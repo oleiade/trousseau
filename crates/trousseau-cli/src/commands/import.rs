@@ -13,22 +13,14 @@ use trousseau::store::LockMode;
 
 use crate::cli::{ImportArgs, ImportStrategy, PayloadFormat};
 use crate::context::Context;
+use crate::document::DocEntry;
 use crate::output::{self, OutputMode};
 
-/// One entry parsed out of an import source, before it is applied to
-/// the store: everything [`trousseau::schema::Entry`] carries except
-/// `updated_at` (always set to "now" on import, 3.5.11) and, for every
-/// format but `json`, `created_at` (which the format does not carry, so
-/// "now" is used instead).
-struct ImportedEntry {
-    value: Value,
-    encoding: Encoding,
-    env: Option<String>,
-    description: Option<String>,
-    /// `Some` only for `--format json`, which is the only format
-    /// carrying a `created_at` to preserve (3.5.11).
-    created_at: Option<OffsetDateTime>,
-}
+/// Every entry parsed out of an import source, before it is applied to
+/// the store. The `created_at` beside each [`DocEntry`] is `Some` only
+/// for `--format json`, the one format that carries a timestamp to
+/// preserve; `updated_at` is always "now" on import (3.5.11).
+type Imported = BTreeMap<Key, (DocEntry, Option<OffsetDateTime>)>;
 
 /// Run `import`.
 ///
@@ -77,28 +69,27 @@ pub fn run(ctx: &Context, args: &ImportArgs) -> anyhow::Result<()> {
 /// `(added, updated, skipped)`.
 fn apply_imported(
     store: &mut Store,
-    imported: BTreeMap<Key, ImportedEntry>,
+    imported: Imported,
     strategy: ImportStrategy,
     now: OffsetDateTime,
 ) -> (u64, u64, u64) {
     let mut added = 0u64;
     let mut updated = 0u64;
     let mut skipped = 0u64;
-    for (key, imported_entry) in imported {
+    for (key, (doc, created_at)) in imported {
         let existed = store.entries.contains_key(&key);
         if existed && strategy == ImportStrategy::Keep {
             skipped += 1;
             continue;
         }
-        let created_at = imported_entry.created_at.unwrap_or(now);
         store.entries.insert(
             key,
             Entry {
-                value: imported_entry.value,
-                encoding: imported_entry.encoding,
-                env: imported_entry.env,
-                description: imported_entry.description,
-                created_at,
+                value: doc.value,
+                encoding: doc.encoding,
+                env: doc.env,
+                description: doc.description,
+                created_at: created_at.unwrap_or(now),
                 updated_at: now,
             },
         );
@@ -125,11 +116,8 @@ fn read_input(path: Option<&Path>) -> anyhow::Result<Vec<u8>> {
     Ok(buf)
 }
 
-/// Parse `bytes` into one [`ImportedEntry`] per key, per `format`.
-fn parse_import(
-    format: PayloadFormat,
-    bytes: &[u8],
-) -> anyhow::Result<BTreeMap<Key, ImportedEntry>> {
+/// Parse `bytes` into one entry per key, per `format`.
+fn parse_import(format: PayloadFormat, bytes: &[u8]) -> anyhow::Result<Imported> {
     match format {
         PayloadFormat::Json => parse_json(bytes),
         PayloadFormat::Dotenv => parse_dotenv(bytes),
@@ -141,7 +129,7 @@ fn parse_import(
 /// `recipients`, and the store-level timestamps are parsed (so the
 /// document is validated as a whole) and then ignored; only `entries`
 /// is used, keeping each entry's `created_at`.
-fn parse_json(bytes: &[u8]) -> anyhow::Result<BTreeMap<Key, ImportedEntry>> {
+fn parse_json(bytes: &[u8]) -> anyhow::Result<Imported> {
     let doc = Store::from_json(bytes)?;
     Ok(doc
         .entries
@@ -149,13 +137,15 @@ fn parse_json(bytes: &[u8]) -> anyhow::Result<BTreeMap<Key, ImportedEntry>> {
         .map(|(key, entry)| {
             (
                 key,
-                ImportedEntry {
-                    value: entry.value,
-                    encoding: entry.encoding,
-                    env: entry.env,
-                    description: entry.description,
-                    created_at: Some(entry.created_at),
-                },
+                (
+                    DocEntry {
+                        value: entry.value,
+                        encoding: entry.encoding,
+                        env: entry.env,
+                        description: entry.description,
+                    },
+                    Some(entry.created_at),
+                ),
             )
         })
         .collect())
@@ -166,7 +156,7 @@ fn parse_json(bytes: &[u8]) -> anyhow::Result<BTreeMap<Key, ImportedEntry>> {
 /// `export ` kept for shell `.env` files. Blank lines and `#` comment
 /// lines are ignored. The key is `NAME` lowercased; `env` is set to
 /// `NAME` unchanged.
-fn parse_dotenv(bytes: &[u8]) -> anyhow::Result<BTreeMap<Key, ImportedEntry>> {
+fn parse_dotenv(bytes: &[u8]) -> anyhow::Result<Imported> {
     let text = std::str::from_utf8(bytes).context("dotenv input is not valid UTF-8")?;
     let mut result = BTreeMap::new();
     for (index, raw_line) in text.lines().enumerate() {
@@ -184,13 +174,15 @@ fn parse_dotenv(bytes: &[u8]) -> anyhow::Result<BTreeMap<Key, ImportedEntry>> {
             .with_context(|| format!("line {}: {name}", index + 1))?;
         result.insert(
             key,
-            ImportedEntry {
-                value: Value::from_bytes(value.into_bytes())?,
-                encoding: Encoding::Utf8,
-                env: Some(name.to_owned()),
-                description: None,
-                created_at: None,
-            },
+            (
+                DocEntry {
+                    value: Value::from_bytes(value.into_bytes())?,
+                    encoding: Encoding::Utf8,
+                    env: Some(name.to_owned()),
+                    description: None,
+                },
+                None,
+            ),
         );
     }
     Ok(result)
@@ -236,23 +228,11 @@ fn unescape_double_quoted(text: &str) -> String {
 /// `--format toml`: the `edit` document format (3.5.12), via
 /// `crate::document::from_toml`. Carries no timestamps, so every entry
 /// gets `created_at` = now on import.
-fn parse_toml(bytes: &[u8]) -> anyhow::Result<BTreeMap<Key, ImportedEntry>> {
+fn parse_toml(bytes: &[u8]) -> anyhow::Result<Imported> {
     let text = std::str::from_utf8(bytes).context("toml input is not valid UTF-8")?;
-    let entries = crate::document::from_toml(text)?;
-    Ok(entries
+    Ok(crate::document::from_toml(text)?
         .into_iter()
-        .map(|(key, doc)| {
-            (
-                key,
-                ImportedEntry {
-                    value: doc.value,
-                    encoding: doc.encoding,
-                    env: doc.env,
-                    description: doc.description,
-                    created_at: None,
-                },
-            )
-        })
+        .map(|(key, doc)| (key, (doc, None)))
         .collect())
 }
 
