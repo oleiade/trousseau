@@ -5,7 +5,7 @@ use std::path::Path;
 use serde::Serialize;
 
 use trousseau::envelope::EnvelopeKind;
-use trousseau::store::{LockMode, RawStore};
+use trousseau::store::LockMode;
 
 use crate::context::Context;
 use crate::exit::CliError;
@@ -167,21 +167,11 @@ fn guard_own_recipient(ctx: &Context, removed: &[String], force: bool) -> anyhow
 /// Return an error if the store at `path` is a passphrase store: 3.5.9
 /// restricts `recipients` to recipients stores.
 ///
-/// Uses [`trousseau::envelope::peek_kind`] rather than
-/// [`Context::unlock`], so this fails before ever asking for a
-/// passphrase that would just be rejected a moment later.
+/// Uses [`Context::peek_kind`] rather than [`Context::unlock`], so this
+/// fails before ever asking for a passphrase that would just be
+/// rejected a moment later.
 fn require_recipients_store(path: &Path) -> anyhow::Result<()> {
-    let raw = trousseau::store::read_raw(path)?;
-    let bytes = match &raw {
-        RawStore::Current(bytes) => bytes,
-        RawStore::Legacy(_) => {
-            return Err(trousseau::error::Error::LegacyStore {
-                path: path.to_path_buf(),
-            }
-            .into());
-        }
-    };
-    if trousseau::envelope::peek_kind(bytes)? == EnvelopeKind::Passphrase {
+    if Context::peek_kind(path)? == EnvelopeKind::Passphrase {
         return Err(anyhow::anyhow!(
             "this is a passphrase store; use 'rekey --to-recipients'"
         ));

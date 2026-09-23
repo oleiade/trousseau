@@ -152,7 +152,6 @@ fn legacy_store(entries: &[(&str, &str)]) -> LegacyStore {
         })
         .collect();
     LegacyStore {
-        version: Some("0.4.1".to_owned()),
         recipients: vec!["4B7D890".to_owned()],
         data,
     }

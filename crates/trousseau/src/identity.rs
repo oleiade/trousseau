@@ -18,6 +18,7 @@ use secrecy::{ExposeSecret, SecretString};
 use time::OffsetDateTime;
 use time::format_description::well_known::Rfc3339;
 
+use crate::envelope::ARMOR_HEADER;
 use crate::error::Error;
 
 /// The maximum scrypt work factor accepted when opening an
@@ -277,7 +278,7 @@ pub enum IdentityFileKind {
 /// Returns `None` if `bytes` matches none of the four recognized forms.
 #[must_use]
 pub fn detect_identity_file(bytes: &[u8]) -> Option<IdentityFileKind> {
-    if bytes.starts_with(b"-----BEGIN AGE ENCRYPTED FILE-----") {
+    if bytes.starts_with(ARMOR_HEADER) {
         return Some(IdentityFileKind::AgeEncrypted);
     }
     if bytes.starts_with(b"-----BEGIN OPENSSH PRIVATE KEY-----") {

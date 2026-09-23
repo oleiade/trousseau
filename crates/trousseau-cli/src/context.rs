@@ -18,8 +18,9 @@ use etcetera::BaseStrategy as _;
 use secrecy::SecretString;
 use time::OffsetDateTime;
 use time::format_description::well_known::Rfc3339;
+use trousseau::envelope::EnvelopeKind;
 use trousseau::schema::{Store, StoreKind};
-use trousseau::store::{Locator, LockGuard, LockMode, Resolved};
+use trousseau::store::{Locator, LockGuard, LockMode, RawStore, Resolved};
 
 use crate::cli::Cli;
 use crate::config::Config;
@@ -234,27 +235,15 @@ impl Context {
     ///
     /// # Errors
     ///
-    /// Returns whatever [`trousseau::store::read_raw`],
-    /// [`trousseau::envelope::peek_kind`], identity loading, or
+    /// Returns whatever [`Context::peek_kind`], identity loading, or
     /// [`trousseau::store::open`] returns.
     pub fn unlock(&self, path: &Path) -> anyhow::Result<Store> {
-        let raw = trousseau::store::read_raw(path)?;
-        let bytes = match &raw {
-            trousseau::store::RawStore::Current(bytes) => bytes,
-            trousseau::store::RawStore::Legacy(_) => {
-                return Err(trousseau::error::Error::LegacyStore {
-                    path: path.to_path_buf(),
-                }
-                .into());
-            }
-        };
-        let kind = trousseau::envelope::peek_kind(bytes)?;
-        let store = match kind {
-            trousseau::envelope::EnvelopeKind::Passphrase => {
+        let store = match Self::peek_kind(path)? {
+            EnvelopeKind::Passphrase => {
                 let passphrase = self.passphrase()?;
                 trousseau::store::open(path, trousseau::store::Unlock::Passphrase(&passphrase))?
             }
-            trousseau::envelope::EnvelopeKind::Recipients => {
+            EnvelopeKind::Recipients => {
                 let identities =
                     trousseau::identity::load_identities(&self.identity_paths, self.callbacks())?;
                 if identities.is_empty() {
@@ -264,6 +253,26 @@ impl Context {
             }
         };
         Ok(store)
+    }
+
+    /// Read the store at `path` and classify its envelope without
+    /// decrypting it (so without prompting for anything). Shared by
+    /// [`Context::unlock`], `info`'s `(locked)` report, and `recipients`'
+    /// passphrase-store refusal.
+    ///
+    /// # Errors
+    ///
+    /// Returns whatever [`trousseau::store::read_raw`] or
+    /// [`trousseau::envelope::peek_kind`] returns, or
+    /// [`trousseau::error::Error::LegacyStore`] for a legacy v0.4 store.
+    pub fn peek_kind(path: &Path) -> anyhow::Result<EnvelopeKind> {
+        match trousseau::store::read_raw(path)? {
+            RawStore::Current(bytes) => Ok(trousseau::envelope::peek_kind(&bytes)?),
+            RawStore::Legacy(_) => Err(trousseau::error::Error::LegacyStore {
+                path: path.to_path_buf(),
+            }
+            .into()),
+        }
     }
 
     /// Build the material needed to re-seal `store`: recipients derived

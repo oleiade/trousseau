@@ -178,12 +178,6 @@ impl fmt::Display for Key {
     }
 }
 
-impl AsRef<str> for Key {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
 impl FromStr for Key {
     type Err = Error;
 
@@ -413,7 +407,7 @@ fn entry_repr(entry: &Entry) -> Result<EntryRepr, Error> {
 /// "Payload" section: `value` is the raw UTF-8 text or standard base64
 /// depending on `encoding`, and unknown fields are rejected. `Debug`
 /// redacts `value` through [`Value`]'s own `Debug` implementation.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Entry {
     /// The secret bytes.
     pub value: Value,
@@ -428,22 +422,6 @@ pub struct Entry {
     /// When this entry was last changed.
     pub updated_at: OffsetDateTime,
 }
-
-/// Compares every field, including the value (see [`Value`]'s
-/// `PartialEq`). Implemented unconditionally because it is needed by
-/// tests and is harmless.
-impl PartialEq for Entry {
-    fn eq(&self, other: &Self) -> bool {
-        self.value == other.value
-            && self.encoding == other.encoding
-            && self.env == other.env
-            && self.description == other.description
-            && self.created_at == other.created_at
-            && self.updated_at == other.updated_at
-    }
-}
-
-impl Eq for Entry {}
 
 impl Serialize for Entry {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -473,7 +451,7 @@ impl<'de> Deserialize<'de> for Entry {
 /// object with sorted keys, pretty-printed, with a trailing newline (see
 /// [`Store::to_json`]). `Debug` redacts every entry's value through
 /// [`Entry`]'s own `Debug` implementation.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Store {
     /// The schema version. Must be [`SCHEMA_VERSION`] for a store this
@@ -493,21 +471,6 @@ pub struct Store {
     /// The store's entries, keyed by path.
     pub entries: BTreeMap<Key, Entry>,
 }
-
-/// Compares every field, including every entry's value. Implemented
-/// unconditionally because it is needed by tests and is harmless.
-impl PartialEq for Store {
-    fn eq(&self, other: &Self) -> bool {
-        self.schema == other.schema
-            && self.kind == other.kind
-            && self.created_at == other.created_at
-            && self.updated_at == other.updated_at
-            && self.recipients == other.recipients
-            && self.entries == other.entries
-    }
-}
-
-impl Eq for Store {}
 
 impl Store {
     /// Build a new, empty store of the given kind, sealed to
@@ -529,13 +492,14 @@ impl Store {
     /// Check every rule in `docs/format.md`'s "Payload" section: the
     /// schema version, `kind`/`recipients` consistency, that recipients
     /// are sorted and unique, every entry's `env` override and
-    /// description, every entry's encoding/value consistency, and the
-    /// total serialized size.
+    /// description, and every entry's encoding/value consistency. The
+    /// total payload size is checked where it has a size, by
+    /// [`Store::to_json`] and [`Store::from_json`].
     ///
     /// # Errors
     ///
-    /// Returns [`Error::SchemaTooNew`], [`Error::InvalidStore`], or
-    /// [`Error::TooLarge`] for the first rule that is violated.
+    /// Returns [`Error::SchemaTooNew`] or [`Error::InvalidStore`] for the
+    /// first rule that is violated.
     pub fn validate(&self) -> Result<(), Error> {
         self.validate_schema()?;
         self.validate_kind()?;
@@ -543,7 +507,7 @@ impl Store {
         for (key, entry) in &self.entries {
             Self::validate_entry(key, entry)?;
         }
-        self.validate_size()
+        Ok(())
     }
 
     fn validate_schema(&self) -> Result<(), Error> {
@@ -599,12 +563,6 @@ impl Store {
             });
         }
         let bytes = entry.value.expose();
-        if bytes.len() > MAX_VALUE_BYTES {
-            return Err(Error::TooLarge {
-                bytes: bytes.len(),
-                limit: MAX_VALUE_BYTES,
-            });
-        }
         if matches!(entry.encoding, Encoding::Utf8) {
             let text = std::str::from_utf8(bytes).map_err(|_err| Error::InvalidStore {
                 reason: format!("entry {key} is not valid UTF-8"),
@@ -618,27 +576,13 @@ impl Store {
         Ok(())
     }
 
-    fn validate_size(&self) -> Result<(), Error> {
-        let bytes = serde_json::to_vec(self).map_err(|err| Error::InvalidStore {
-            reason: err.to_string(),
-        })?;
-        if bytes.len() > MAX_PAYLOAD_BYTES {
-            return Err(Error::TooLarge {
-                bytes: bytes.len(),
-                limit: MAX_PAYLOAD_BYTES,
-            });
-        }
-        Ok(())
-    }
-
     /// Validate, then serialize to pretty-printed JSON with sorted keys
     /// and a trailing newline, per `docs/format.md`.
     ///
     /// # Errors
     ///
     /// Returns whatever [`Store::validate`] returns, or
-    /// [`Error::TooLarge`] if the pretty-printed form (which is larger
-    /// than the compact form `validate` checks) exceeds
+    /// [`Error::TooLarge`] if the pretty-printed form exceeds
     /// [`MAX_PAYLOAD_BYTES`].
     pub fn to_json(&self) -> Result<Vec<u8>, Error> {
         self.validate()?;
@@ -658,8 +602,8 @@ impl Store {
     /// Parse and validate a store's JSON payload.
     ///
     /// Checks the raw byte length against [`MAX_PAYLOAD_BYTES`] first,
-    /// then parses, then checks the schema version, then runs
-    /// [`Store::validate`].
+    /// then parses, then runs [`Store::validate`] (which checks the
+    /// schema version first).
     ///
     /// # Errors
     ///
@@ -678,12 +622,6 @@ impl Store {
         let store: Self = serde_json::from_slice(bytes).map_err(|err| Error::InvalidStore {
             reason: err.to_string(),
         })?;
-        if store.schema > SCHEMA_VERSION {
-            return Err(Error::SchemaTooNew {
-                found: store.schema,
-                supported: SCHEMA_VERSION,
-            });
-        }
         store.validate()?;
         Ok(store)
     }

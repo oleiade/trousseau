@@ -67,15 +67,6 @@ pub enum LegacyAlgorithm {
     OpenPgp,
 }
 
-impl fmt::Display for LegacyAlgorithm {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(match self {
-            Self::Aes256Cfb => "AES-256-CFB",
-            Self::OpenPgp => "OpenPGP",
-        })
-    }
-}
-
 /// A parsed legacy v0.4 envelope (3.7.1): which algorithm protects it,
 /// and the still-encrypted payload bytes (the decoded `_data` field).
 #[derive(Clone)]
@@ -153,8 +144,6 @@ pub fn parse_envelope(bytes: &[u8]) -> Result<LegacyEnvelope, Error> {
 /// straight to [`Store::set`].
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LegacyStore {
-    /// The legacy writer's version string, if present.
-    pub version: Option<String>,
     /// Legacy recipients (PGP key ids), printed for information only;
     /// [`convert`] does not carry them into the new store's recipients.
     pub recipients: Vec<String>,
@@ -167,8 +156,6 @@ pub struct LegacyStore {
 /// ignored, matching the legacy writer, which was not strict either.
 #[derive(Deserialize, Default)]
 struct LegacyMetadata {
-    #[serde(default)]
-    version: Option<String>,
     #[serde(default)]
     recipients: Vec<String>,
 }
@@ -200,7 +187,6 @@ fn parse_inner_document(bytes: &[u8]) -> Result<LegacyStore, Error> {
         data.insert(key, Value::from_bytes(value.into_bytes())?);
     }
     Ok(LegacyStore {
-        version: document.metadata.version,
         recipients: document.metadata.recipients,
         data,
     })
@@ -219,15 +205,10 @@ fn parse_inner_document(bytes: &[u8]) -> Result<LegacyStore, Error> {
 ///
 /// # Errors
 ///
-/// Returns [`Error::Legacy`] if `env` is not an AES-256-CFB envelope,
-/// and [`Error::Unlock`] if the passphrase is wrong or the payload is
-/// corrupted.
+/// Returns [`Error::Unlock`] if the passphrase is wrong or the payload
+/// is corrupted, including when `env` is not an AES-256-CFB envelope at
+/// all (the caller dispatches on [`LegacyEnvelope::algorithm`]).
 pub fn decrypt_aes(env: &LegacyEnvelope, passphrase: &SecretString) -> Result<LegacyStore, Error> {
-    if env.algorithm != LegacyAlgorithm::Aes256Cfb {
-        return Err(Error::Legacy {
-            reason: format!("legacy envelope uses {}, not AES-256-CFB", env.algorithm),
-        });
-    }
     if env.data.len() < AES_SALT_LEN + AES_IV_LEN {
         return Err(Error::Unlock {
             reason: "wrong passphrase or corrupted store".to_owned(),
@@ -287,19 +268,12 @@ pub struct GpgOptions {
 ///
 /// # Errors
 ///
-/// Returns [`Error::Legacy`] if `env` is not an `OpenPGP` envelope, if the
-/// binary cannot be spawned (the reason names the binary and the `io`
-/// error, never anything secret), or if `gpg` exits non-zero (the
-/// reason is the last non-empty line of its stderr). Returns
-/// [`Error::Io`] if writing to the child's stdin or reading its output
-/// fails for a reason other than a non-zero exit.
+/// Returns [`Error::Legacy`] if the binary cannot be spawned (the reason
+/// names the binary and the `io` error, never anything secret), or if
+/// `gpg` exits non-zero (the reason is the last non-empty line of its
+/// stderr). Returns [`Error::Io`] if writing to the child's stdin or
+/// reading its output fails for a reason other than a non-zero exit.
 pub fn decrypt_gpg(env: &LegacyEnvelope, opts: &GpgOptions) -> Result<LegacyStore, Error> {
-    if env.algorithm != LegacyAlgorithm::OpenPgp {
-        return Err(Error::Legacy {
-            reason: format!("legacy envelope uses {}, not OpenPGP", env.algorithm),
-        });
-    }
-
     let mut command = Command::new(&opts.binary);
     command.args(["--batch", "--quiet", "--decrypt"]);
     if let Some(home) = &opts.gnupg_home {
@@ -414,27 +388,21 @@ pub fn convert(
 /// still fail the [`Key`] grammar (for example, an empty string or a
 /// segment starting with `.` or `_`); [`key_or_migrated`] handles that.
 fn sanitize(raw: &str) -> String {
-    let mut replaced = String::with_capacity(raw.len());
-    for ch in raw.chars() {
-        if ch.is_ascii_alphanumeric() || matches!(ch, '.' | '_' | '-' | '/') {
-            replaced.push(ch);
-        } else {
-            replaced.push('_');
-        }
-    }
-
-    let mut collapsed = String::with_capacity(replaced.len());
-    let mut last_was_slash = false;
-    for ch in replaced.chars() {
-        let is_slash = ch == '/';
-        if is_slash && last_was_slash {
-            continue;
-        }
-        collapsed.push(ch);
-        last_was_slash = is_slash;
-    }
-
-    collapsed.trim_matches('/').to_owned()
+    let replaced: String = raw
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || matches!(ch, '.' | '_' | '-' | '/') {
+                ch
+            } else {
+                '_'
+            }
+        })
+        .collect();
+    replaced
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .collect::<Vec<_>>()
+        .join("/")
 }
 
 /// Parse `candidate` as a [`Key`], falling back to `migrated/<n>`

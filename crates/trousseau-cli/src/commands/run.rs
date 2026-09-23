@@ -86,21 +86,10 @@ fn build_command(
     }
 
     for (name, entry) in env_map {
-        command.env(name, entry_value(entry));
+        command.env(name, super::entry_text(entry));
     }
 
     Ok(command)
-}
-
-/// An entry's value as a `String`, for injection into the child's
-/// environment. `env_map` only ever contains `utf8` entries (`base64`
-/// entries are excluded, 3.1.4), whose bytes are always valid UTF-8
-/// (checked at every write path); `unwrap_or_default` is a defensive
-/// fallback, never expected to trigger.
-fn entry_value(entry: &Entry) -> String {
-    std::str::from_utf8(entry.value.expose())
-        .unwrap_or_default()
-        .to_owned()
 }
 
 /// Unix: replace the current process with `CMD` (3.5.13). Only returns

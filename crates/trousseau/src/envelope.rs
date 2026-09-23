@@ -23,9 +23,9 @@ use crate::schema::MAX_PAYLOAD_BYTES;
 /// Binary (unarmored) age files are not accepted as stores (section
 /// 3.1.1): this crate checks for the marker before attempting to parse
 /// anything, so an unarmored age file is rejected the same way as
-/// arbitrary garbage. `pub(crate)` so `store.rs`'s own classification
-/// check ([`crate::store::looks_like_legacy`]'s neighbor) can share it
-/// instead of keeping its own copy.
+/// arbitrary garbage. `pub(crate)` so the other byte-sniffing checks in
+/// this crate (store classification in `store.rs`, identity file
+/// detection in `identity.rs`) share it instead of keeping copies.
 pub(crate) const ARMOR_HEADER: &[u8] = b"-----BEGIN AGE ENCRYPTED FILE-----";
 
 /// Which kind of age envelope a store's bytes are, distinguished by the
